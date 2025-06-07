@@ -15,6 +15,7 @@ import Image from "next/image"
 import { toast } from "sonner"
 
 export default function SponsorPage() {
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     companyName: "",
     contactPerson: "",
@@ -116,6 +117,7 @@ export default function SponsorPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
 
     try {
       const response = await fetch("/api/sponsors/apply", {
@@ -123,6 +125,8 @@ export default function SponsorPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       })
+
+      const data = await response.json()
 
       if (response.ok) {
         toast.success("Sponsorship application submitted successfully! We'll contact you soon.")
@@ -138,10 +142,13 @@ export default function SponsorPage() {
           message: "",
         })
       } else {
-        toast.error("Failed to submit application. Please try again.")
+        toast.error(data.error || "Failed to submit application. Please try again.")
       }
     } catch (error) {
       toast.error("An error occurred. Please try again.")
+      console.error("Sponsor application error:", error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -416,9 +423,9 @@ export default function SponsorPage() {
                     />
                   </div>
 
-                  <Button type="submit" className="w-full h-12 text-lg">
+                  <Button type="submit" className="w-full h-12 text-lg" disabled={isSubmitting}>
                     <Building className="w-5 h-5 mr-2" />
-                    Submit Sponsorship Application
+                    {isSubmitting ? "Submitting..." : "Submit Sponsorship Application"}
                   </Button>
                 </form>
               </CardContent>

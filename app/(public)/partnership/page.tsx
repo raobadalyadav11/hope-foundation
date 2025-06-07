@@ -15,6 +15,7 @@ import Image from "next/image"
 import { toast } from "sonner"
 
 export default function PartnershipPage() {
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     organizationName: "",
     organizationType: "",
@@ -121,6 +122,7 @@ export default function PartnershipPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
 
     try {
       const response = await fetch("/api/partnerships/apply", {
@@ -128,6 +130,8 @@ export default function PartnershipPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       })
+
+      const data = await response.json()
 
       if (response.ok) {
         toast.success("Partnership application submitted successfully! We'll review and contact you soon.")
@@ -145,10 +149,13 @@ export default function PartnershipPage() {
           message: "",
         })
       } else {
-        toast.error("Failed to submit application. Please try again.")
+        toast.error(data.error || "Failed to submit application. Please try again.")
       }
     } catch (error) {
       toast.error("An error occurred. Please try again.")
+      console.error("Partnership application error:", error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -496,9 +503,9 @@ export default function PartnershipPage() {
                     />
                   </div>
 
-                  <Button type="submit" className="w-full h-12 text-lg">
+                  <Button type="submit" className="w-full h-12 text-lg" disabled={isSubmitting}>
                     <Handshake className="w-5 h-5 mr-2" />
-                    Submit Partnership Application
+                    {isSubmitting ? "Submitting..." : "Submit Partnership Application"}
                   </Button>
                 </form>
               </CardContent>
