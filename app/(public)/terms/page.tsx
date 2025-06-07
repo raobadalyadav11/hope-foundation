@@ -1,128 +1,155 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileText, AlertTriangle, Scale, Users } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Scale, FileText, Shield, AlertTriangle, Users, CreditCard } from "lucide-react"
 
-export default function TermsPage() {
+export default function TermsOfServicePage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-16">
+      <section className="bg-gradient-to-r from-purple-600 to-blue-700 text-white py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-5xl font-bold mb-6">Terms of Service</h1>
             <p className="text-xl opacity-90">
-              Please read these terms carefully before using our services. By using our website and services, you agree
-              to these terms.
+              Please read these terms carefully before using our services. By accessing our website, you agree to be
+              bound by these terms.
             </p>
-            <p className="text-sm opacity-75 mt-4">Last updated: January 2024</p>
+            <p className="text-sm opacity-75 mt-4">Last updated: December 2024</p>
           </div>
         </div>
       </section>
 
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto space-y-8">
-          {/* Acceptance */}
+          {/* Acceptance of Terms */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileText className="w-6 h-6 text-blue-600" />
+                <Scale className="w-6 h-6 text-blue-600" />
                 Acceptance of Terms
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="prose max-w-none">
               <p>
                 By accessing and using the Hope Foundation website and services, you accept and agree to be bound by the
                 terms and provision of this agreement. If you do not agree to abide by the above, please do not use this
                 service.
               </p>
-            </CardContent>
-          </Card>
-
-          {/* Use License */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Use License</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
               <p>
-                Permission is granted to temporarily download one copy of the materials on Hope Foundation's website for
-                personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of
-                title, and under this license you may not:
-              </p>
-
-              <ul className="list-disc list-inside space-y-2 text-gray-700">
-                <li>modify or copy the materials</li>
-                <li>
-                  use the materials for any commercial purpose or for any public display (commercial or non-commercial)
-                </li>
-                <li>attempt to decompile or reverse engineer any software contained on the website</li>
-                <li>remove any copyright or other proprietary notations from the materials</li>
-              </ul>
-
-              <p>
-                This license shall automatically terminate if you violate any of these restrictions and may be
-                terminated by Hope Foundation at any time.
+                These Terms of Service ("Terms") govern your use of our website located at hopefoundation.org (the
+                "Service") operated by Hope Foundation ("us", "we", or "our").
               </p>
             </CardContent>
           </Card>
 
-          {/* Donations */}
+          {/* Use of Website */}
           <Card>
             <CardHeader>
-              <CardTitle>Donations and Payments</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-6 h-6 text-green-600" />
+                Use of Website
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Permitted Uses</h3>
+                <ul className="list-disc list-inside space-y-2 text-gray-700">
+                  <li>Making donations to support our charitable activities</li>
+                  <li>Applying for volunteer opportunities</li>
+                  <li>Accessing information about our programs and impact</li>
+                  <li>Subscribing to newsletters and updates</li>
+                  <li>Participating in fundraising campaigns</li>
+                  <li>Contacting us for legitimate inquiries</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Account Responsibilities</h3>
+                <ul className="list-disc list-inside space-y-2 text-gray-700">
+                  <li>Provide accurate and complete information</li>
+                  <li>Maintain the security of your account credentials</li>
+                  <li>Notify us immediately of any unauthorized use</li>
+                  <li>Update your information when necessary</li>
+                  <li>Use the service in compliance with applicable laws</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Prohibited Activities */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
+                Prohibited Activities
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-700 mb-4">
+                You agree not to engage in any of the following prohibited activities:
+              </p>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Technical Violations</h3>
+                  <ul className="list-disc list-inside space-y-2 text-gray-700">
+                    <li>Attempting to hack or compromise our systems</li>
+                    <li>Using automated tools to access our services</li>
+                    <li>Reverse engineering our software</li>
+                    <li>Introducing viruses or malicious code</li>
+                    <li>Overloading our servers or networks</li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Content Violations</h3>
+                  <ul className="list-disc list-inside space-y-2 text-gray-700">
+                    <li>Posting false or misleading information</li>
+                    <li>Sharing inappropriate or offensive content</li>
+                    <li>Violating intellectual property rights</li>
+                    <li>Impersonating others or organizations</li>
+                    <li>Soliciting for competing organizations</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Donations and Payments */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="w-6 h-6 text-purple-600" />
+                Donations and Payments
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
               <div>
                 <h3 className="text-lg font-semibold mb-3">Donation Terms</h3>
                 <ul className="list-disc list-inside space-y-2 text-gray-700">
                   <li>All donations are voluntary and non-refundable unless required by law</li>
-                  <li>Donations are used to support our charitable activities and operations</li>
-                  <li>We reserve the right to use donations where they are most needed</li>
+                  <li>Donations will be used for charitable purposes as described on our website</li>
                   <li>Tax receipts will be provided for eligible donations</li>
-                  <li>Recurring donations can be cancelled at any time through your account</li>
+                  <li>We reserve the right to refuse donations from certain sources</li>
+                  <li>Recurring donations can be cancelled at any time</li>
                 </ul>
               </div>
 
               <div>
                 <h3 className="text-lg font-semibold mb-3">Payment Processing</h3>
                 <ul className="list-disc list-inside space-y-2 text-gray-700">
-                  <li>Payments are processed securely through Razorpay</li>
-                  <li>We do not store your payment information on our servers</li>
-                  <li>You are responsible for providing accurate payment information</li>
+                  <li>Payments are processed through secure third-party providers</li>
+                  <li>We do not store your complete payment information</li>
+                  <li>Payment disputes should be reported within 30 days</li>
                   <li>Failed payments may result in suspension of recurring donations</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* User Accounts */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="w-6 h-6 text-green-600" />
-                User Accounts and Responsibilities
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold mb-3">Account Creation</h3>
-                <ul className="list-disc list-inside space-y-2 text-gray-700">
-                  <li>You must provide accurate and complete information when creating an account</li>
-                  <li>You are responsible for maintaining the confidentiality of your account credentials</li>
-                  <li>You must notify us immediately of any unauthorized use of your account</li>
-                  <li>One person may not maintain multiple accounts</li>
+                  <li>Currency conversion fees may apply for international donations</li>
                 </ul>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-3">Prohibited Activities</h3>
-                <ul className="list-disc list-inside space-y-2 text-gray-700">
-                  <li>Providing false or misleading information</li>
-                  <li>Using the service for any illegal or unauthorized purpose</li>
-                  <li>Attempting to gain unauthorized access to our systems</li>
-                  <li>Harassing, abusing, or harming other users</li>
-                  <li>Posting inappropriate or offensive content</li>
-                  <li>Violating any applicable laws or regulations</li>
-                </ul>
+                <h3 className="text-lg font-semibold mb-3">Refund Policy</h3>
+                <p className="text-gray-700">
+                  Donations are generally non-refundable. However, we may consider refunds in exceptional circumstances
+                  such as technical errors, duplicate charges, or fraudulent transactions. Refund requests must be
+                  submitted within 30 days of the donation.
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -130,56 +157,89 @@ export default function TermsPage() {
           {/* Volunteer Terms */}
           <Card>
             <CardHeader>
-              <CardTitle>Volunteer Terms</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-6 h-6 text-green-600" />
+                Volunteer Terms
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <ul className="list-disc list-inside space-y-2 text-gray-700">
-                <li>Volunteer positions are unpaid and voluntary</li>
-                <li>Background checks may be required for certain positions</li>
-                <li>Volunteers must comply with our code of conduct and policies</li>
-                <li>We reserve the right to terminate volunteer relationships at any time</li>
-                <li>Volunteers are not employees and are not entitled to employment benefits</li>
-                <li>Confidential information must be kept confidential</li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          {/* Content and Intellectual Property */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Content and Intellectual Property</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold mb-3">Our Content</h3>
-                <p>
-                  The materials on Hope Foundation's website are owned by or licensed to Hope Foundation and are
-                  protected by applicable copyright and trademark law. You may not reproduce, distribute, or create
-                  derivative works from our content without permission.
+                <h3 className="text-lg font-semibold mb-3">Volunteer Obligations</h3>
+                <ul className="list-disc list-inside space-y-2 text-gray-700">
+                  <li>Complete required training and orientation programs</li>
+                  <li>Adhere to our code of conduct and ethical guidelines</li>
+                  <li>Maintain confidentiality of sensitive information</li>
+                  <li>Report any incidents or concerns promptly</li>
+                  <li>Represent the organization professionally</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Background Checks</h3>
+                <p className="text-gray-700">
+                  Certain volunteer positions may require background checks, reference verification, or other screening
+                  procedures. By applying to volunteer, you consent to such checks as deemed necessary by the
+                  organization.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-3">User-Generated Content</h3>
-                <ul className="list-disc list-inside space-y-2 text-gray-700">
-                  <li>You retain ownership of content you submit to us</li>
-                  <li>By submitting content, you grant us a license to use, modify, and distribute it</li>
-                  <li>You are responsible for ensuring you have rights to any content you submit</li>
-                  <li>We reserve the right to remove any content that violates our policies</li>
-                </ul>
+                <h3 className="text-lg font-semibold mb-3">Termination of Volunteer Status</h3>
+                <p className="text-gray-700">
+                  We reserve the right to terminate volunteer relationships at any time for any reason, including but
+                  not limited to violation of policies, inappropriate conduct, or organizational needs.
+                </p>
               </div>
             </CardContent>
           </Card>
 
-          {/* Privacy */}
+          {/* Intellectual Property */}
           <Card>
             <CardHeader>
-              <CardTitle>Privacy</CardTitle>
+              <CardTitle>Intellectual Property Rights</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Our Content</h3>
+                <p className="text-gray-700">
+                  The Service and its original content, features, and functionality are and will remain the exclusive
+                  property of Hope Foundation and its licensors. The Service is protected by copyright, trademark, and
+                  other laws.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-3">User Content</h3>
+                <p className="text-gray-700">
+                  By submitting content to our Service, you grant us a non-exclusive, worldwide, royalty-free license to
+                  use, reproduce, modify, and distribute such content for the purposes of operating and promoting our
+                  charitable activities.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Trademark Usage</h3>
+                <p className="text-gray-700">
+                  Our trademarks and trade dress may not be used in connection with any product or service without our
+                  prior written consent.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Privacy and Data */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="w-6 h-6 text-blue-600" />
+                Privacy and Data Protection
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <p>
-                Your privacy is important to us. Please review our Privacy Policy, which also governs your use of the
-                website, to understand our practices regarding the collection and use of your personal information.
+              <p className="text-gray-700">
+                Your privacy is important to us. Our Privacy Policy explains how we collect, use, and protect your
+                information when you use our Service. By using our Service, you agree to the collection and use of
+                information in accordance with our Privacy Policy.
               </p>
             </CardContent>
           </Card>
@@ -187,52 +247,60 @@ export default function TermsPage() {
           {/* Disclaimers */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="w-6 h-6 text-yellow-600" />
-                Disclaimers and Limitations
-              </CardTitle>
+              <CardTitle>Disclaimers and Limitations</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <h3 className="text-lg font-semibold mb-3">Service Availability</h3>
-                <p>
+                <p className="text-gray-700">
                   We strive to maintain continuous service availability but cannot guarantee uninterrupted access. We
-                  reserve the right to modify, suspend, or discontinue services at any time without notice.
+                  may suspend or discontinue the Service at any time for maintenance, updates, or other reasons.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-3">Limitation of Liability</h3>
-                <p>
-                  Hope Foundation shall not be liable for any indirect, incidental, special, consequential, or punitive
-                  damages, including without limitation, loss of profits, data, use, goodwill, or other intangible
-                  losses.
+                <h3 className="text-lg font-semibold mb-3">Information Accuracy</h3>
+                <p className="text-gray-700">
+                  While we strive to provide accurate and up-to-date information, we make no warranties about the
+                  completeness, reliability, or accuracy of the information on our website.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-3">Indemnification</h3>
-                <p>
-                  You agree to defend, indemnify, and hold harmless Hope Foundation from and against any claims,
-                  damages, obligations, losses, liabilities, costs, or debt arising from your use of our services.
+                <h3 className="text-lg font-semibold mb-3">Third-Party Links</h3>
+                <p className="text-gray-700">
+                  Our Service may contain links to third-party websites. We are not responsible for the content, privacy
+                  policies, or practices of these external sites.
                 </p>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Limitation of Liability */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Limitation of Liability</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-700">
+                In no event shall Hope Foundation, nor its directors, employees, partners, agents, suppliers, or
+                affiliates, be liable for any indirect, incidental, special, consequential, or punitive damages,
+                including without limitation, loss of profits, data, use, goodwill, or other intangible losses,
+                resulting from your use of the Service.
+              </p>
             </CardContent>
           </Card>
 
           {/* Governing Law */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Scale className="w-6 h-6 text-purple-600" />
-                Governing Law
-              </CardTitle>
+              <CardTitle>Governing Law and Jurisdiction</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>
-                These terms and conditions are governed by and construed in accordance with the laws of India. Any
-                disputes relating to these terms shall be subject to the exclusive jurisdiction of the courts of Mumbai,
-                Maharashtra.
+              <p className="text-gray-700">
+                These Terms shall be interpreted and governed by the laws of India. Any disputes arising from these
+                Terms or your use of the Service shall be subject to the exclusive jurisdiction of the courts in Mumbai,
+                India.
               </p>
             </CardContent>
           </Card>
@@ -243,9 +311,10 @@ export default function TermsPage() {
               <CardTitle>Changes to Terms</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>
-                Hope Foundation reserves the right to revise these terms of service at any time without notice. By using
-                this website, you are agreeing to be bound by the then current version of these terms of service.
+              <p className="text-gray-700">
+                We reserve the right to modify or replace these Terms at any time. If a revision is material, we will
+                try to provide at least 30 days notice prior to any new terms taking effect. What constitutes a material
+                change will be determined at our sole discretion.
               </p>
             </CardContent>
           </Card>
@@ -254,18 +323,21 @@ export default function TermsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Contact Information</CardTitle>
-              <CardDescription>
-                If you have any questions about these Terms of Service, please contact us:
-              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div>
-                <p className="font-semibold">Hope Foundation</p>
-                <p>123 Hope Street</p>
-                <p>Mumbai, Maharashtra 400001</p>
-                <p>India</p>
-                <p className="mt-2">Email: legal@hopefoundation.org</p>
-                <p>Phone: +91 98765 43210</p>
+              <p className="text-gray-700 mb-4">
+                If you have any questions about these Terms of Service, please contact us:
+              </p>
+              <div className="space-y-2 text-gray-700">
+                <p>
+                  <strong>Email:</strong> legal@hopefoundation.org
+                </p>
+                <p>
+                  <strong>Phone:</strong> +91 98765 43210
+                </p>
+                <p>
+                  <strong>Address:</strong> Hope Foundation, 123 Hope Street, Mumbai, India 400001
+                </p>
               </div>
             </CardContent>
           </Card>
