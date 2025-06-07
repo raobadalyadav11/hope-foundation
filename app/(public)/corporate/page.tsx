@@ -67,4 +67,41 @@ export default function CorporateCSRPage() {
       title: "Women Empowerment",
       description: "Empower women through skills and opportunities",
       icon: Users,
-      \
+      color: "bg-purple-100 text-purple-600",
+      impact: "2,50,000+ trees planted",
+      programs: [
+        "Skill development workshops",
+        "Entrepreneurship support",
+        "Health and wellness programs",
+        "Legal awareness campaigns",
+        "Leadership training initiatives",
+      ],
+    }
+  ];
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-4">Corporate CSR Programs</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {csrPrograms.map((program, index) => (
+          <div
+            key={index}
+            className={`bg-white rounded-lg shadow-md p-4 ${program.color}`}
+          >
+            <div className="flex items-center mb-2">
+              <program.icon className="w-6 h-6 mr-2" />
+              <h2 className="text-lg font-semibold">{program.title}</h2>
+            </div>
+            <p className="text-gray-600">{program.description}</p>
+            <p className="text-gray-600 mt-2">
+              <strong>Impact:</strong> {program.impact}
+            </p>
+            <p className="text-gray-600 mt-2">
+              <strong>Programs:</strong> {program.programs.join(", ")}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
