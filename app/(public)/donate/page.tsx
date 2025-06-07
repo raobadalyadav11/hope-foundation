@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Heart, Shield, CreditCard, Users, BookOpen, Calendar, Repeat } from "lucide-react"
 import { toast } from "sonner"
 import Script from "next/script"
+import Link from "next/link"
 
 declare global {
   interface Window {
@@ -107,6 +108,11 @@ export default function DonatePage() {
         throw new Error(orderData.error || "Failed to create order")
       }
 
+      // Check if Razorpay is loaded
+      if (!window.Razorpay) {
+        throw new Error("Payment gateway not loaded. Please refresh and try again.")
+      }
+
       // Initialize Razorpay
       const options = {
         key: orderData.key,
@@ -132,13 +138,21 @@ export default function DonatePage() {
 
             if (verifyResponse.ok) {
               toast.success("Thank you for your donation! Payment successful.")
-              // Reset form or redirect
+              // Reset form
               setAmount("")
               setSelectedCause("")
+              setDonorInfo({
+                name: session?.user?.name || "",
+                email: session?.user?.email || "",
+                phone: "",
+                address: "",
+              })
+              setIsAnonymous(false)
             } else {
               toast.error(verifyData.error || "Payment verification failed")
             }
           } catch (error) {
+            console.error("Payment verification error:", error)
             toast.error("Payment verification failed")
           }
         },
@@ -150,13 +164,22 @@ export default function DonatePage() {
         theme: {
           color: "#2563eb",
         },
+        modal: {
+          ondismiss: () => {
+            setIsProcessing(false)
+          },
+        },
       }
 
       const rzp = new window.Razorpay(options)
+      rzp.on("payment.failed", (response: any) => {
+        toast.error("Payment failed. Please try again.")
+        setIsProcessing(false)
+      })
       rzp.open()
     } catch (error: any) {
+      console.error("Payment error:", error)
       toast.error(error.message || "Failed to process donation")
-    } finally {
       setIsProcessing(false)
     }
   }
@@ -206,7 +229,19 @@ export default function DonatePage() {
       if (subscriptionData.shortUrl) {
         window.open(subscriptionData.shortUrl, "_blank")
       }
+
+      // Reset form
+      setAmount("")
+      setSelectedCause("")
+      setDonorInfo({
+        name: session?.user?.name || "",
+        email: session?.user?.email || "",
+        phone: "",
+        address: "",
+      })
+      setIsAnonymous(false)
     } catch (error: any) {
+      console.error("Subscription error:", error)
       toast.error(error.message || "Failed to set up recurring donation")
     } finally {
       setIsProcessing(false)
@@ -223,7 +258,11 @@ export default function DonatePage() {
 
   return (
     <>
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        onLoad={() => console.log("Razorpay script loaded")}
+        onError={() => toast.error("Failed to load payment gateway")}
+      />
       <div className="min-h-screen bg-gray-50">
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-16">
@@ -239,6 +278,24 @@ export default function DonatePage() {
         </section>
 
         <div className="container mx-auto px-4 py-12">
+          {!session && (
+            <Card className="mb-8 border-yellow-200 bg-yellow-50">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-yellow-600" />
+                  <span className="font-medium text-yellow-800">Login Required</span>
+                </div>
+                <p className="text-yellow-700 mt-2">
+                  Please{" "}
+                  <Link href="/signin" className="underline font-medium">
+                    login
+                  </Link>{" "}
+                  to make a donation. This helps us provide you with tax receipts and track your contributions.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Donation Form */}
             <div className="lg:col-span-2">
@@ -344,6 +401,7 @@ export default function DonatePage() {
                       {predefinedAmounts.map((preAmount) => (
                         <Button
                           key={preAmount}
+                          type="button"
                           variant={amount === preAmount.toString() ? "default" : "outline"}
                           onClick={() => setAmount(preAmount.toString())}
                           className="h-12"
@@ -418,7 +476,11 @@ export default function DonatePage() {
 
                   {/* Anonymous Donation */}
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="anonymous" checked={isAnonymous} onCheckedChange={(checked) => setIsAnonymous(checked === true)} />
+                    <Checkbox
+                      id="anonymous"
+                      checked={isAnonymous}
+                      onCheckedChange={(checked) => setIsAnonymous(checked === true)}
+                    />
                     <Label htmlFor="anonymous" className="text-sm">
                       Make this donation anonymous
                     </Label>
@@ -429,6 +491,7 @@ export default function DonatePage() {
                     onClick={handleDonate}
                     className="w-full h-12 text-lg"
                     disabled={
+                      !session ||
                       !amount ||
                       Number.parseFloat(amount) <= 0 ||
                       (donationType === "recurring" && Number.parseFloat(amount) < 100) ||
