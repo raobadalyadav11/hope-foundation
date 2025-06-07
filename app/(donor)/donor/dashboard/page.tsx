@@ -77,15 +77,15 @@ export default function DonorDashboard() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div>
+      <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Donor Dashboard</h1>
-        <p className="text-gray-600">Track your donations and impact</p>
+        <p className="text-gray-600 mt-2">Track your donations and impact</p>
       </div>
 
       {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Donated</CardTitle>
@@ -122,7 +122,7 @@ export default function DonorDashboard() {
 
       {/* Recent Donations */}
       {donorStats?.donations && donorStats.donations.length > 0 && (
-        <Card>
+        <Card className="mb-8">
           <CardHeader>
             <CardTitle>Recent Donations</CardTitle>
             <CardDescription>Your latest contributions and receipts</CardDescription>
@@ -176,7 +176,7 @@ export default function DonorDashboard() {
 
       {/* Featured Campaigns */}
       {featuredCampaigns && featuredCampaigns.length > 0 && (
-        <Card>
+        <Card className="mb-8">
           <CardHeader>
             <CardTitle>Featured Campaigns</CardTitle>
             <CardDescription>Support our most urgent causes</CardDescription>

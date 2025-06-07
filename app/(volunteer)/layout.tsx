@@ -4,10 +4,10 @@ import type React from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
-import { AdminSidebar } from "@/components/admin/sidebar"
-import { AdminHeader } from "@/components/admin/header"
+import { Navbar } from "@/components/navbar"
+import { Footer } from "@/components/footer"
 
-export default function AdminLayout({
+export default function VolunteerLayout({
   children,
 }: {
   children: React.ReactNode
@@ -18,7 +18,7 @@ export default function AdminLayout({
   useEffect(() => {
     if (status === "loading") return
 
-    if (!session || !["admin", "creator"].includes(session.user.role)) {
+    if (!session) {
       router.push("/auth/signin")
     }
   }, [session, status, router])
@@ -31,17 +31,15 @@ export default function AdminLayout({
     )
   }
 
-  if (!session || !["admin", "creator"].includes(session.user.role)) {
+  if (!session) {
     return null
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <AdminHeader />
-      <div className="flex">
-        <AdminSidebar />
-        <main className="flex-1 p-8">{children}</main>
-      </div>
-    </div>
+    <>
+      <Navbar />
+      <main className="min-h-screen">{children}</main>
+      <Footer />
+    </>
   )
 }

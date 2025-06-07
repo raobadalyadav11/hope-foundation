@@ -8,20 +8,20 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || session.user.role !== "admin") {
+    if (!session || !["admin", "creator"].includes(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     await dbConnect()
 
     const body = await request.json()
-    const { role, status, ...otherUpdates } = body
+    const { role, isActive } = body
 
-    const user = await User.findByIdAndUpdate(
-      params.id,
-      { role, status, ...otherUpdates },
-      { new: true, select: "-password" },
-    )
+    const updateData: any = {}
+    if (role !== undefined) updateData.role = role
+    if (isActive !== undefined) updateData.isActive = isActive
+
+    const user = await User.findByIdAndUpdate(params.id, updateData, { new: true }).select("-password")
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
@@ -38,7 +38,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || session.user.role !== "admin") {
+    if (!session || !["admin", "creator"].includes(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
