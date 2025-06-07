@@ -418,7 +418,7 @@ export default function DonatePage() {
 
                   {/* Anonymous Donation */}
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="anonymous" checked={isAnonymous} onCheckedChange={setIsAnonymous} />
+                    <Checkbox id="anonymous" checked={isAnonymous} onCheckedChange={(checked) => setIsAnonymous(checked === true)} />
                     <Label htmlFor="anonymous" className="text-sm">
                       Make this donation anonymous
                     </Label>
