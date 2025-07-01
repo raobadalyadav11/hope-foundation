@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
 import Campaign from "@/lib/models/Campaign"
 import Donation from "@/lib/models/Donation"
 import { authOptions } from "@/lib/auth"
 import { sendCampaignUpdate } from "@/lib/email"
 import { z } from "zod"
+import connectToDatabase from "@/lib/mongodb"
 
 const updateSchema = z.object({
   title: z.string().min(1, "Title is required"),
