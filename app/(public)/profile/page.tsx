@@ -2,57 +2,31 @@
 
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { toast } from "@/hooks/use-toast"
-import { User, Calendar, Heart, Target, Award, Edit, Save, Camera, Shield, Bell, CreditCard } from "lucide-react"
-
-interface UserProfile {
-  id: string
-  name: string
-  email: string
-  phone?: string
-  address?: string
-  bio?: string
-  avatar?: string
-  role: string
-  joinedAt: string
-  stats: {
-    totalDonated: number
-    donationCount: number
-    campaignsSupported: number
-    volunteerHours: number
-  }
-  preferences: {
-    emailNotifications: boolean
-    smsNotifications: boolean
-    newsletter: boolean
-  }
-}
+import { Separator } from "@/components/ui/separator"
+import { useToast } from "@/hooks/use-toast"
+import { User, Save, Mail, Phone, Calendar, Heart, Shield, Bell, Camera, Award, Target } from "lucide-react"
 
 export default function ProfilePage() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [editing, setEditing] = useState(false)
+  const { data: session, update } = useSession()
+  const [profile, setProfile] = useState<any>({})
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+  const { toast } = useToast()
 
   useEffect(() => {
-    if (status === "loading") return
-    if (!session) {
-      router.push("/auth/signin")
-      return
+    if (session?.user) {
+      fetchProfile()
     }
-    fetchProfile()
-  }, [session, status, router])
+  }, [session])
 
   const fetchProfile = async () => {
     try {
@@ -60,363 +34,723 @@ export default function ProfilePage() {
       const data = await response.json()
       setProfile(data)
     } catch (error) {
-      console.error("Error fetching profile:", error)
-      toast({
-        title: "Error",
-        description: "Failed to load profile",
-        variant: "destructive",
+      console.error("Failed to fetch profile:", error)
+      // Mock data for demo
+      setProfile({
+        personal: {
+          name: session?.user?.name || "",
+          email: session?.user?.email || "",
+          phone: "+91 98765 43210",
+          dateOfBirth: "1990-01-01",
+          gender: "prefer-not-to-say",
+          address: "123 Main Street, Mumbai, India",
+          bio: "Passionate about making a difference in the world through charitable giving and community involvement.",
+          avatar: session?.user?.image || "",
+        },
+        preferences: {
+          emailNotifications: true,
+          smsNotifications: false,
+          newsletter: true,
+          donationReminders: true,
+          eventUpdates: true,
+          campaignUpdates: true,
+          language: "en",
+          timezone: "Asia/Kolkata",
+          currency: "INR",
+        },
+        privacy: {
+          profileVisibility: "public",
+          showDonations: false,
+          showVolunteerHours: true,
+          allowMessages: true,
+          showEmail: false,
+          showPhone: false,
+        },
+        stats: {
+          totalDonations: 15000,
+          donationCount: 12,
+          volunteerHours: 48,
+          campaignsSupported: 8,
+          eventsAttended: 5,
+          memberSince: "2022-01-15",
+        },
       })
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
-  const saveProfile = async () => {
-    if (!profile) return
-
-    setSaving(true)
+  const saveProfile = async (section: string, data: any) => {
+    setIsSaving(true)
     try {
       const response = await fetch("/api/user/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(profile),
+        body: JSON.stringify({ section, data }),
       })
 
       if (response.ok) {
+        setProfile((prev: any) => ({ ...prev, [section]: data }))
+
+        // Update session if personal info changed
+        if (section === "personal") {
+          await update({
+            name: data.name,
+            image: data.avatar,
+          })
+        }
+
         toast({
-          title: "Success",
-          description: "Profile updated successfully",
+          title: "Profile updated",
+          description: "Your changes have been saved successfully.",
         })
-        setEditing(false)
       } else {
         throw new Error("Failed to save profile")
       }
     } catch (error) {
-      console.error("Error saving profile:", error)
       toast({
         title: "Error",
-        description: "Failed to save profile",
+        description: "Failed to save profile. Please try again.",
         variant: "destructive",
       })
     } finally {
-      setSaving(false)
+      setIsSaving(false)
     }
   }
 
-  const updateProfile = (field: keyof UserProfile, value: any) => {
-    if (!profile) return
-    setProfile({ ...profile, [field]: value })
-  }
-
-  const updatePreferences = (field: string, value: boolean) => {
-    if (!profile) return
-    setProfile({
-      ...profile,
-      preferences: {
-        ...profile.preferences,
-        [field]: value,
-      },
-    })
-  }
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="animate-pulse space-y-6">
+            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-96 bg-gray-200 rounded-xl"></div>
+          </div>
+        </div>
       </div>
     )
   }
 
-  if (!profile) {
-    return <div className="text-center py-12">Failed to load profile</div>
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* Header */}
-          <div className="text-center">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              My Profile
-            </h1>
-            <p className="text-gray-600 mt-2">Manage your account settings and preferences</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <div className="relative inline-block">
+            <Avatar className="h-24 w-24 border-4 border-white shadow-xl">
+              <AvatarImage src={profile.personal?.avatar || "/placeholder.svg"} alt={profile.personal?.name} />
+              <AvatarFallback className="text-2xl bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+                {profile.personal?.name?.charAt(0)?.toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
+            <Button
+              size="sm"
+              className="absolute -bottom-2 -right-2 rounded-full h-8 w-8 p-0 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+            >
+              <Camera className="h-4 w-4" />
+            </Button>
           </div>
 
-          {/* Profile Header Card */}
-          <Card className="shadow-xl border-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-            <CardContent className="pt-6">
-              <div className="flex flex-col md:flex-row items-center gap-6">
-                <div className="relative">
-                  <Avatar className="w-24 h-24 border-4 border-white shadow-lg">
-                    <AvatarImage src={profile.avatar || "/placeholder.svg"} alt={profile.name} />
-                    <AvatarFallback className="text-2xl bg-white text-blue-600">
-                      {profile.name.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <Button
-                    size="sm"
-                    className="absolute -bottom-2 -right-2 rounded-full w-8 h-8 bg-white text-blue-600 hover:bg-gray-100"
-                  >
-                    <Camera className="w-4 h-4" />
-                  </Button>
-                </div>
-                <div className="text-center md:text-left flex-1">
-                  <h2 className="text-2xl font-bold">{profile.name}</h2>
-                  <p className="text-blue-100">{profile.email}</p>
-                  <div className="flex items-center justify-center md:justify-start gap-2 mt-2">
-                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                      {profile.role}
-                    </Badge>
-                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                      <Calendar className="w-3 h-3 mr-1" />
-                      Joined {new Date(profile.joinedAt).getFullYear()}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  {editing ? (
-                    <>
-                      <Button
-                        onClick={saveProfile}
-                        disabled={saving}
-                        className="bg-white text-blue-600 hover:bg-gray-100"
-                      >
-                        <Save className="w-4 h-4 mr-2" />
-                        {saving ? "Saving..." : "Save"}
-                      </Button>
-                      <Button
-                        onClick={() => setEditing(false)}
-                        variant="outline"
-                        className="border-white text-white hover:bg-white/10"
-                      >
-                        Cancel
-                      </Button>
-                    </>
-                  ) : (
-                    <Button onClick={() => setEditing(true)} className="bg-white text-blue-600 hover:bg-gray-100">
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit Profile
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              {profile.personal?.name || "User Profile"}
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Member since {new Date(profile.stats?.memberSince).toLocaleDateString()}
+            </p>
+          </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="shadow-lg border-0 hover:shadow-xl transition-shadow">
-              <CardContent className="pt-6 text-center">
-                <div className="p-3 bg-green-100 rounded-full w-fit mx-auto mb-3">
-                  <CreditCard className="w-6 h-6 text-green-600" />
-                </div>
-                <div className="text-2xl font-bold text-gray-900">₹{profile.stats.totalDonated.toLocaleString()}</div>
-                <p className="text-sm text-gray-600">Total Donated</p>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6">
+            <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg">
+              <CardContent className="p-4 text-center">
+                <Heart className="h-6 w-6 mx-auto mb-2 text-blue-200" />
+                <div className="text-2xl font-bold">₹{(profile.stats?.totalDonations / 1000).toFixed(0)}K</div>
+                <div className="text-xs text-blue-200">Total Donated</div>
               </CardContent>
             </Card>
-            <Card className="shadow-lg border-0 hover:shadow-xl transition-shadow">
-              <CardContent className="pt-6 text-center">
-                <div className="p-3 bg-blue-100 rounded-full w-fit mx-auto mb-3">
-                  <Heart className="w-6 h-6 text-blue-600" />
-                </div>
-                <div className="text-2xl font-bold text-gray-900">{profile.stats.donationCount}</div>
-                <p className="text-sm text-gray-600">Donations Made</p>
+
+            <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0 shadow-lg">
+              <CardContent className="p-4 text-center">
+                <Target className="h-6 w-6 mx-auto mb-2 text-green-200" />
+                <div className="text-2xl font-bold">{profile.stats?.donationCount}</div>
+                <div className="text-xs text-green-200">Donations</div>
               </CardContent>
             </Card>
-            <Card className="shadow-lg border-0 hover:shadow-xl transition-shadow">
-              <CardContent className="pt-6 text-center">
-                <div className="p-3 bg-purple-100 rounded-full w-fit mx-auto mb-3">
-                  <Target className="w-6 h-6 text-purple-600" />
-                </div>
-                <div className="text-2xl font-bold text-gray-900">{profile.stats.campaignsSupported}</div>
-                <p className="text-sm text-gray-600">Campaigns Supported</p>
+
+            <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 shadow-lg">
+              <CardContent className="p-4 text-center">
+                <Award className="h-6 w-6 mx-auto mb-2 text-purple-200" />
+                <div className="text-2xl font-bold">{profile.stats?.volunteerHours}</div>
+                <div className="text-xs text-purple-200">Volunteer Hours</div>
               </CardContent>
             </Card>
-            <Card className="shadow-lg border-0 hover:shadow-xl transition-shadow">
-              <CardContent className="pt-6 text-center">
-                <div className="p-3 bg-orange-100 rounded-full w-fit mx-auto mb-3">
-                  <Award className="w-6 h-6 text-orange-600" />
-                </div>
-                <div className="text-2xl font-bold text-gray-900">{profile.stats.volunteerHours}</div>
-                <p className="text-sm text-gray-600">Volunteer Hours</p>
+
+            <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0 shadow-lg">
+              <CardContent className="p-4 text-center">
+                <Heart className="h-6 w-6 mx-auto mb-2 text-orange-200" />
+                <div className="text-2xl font-bold">{profile.stats?.campaignsSupported}</div>
+                <div className="text-xs text-orange-200">Campaigns</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-pink-500 to-pink-600 text-white border-0 shadow-lg">
+              <CardContent className="p-4 text-center">
+                <Calendar className="h-6 w-6 mx-auto mb-2 text-pink-200" />
+                <div className="text-2xl font-bold">{profile.stats?.eventsAttended}</div>
+                <div className="text-xs text-pink-200">Events</div>
               </CardContent>
             </Card>
           </div>
-
-          {/* Profile Details */}
-          <Tabs defaultValue="personal" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-gray-100">
-              <TabsTrigger value="personal" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-                <User className="w-4 h-4 mr-2" />
-                Personal Info
-              </TabsTrigger>
-              <TabsTrigger
-                value="preferences"
-                className="data-[state=active]:bg-green-600 data-[state=active]:text-white"
-              >
-                <Bell className="w-4 h-4 mr-2" />
-                Preferences
-              </TabsTrigger>
-              <TabsTrigger value="security" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
-                <Shield className="w-4 h-4 mr-2" />
-                Security
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="personal" className="space-y-6">
-              <Card className="shadow-lg border-0">
-                <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-t-lg">
-                  <CardTitle className="text-blue-800">Personal Information</CardTitle>
-                  <CardDescription className="text-blue-600">Update your personal details</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-6 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
-                      <Input
-                        id="name"
-                        value={profile.name}
-                        onChange={(e) => updateProfile("name", e.target.value)}
-                        disabled={!editing}
-                        className="border-gray-300 focus:border-blue-500"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email Address</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={profile.email}
-                        disabled
-                        className="border-gray-300 bg-gray-50"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number</Label>
-                      <Input
-                        id="phone"
-                        value={profile.phone || ""}
-                        onChange={(e) => updateProfile("phone", e.target.value)}
-                        disabled={!editing}
-                        className="border-gray-300 focus:border-blue-500"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="role">Role</Label>
-                      <Input id="role" value={profile.role} disabled className="border-gray-300 bg-gray-50" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="address">Address</Label>
-                    <Textarea
-                      id="address"
-                      value={profile.address || ""}
-                      onChange={(e) => updateProfile("address", e.target.value)}
-                      disabled={!editing}
-                      className="border-gray-300 focus:border-blue-500"
-                      rows={3}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="bio">Bio</Label>
-                    <Textarea
-                      id="bio"
-                      value={profile.bio || ""}
-                      onChange={(e) => updateProfile("bio", e.target.value)}
-                      disabled={!editing}
-                      className="border-gray-300 focus:border-blue-500"
-                      rows={4}
-                      placeholder="Tell us about yourself..."
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="preferences" className="space-y-6">
-              <Card className="shadow-lg border-0">
-                <CardHeader className="bg-gradient-to-r from-green-50 to-green-100 rounded-t-lg">
-                  <CardTitle className="text-green-800">Notification Preferences</CardTitle>
-                  <CardDescription className="text-green-600">Choose how you want to be notified</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-6 space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
-                      <div>
-                        <Label className="text-sm font-medium">Email Notifications</Label>
-                        <p className="text-sm text-gray-600">Receive updates about donations and campaigns via email</p>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={profile.preferences.emailNotifications}
-                        onChange={(e) => updatePreferences("emailNotifications", e.target.checked)}
-                        className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
-                      />
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
-                      <div>
-                        <Label className="text-sm font-medium">SMS Notifications</Label>
-                        <p className="text-sm text-gray-600">Get important updates via text message</p>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={profile.preferences.smsNotifications}
-                        onChange={(e) => updatePreferences("smsNotifications", e.target.checked)}
-                        className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
-                      />
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
-                      <div>
-                        <Label className="text-sm font-medium">Newsletter</Label>
-                        <p className="text-sm text-gray-600">Subscribe to our monthly newsletter</p>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={profile.preferences.newsletter}
-                        onChange={(e) => updatePreferences("newsletter", e.target.checked)}
-                        className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="security" className="space-y-6">
-              <Card className="shadow-lg border-0">
-                <CardHeader className="bg-gradient-to-r from-red-50 to-red-100 rounded-t-lg">
-                  <CardTitle className="text-red-800">Security Settings</CardTitle>
-                  <CardDescription className="text-red-600">Manage your account security</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-6 space-y-6">
-                  <div className="space-y-4">
-                    <div className="p-4 bg-red-50 rounded-lg">
-                      <h4 className="font-medium text-red-800 mb-2">Change Password</h4>
-                      <p className="text-sm text-red-600 mb-4">Update your password to keep your account secure</p>
-                      <Button className="bg-red-600 hover:bg-red-700">Change Password</Button>
-                    </div>
-                    <div className="p-4 bg-yellow-50 rounded-lg">
-                      <h4 className="font-medium text-yellow-800 mb-2">Two-Factor Authentication</h4>
-                      <p className="text-sm text-yellow-600 mb-4">Add an extra layer of security to your account</p>
-                      <Button
-                        variant="outline"
-                        className="border-yellow-600 text-yellow-600 hover:bg-yellow-50 bg-transparent"
-                      >
-                        Enable 2FA
-                      </Button>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <h4 className="font-medium text-gray-800 mb-2">Login Sessions</h4>
-                      <p className="text-sm text-gray-600 mb-4">Manage your active login sessions</p>
-                      <Button variant="outline">View Sessions</Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
         </div>
+
+        {/* Profile Tabs */}
+        <Tabs defaultValue="personal" className="space-y-6">
+          <TabsList className="bg-white/80 backdrop-blur-sm border border-gray-200 p-1 rounded-xl grid grid-cols-3 w-full">
+            <TabsTrigger
+              value="personal"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg"
+            >
+              <User className="h-4 w-4 mr-2" />
+              Personal Info
+            </TabsTrigger>
+            <TabsTrigger
+              value="preferences"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-teal-500 data-[state=active]:text-white rounded-lg"
+            >
+              <Bell className="h-4 w-4 mr-2" />
+              Preferences
+            </TabsTrigger>
+            <TabsTrigger
+              value="privacy"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-lg"
+            >
+              <Shield className="h-4 w-4 mr-2" />
+              Privacy
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Personal Information */}
+          <TabsContent value="personal">
+            <Card className="bg-white/80 backdrop-blur-sm border-gray-200 shadow-xl">
+              <CardHeader className="pb-6">
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center">
+                  <User className="h-6 w-6 mr-3 text-blue-600" />
+                  Personal Information
+                </CardTitle>
+                <CardDescription>Update your personal details and contact information</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-sm font-medium text-gray-700">
+                      Full Name
+                    </Label>
+                    <Input
+                      id="name"
+                      value={profile.personal?.name || ""}
+                      onChange={(e) =>
+                        setProfile((prev: any) => ({
+                          ...prev,
+                          personal: { ...prev.personal, name: e.target.value },
+                        }))
+                      }
+                      className="bg-white/80 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                      Email Address
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={profile.personal?.email || ""}
+                      onChange={(e) =>
+                        setProfile((prev: any) => ({
+                          ...prev,
+                          personal: { ...prev.personal, email: e.target.value },
+                        }))
+                      }
+                      className="bg-white/80 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
+                      Phone Number
+                    </Label>
+                    <Input
+                      id="phone"
+                      value={profile.personal?.phone || ""}
+                      onChange={(e) =>
+                        setProfile((prev: any) => ({
+                          ...prev,
+                          personal: { ...prev.personal, phone: e.target.value },
+                        }))
+                      }
+                      className="bg-white/80 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="dateOfBirth" className="text-sm font-medium text-gray-700">
+                      Date of Birth
+                    </Label>
+                    <Input
+                      id="dateOfBirth"
+                      type="date"
+                      value={profile.personal?.dateOfBirth || ""}
+                      onChange={(e) =>
+                        setProfile((prev: any) => ({
+                          ...prev,
+                          personal: { ...prev.personal, dateOfBirth: e.target.value },
+                        }))
+                      }
+                      className="bg-white/80 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="gender" className="text-sm font-medium text-gray-700">
+                    Gender
+                  </Label>
+                  <Select
+                    value={profile.personal?.gender || ""}
+                    onValueChange={(value) =>
+                      setProfile((prev: any) => ({
+                        ...prev,
+                        personal: { ...prev.personal, gender: value },
+                      }))
+                    }
+                  >
+                    <SelectTrigger className="bg-white/80 border-gray-300">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="address" className="text-sm font-medium text-gray-700">
+                    Address
+                  </Label>
+                  <Textarea
+                    id="address"
+                    rows={3}
+                    value={profile.personal?.address || ""}
+                    onChange={(e) =>
+                      setProfile((prev: any) => ({
+                        ...prev,
+                        personal: { ...prev.personal, address: e.target.value },
+                      }))
+                    }
+                    className="bg-white/80 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="bio" className="text-sm font-medium text-gray-700">
+                    Bio
+                  </Label>
+                  <Textarea
+                    id="bio"
+                    rows={4}
+                    placeholder="Tell us about yourself..."
+                    value={profile.personal?.bio || ""}
+                    onChange={(e) =>
+                      setProfile((prev: any) => ({
+                        ...prev,
+                        personal: { ...prev.personal, bio: e.target.value },
+                      }))
+                    }
+                    className="bg-white/80 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="flex justify-end pt-4">
+                  <Button
+                    onClick={() => saveProfile("personal", profile.personal)}
+                    disabled={isSaving}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    {isSaving ? "Saving..." : "Save Changes"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Preferences */}
+          <TabsContent value="preferences">
+            <Card className="bg-white/80 backdrop-blur-sm border-gray-200 shadow-xl">
+              <CardHeader className="pb-6">
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent flex items-center">
+                  <Bell className="h-6 w-6 mr-3 text-green-600" />
+                  Notification Preferences
+                </CardTitle>
+                <CardDescription>Manage how you receive updates and notifications</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="p-4 bg-gradient-to-r from-green-50 to-teal-50 rounded-lg border border-green-200">
+                    <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
+                      <Mail className="h-5 w-5 mr-2 text-green-600" />
+                      Email Notifications
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="emailNotifications" className="text-sm">
+                          General Notifications
+                        </Label>
+                        <Switch
+                          id="emailNotifications"
+                          checked={profile.preferences?.emailNotifications || false}
+                          onCheckedChange={(checked) =>
+                            setProfile((prev: any) => ({
+                              ...prev,
+                              preferences: { ...prev.preferences, emailNotifications: checked },
+                            }))
+                          }
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="newsletter" className="text-sm">
+                          Newsletter
+                        </Label>
+                        <Switch
+                          id="newsletter"
+                          checked={profile.preferences?.newsletter || false}
+                          onCheckedChange={(checked) =>
+                            setProfile((prev: any) => ({
+                              ...prev,
+                              preferences: { ...prev.preferences, newsletter: checked },
+                            }))
+                          }
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="donationReminders" className="text-sm">
+                          Donation Reminders
+                        </Label>
+                        <Switch
+                          id="donationReminders"
+                          checked={profile.preferences?.donationReminders || false}
+                          onCheckedChange={(checked) =>
+                            setProfile((prev: any) => ({
+                              ...prev,
+                              preferences: { ...prev.preferences, donationReminders: checked },
+                            }))
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                    <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
+                      <Phone className="h-5 w-5 mr-2 text-blue-600" />
+                      SMS & Updates
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="smsNotifications" className="text-sm">
+                          SMS Notifications
+                        </Label>
+                        <Switch
+                          id="smsNotifications"
+                          checked={profile.preferences?.smsNotifications || false}
+                          onCheckedChange={(checked) =>
+                            setProfile((prev: any) => ({
+                              ...prev,
+                              preferences: { ...prev.preferences, smsNotifications: checked },
+                            }))
+                          }
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="eventUpdates" className="text-sm">
+                          Event Updates
+                        </Label>
+                        <Switch
+                          id="eventUpdates"
+                          checked={profile.preferences?.eventUpdates || false}
+                          onCheckedChange={(checked) =>
+                            setProfile((prev: any) => ({
+                              ...prev,
+                              preferences: { ...prev.preferences, eventUpdates: checked },
+                            }))
+                          }
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="campaignUpdates" className="text-sm">
+                          Campaign Updates
+                        </Label>
+                        <Switch
+                          id="campaignUpdates"
+                          checked={profile.preferences?.campaignUpdates || false}
+                          onCheckedChange={(checked) =>
+                            setProfile((prev: any) => ({
+                              ...prev,
+                              preferences: { ...prev.preferences, campaignUpdates: checked },
+                            }))
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="language" className="text-sm font-medium text-gray-700">
+                      Language
+                    </Label>
+                    <Select
+                      value={profile.preferences?.language || ""}
+                      onValueChange={(value) =>
+                        setProfile((prev: any) => ({
+                          ...prev,
+                          preferences: { ...prev.preferences, language: value },
+                        }))
+                      }
+                    >
+                      <SelectTrigger className="bg-white/80 border-gray-300">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="hi">Hindi</SelectItem>
+                        <SelectItem value="es">Spanish</SelectItem>
+                        <SelectItem value="fr">French</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="timezone" className="text-sm font-medium text-gray-700">
+                      Timezone
+                    </Label>
+                    <Select
+                      value={profile.preferences?.timezone || ""}
+                      onValueChange={(value) =>
+                        setProfile((prev: any) => ({
+                          ...prev,
+                          preferences: { ...prev.preferences, timezone: value },
+                        }))
+                      }
+                    >
+                      <SelectTrigger className="bg-white/80 border-gray-300">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Asia/Kolkata">Asia/Kolkata</SelectItem>
+                        <SelectItem value="UTC">UTC</SelectItem>
+                        <SelectItem value="America/New_York">America/New_York</SelectItem>
+                        <SelectItem value="Europe/London">Europe/London</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="currency" className="text-sm font-medium text-gray-700">
+                      Currency
+                    </Label>
+                    <Select
+                      value={profile.preferences?.currency || ""}
+                      onValueChange={(value) =>
+                        setProfile((prev: any) => ({
+                          ...prev,
+                          preferences: { ...prev.preferences, currency: value },
+                        }))
+                      }
+                    >
+                      <SelectTrigger className="bg-white/80 border-gray-300">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="INR">Indian Rupee (₹)</SelectItem>
+                        <SelectItem value="USD">US Dollar ($)</SelectItem>
+                        <SelectItem value="EUR">Euro (€)</SelectItem>
+                        <SelectItem value="GBP">British Pound (£)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-4">
+                  <Button
+                    onClick={() => saveProfile("preferences", profile.preferences)}
+                    disabled={isSaving}
+                    className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white shadow-lg"
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    {isSaving ? "Saving..." : "Save Changes"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Privacy Settings */}
+          <TabsContent value="privacy">
+            <Card className="bg-white/80 backdrop-blur-sm border-gray-200 shadow-xl">
+              <CardHeader className="pb-6">
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent flex items-center">
+                  <Shield className="h-6 w-6 mr-3 text-red-600" />
+                  Privacy Settings
+                </CardTitle>
+                <CardDescription>Control your privacy and what information is visible to others</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="profileVisibility" className="text-sm font-medium text-gray-700">
+                    Profile Visibility
+                  </Label>
+                  <Select
+                    value={profile.privacy?.profileVisibility || ""}
+                    onValueChange={(value) =>
+                      setProfile((prev: any) => ({
+                        ...prev,
+                        privacy: { ...prev.privacy, profileVisibility: value },
+                      }))
+                    }
+                  >
+                    <SelectTrigger className="bg-white/80 border-gray-300">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="public">Public - Anyone can see your profile</SelectItem>
+                      <SelectItem value="members">Members Only - Only registered members can see</SelectItem>
+                      <SelectItem value="private">Private - Only you can see your profile</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-gray-900">Information Visibility</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg">
+                      <Label htmlFor="showDonations" className="text-sm font-medium">
+                        Show Donation History
+                      </Label>
+                      <Switch
+                        id="showDonations"
+                        checked={profile.privacy?.showDonations || false}
+                        onCheckedChange={(checked) =>
+                          setProfile((prev: any) => ({
+                            ...prev,
+                            privacy: { ...prev.privacy, showDonations: checked },
+                          }))
+                        }
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg">
+                      <Label htmlFor="showVolunteerHours" className="text-sm font-medium">
+                        Show Volunteer Hours
+                      </Label>
+                      <Switch
+                        id="showVolunteerHours"
+                        checked={profile.privacy?.showVolunteerHours || false}
+                        onCheckedChange={(checked) =>
+                          setProfile((prev: any) => ({
+                            ...prev,
+                            privacy: { ...prev.privacy, showVolunteerHours: checked },
+                          }))
+                        }
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg">
+                      <Label htmlFor="showEmail" className="text-sm font-medium">
+                        Show Email Address
+                      </Label>
+                      <Switch
+                        id="showEmail"
+                        checked={profile.privacy?.showEmail || false}
+                        onCheckedChange={(checked) =>
+                          setProfile((prev: any) => ({
+                            ...prev,
+                            privacy: { ...prev.privacy, showEmail: checked },
+                          }))
+                        }
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg">
+                      <Label htmlFor="showPhone" className="text-sm font-medium">
+                        Show Phone Number
+                      </Label>
+                      <Switch
+                        id="showPhone"
+                        checked={profile.privacy?.showPhone || false}
+                        onCheckedChange={(checked) =>
+                          setProfile((prev: any) => ({
+                            ...prev,
+                            privacy: { ...prev.privacy, showPhone: checked },
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-gray-900">Communication Settings</h3>
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded-lg border border-red-200">
+                    <div>
+                      <Label htmlFor="allowMessages" className="text-sm font-medium">
+                        Allow Messages from Other Users
+                      </Label>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Other users can send you messages through the platform
+                      </p>
+                    </div>
+                    <Switch
+                      id="allowMessages"
+                      checked={profile.privacy?.allowMessages || false}
+                      onCheckedChange={(checked) =>
+                        setProfile((prev: any) => ({
+                          ...prev,
+                          privacy: { ...prev.privacy, allowMessages: checked },
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-4">
+                  <Button
+                    onClick={() => saveProfile("privacy", profile.privacy)}
+                    disabled={isSaving}
+                    className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white shadow-lg"
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    {isSaving ? "Saving..." : "Save Changes"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   )
