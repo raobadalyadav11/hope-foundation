@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { connectDB } from "@/lib/mongodb"
+import connectDB  from "@/lib/mongodb"
 import CorporateCSR from "@/lib/models/CorporateCSR"
 import { sendEmail } from "@/lib/email"
 
@@ -23,14 +23,14 @@ export async function POST(req: NextRequest) {
     await sendEmail({
       to: process.env.ADMIN_EMAIL || "admin@hopefoundation.org",
       subject: "New Corporate CSR Inquiry",
-      text: `A new CSR inquiry has been submitted by ${data.companyName}. Please review it in the admin dashboard.`,
+      html: `A new CSR inquiry has been submitted by ${data.companyName}. Please review it in the admin dashboard.`,
     })
 
     // Send confirmation email to company
     await sendEmail({
       to: data.email,
       subject: "CSR Inquiry Received - Hope Foundation",
-      text: `Dear ${data.contactPerson},\n\nThank you for your interest in CSR partnership with Hope Foundation. We have received your inquiry and our CSR team will review it shortly. We will contact you within 24 hours to discuss potential collaboration opportunities.\n\nBest regards,\nHope Foundation CSR Team`,
+      html: `Dear ${data.contactPerson},<br><br>Thank you for your interest in CSR partnership with Hope Foundation. We have received your inquiry and our CSR team will review it shortly. We will contact you within 24 hours to discuss potential collaboration opportunities.<br><br>Best regards,<br>Hope Foundation CSR Team`,
     })
 
     return NextResponse.json({ success: true, id: csrInquiry._id }, { status: 201 })

@@ -4,7 +4,7 @@ import connectDB from "@/lib/mongodb"
 import Event from "@/lib/models/Event"
 import User from "@/lib/models/User"
 import { authOptions } from "@/lib/auth"
-import { sendEventRegistrationConfirmation } from "@/lib/email"
+import { sendEventConfirmation } from "@/lib/email"
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     }
 
     // Check if user is already registered
-    const isAlreadyRegistered = event.attendees.some((attendee) => attendee.userId.toString() === session.user.id)
+    const isAlreadyRegistered = event.attendees.some((attendee: { userId: { toString: () => string } }) => attendee.userId.toString() === session.user.id)
 
     if (isAlreadyRegistered) {
       return NextResponse.json({ error: "You are already registered for this event" }, { status: 400 })
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const user = await User.findById(session.user.id)
 
     // Send confirmation email
-    await sendEventRegistrationConfirmation(event, user)
+    await sendEventConfirmation(event, user, "attending")
 
     return NextResponse.json({
       message: "Successfully registered for event",
@@ -87,7 +87,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     // Find and remove user from attendees
-    const attendeeIndex = event.attendees.findIndex((attendee) => attendee.userId.toString() === session.user.id)
+    const attendeeIndex = event.attendees.findIndex((attendee: { userId: { toString: () => string } }) => attendee.userId.toString() === session.user.id)
 
     if (attendeeIndex === -1) {
       return NextResponse.json({ error: "You are not registered for this event" }, { status: 400 })

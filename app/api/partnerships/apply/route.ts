@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { connectDB } from "@/lib/mongodb"
+import connectDB  from "@/lib/mongodb"
 import Partnership from "@/lib/models/Partnership"
 import { sendEmail } from "@/lib/email"
 
@@ -31,14 +31,14 @@ export async function POST(req: NextRequest) {
     await sendEmail({
       to: process.env.ADMIN_EMAIL || "admin@hopefoundation.org",
       subject: "New Partnership Application",
-      text: `A new partnership application has been submitted by ${data.organizationName}. Please review it in the admin dashboard.`,
+      html: `A new partnership application has been submitted by ${data.organizationName}. Please review it in the admin dashboard.`,
     })
 
     // Send confirmation email to partner
     await sendEmail({
       to: data.email,
       subject: "Partnership Application Received - Hope Foundation",
-      text: `Dear ${data.contactPerson},\n\nThank you for your interest in partnering with Hope Foundation. We have received your application and our team will review it shortly. We will contact you within 3-5 business days to discuss potential collaboration opportunities.\n\nBest regards,\nHope Foundation Team`,
+      html: `Dear ${data.contactPerson},\n\nThank you for your interest in partnering with Hope Foundation. We have received your application and our team will review it shortly. We will contact you within 3-5 business days to discuss potential collaboration opportunities.\n\nBest regards,\nHope Foundation Team`,
     })
 
     return NextResponse.json({ success: true, id: partnership._id }, { status: 201 })

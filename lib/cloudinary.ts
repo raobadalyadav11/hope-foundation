@@ -6,7 +6,27 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
-export async function uploadImage(file: File, folder = "ngo-website") {
+export interface CloudinaryUploadResult {
+  public_id: string
+  secure_url: string
+  width: number
+  height: number
+  format: string
+  resource_type: string
+  created_at: string
+  bytes: number
+  version: number
+  url: string
+}
+
+export interface CloudinaryUploadOptions {
+  folder?: string
+  resource_type?: "auto" | "image" | "video" | "raw"
+  transformation?: any[]
+  [key: string]: any
+}
+
+export async function uploadImage(file: File, folder = "ngo-website"): Promise<CloudinaryUploadResult> {
   try {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
@@ -21,13 +41,36 @@ export async function uploadImage(file: File, folder = "ngo-website") {
           },
           (error, result) => {
             if (error) reject(error)
-            else resolve(result)
+            else resolve(result as CloudinaryUploadResult)
           },
         )
         .end(buffer)
     })
   } catch (error) {
     throw new Error("Failed to upload image")
+  }
+}
+
+export async function uploadToCloudinary(buffer: Buffer, options: CloudinaryUploadOptions = {}): Promise<CloudinaryUploadResult> {
+  try {
+    return new Promise((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream(
+          {
+            folder: options.folder || "ngo-website",
+            resource_type: options.resource_type || "auto",
+            transformation: [{ width: 1200, height: 800, crop: "limit" }, { quality: "auto" }, { format: "auto" }],
+            ...options,
+          },
+          (error, result) => {
+            if (error) reject(error)
+            else resolve(result as CloudinaryUploadResult)
+          },
+        )
+        .end(buffer)
+    })
+  } catch (error) {
+    throw new Error("Failed to upload to cloudinary")
   }
 }
 

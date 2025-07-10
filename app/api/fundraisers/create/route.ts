@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { connectDB } from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Fundraiser from "@/lib/models/Fundraiser"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
@@ -44,14 +44,14 @@ export async function POST(req: NextRequest) {
     await sendEmail({
       to: process.env.ADMIN_EMAIL || "admin@hopefoundation.org",
       subject: "New Fundraiser Campaign",
-      text: `A new fundraiser campaign "${data.campaignTitle}" has been created by ${data.organizerName}. Please review it in the admin dashboard.`,
+      html: `A new fundraiser campaign "${data.campaignTitle}" has been created by ${data.organizerName}. Please review it in the admin dashboard.`,
     })
 
     // Send confirmation email to organizer
     await sendEmail({
       to: data.organizerEmail,
       subject: "Fundraiser Campaign Created - Hope Foundation",
-      text: `Dear ${data.organizerName},\n\nThank you for creating a fundraiser campaign with Hope Foundation. Your campaign "${data.campaignTitle}" has been submitted for review. We will notify you once it's approved and live on our platform.\n\nBest regards,\nHope Foundation Team`,
+      html: `Dear ${data.organizerName},\n\nThank you for creating a fundraiser campaign with Hope Foundation. Your campaign "${data.campaignTitle}" has been submitted for review. We will notify you once it's approved and live on our platform.\n\nBest regards,\nHope Foundation Team`,
     })
 
     return NextResponse.json({ success: true, id: fundraiser._id }, { status: 201 })

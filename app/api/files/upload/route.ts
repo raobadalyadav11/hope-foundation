@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { uploadToCloudinary } from "@/lib/cloudinary"
+import { uploadToCloudinary, type CloudinaryUploadResult } from "@/lib/cloudinary"
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes)
 
     // Upload to Cloudinary
-    const result = await uploadToCloudinary(buffer, {
+    const result: CloudinaryUploadResult = await uploadToCloudinary(buffer, {
       folder: "ngo-uploads",
       resource_type: "auto",
     })
