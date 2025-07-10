@@ -11,4 +11,4 @@ declare global {
   }
 }
 
-export default function connectToDatabase(): Promise<Mongoose>;
+export default function connectDB(): Promise<Mongoose>;

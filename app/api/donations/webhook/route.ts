@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import crypto from "crypto"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Donation from "@/lib/models/Donation"
 import Subscription from "@/lib/models/Subscription"
 import Campaign from "@/lib/models/Campaign"
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     const event = JSON.parse(body)
-    await dbConnect()
+    await connectDB()
 
     switch (event.event) {
       case "subscription.charged":

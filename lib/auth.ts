@@ -1,7 +1,7 @@
 import type { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import User from "@/lib/models/User"
 
 export const authOptions: NextAuthOptions = {
@@ -17,7 +17,7 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        await dbConnect()
+        await connectDB()
 
         const user = await User.findOne({ email: credentials.email }).select("+password")
 
@@ -63,14 +63,14 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (token) {
         session.user.id = token.sub!
-        session.user.role = token.role as string
+        session.user.role = token.role as "admin" | "donor" | "volunteer" | "creator" | null | undefined
         session.user.image = token.image as string
       }
       return session
     },
     async signIn({ user, account, profile }) {
       if (account?.provider === "google") {
-        await dbConnect()
+        await connectDB()
 
         const existingUser = await User.findOne({ email: user.email })
 

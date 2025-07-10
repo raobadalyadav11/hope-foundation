@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Event from "@/lib/models/Event"
 import { authOptions } from "@/lib/auth"
 import { sendEventConfirmation } from "@/lib/email"
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       return NextResponse.json({ error: "Invalid RSVP status" }, { status: 400 })
     }
 
-    await dbConnect()
+    await connectDB()
 
     const event = await Event.findById(params.id)
     if (!event) {

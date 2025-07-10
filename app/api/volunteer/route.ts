@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Volunteer from "@/lib/models/Volunteer"
 import User from "@/lib/models/User"
 import { authOptions } from "@/lib/auth"
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    await dbConnect()
+    await connectDB()
 
     const { searchParams } = new URL(request.url)
     const status = searchParams.get("status")
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const volunteerData = volunteerSchema.parse(body)
 
-    await dbConnect()
+    await connectDB()
 
     // Check if user already has a volunteer application
     const existingVolunteer = await Volunteer.findOne({ userId: session.user.id })

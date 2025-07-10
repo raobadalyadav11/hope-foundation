@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { connectToDatabase } from "@/lib/mongodb"
+import { connectDB } from "@/lib/mongodb"
 import Fundraiser from "@/lib/models/Fundraiser"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    await connectToDatabase()
+    await connectDB()
     const data = await req.json()
 
     // Validate required fields

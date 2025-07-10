@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { connectToDatabase } from "@/lib/mongodb"
+import { connectDB } from "@/lib/mongodb"
 import Fundraiser from "@/lib/models/Fundraiser"
 
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase()
+    await connectDB()
 
     const url = new URL(req.url)
     const status = url.searchParams.get("status") || "active"

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Notification from "@/lib/models/Notification"
 import User from "@/lib/models/User"
 import { authOptions } from "@/lib/auth"
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    await dbConnect()
+    await connectDB()
 
     const { searchParams } = new URL(request.url)
     const search = searchParams.get("search") || ""
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    await dbConnect()
+    await connectDB()
 
     const { type, title, message, recipients, scheduledAt, template } = await request.json()
 
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get recipient users
-    let recipientUsers = []
+    let recipientUsers: string | any[] = []
     let recipientCount = 0
 
     if (recipients.type === "all") {

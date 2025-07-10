@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Blog from "@/lib/models/Blog"
 import Volunteer from "@/lib/models/Volunteer"
 import { authOptions } from "@/lib/auth"
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    await dbConnect()
+    await connectDB()
 
     const { searchParams } = new URL(request.url)
     const status = searchParams.get("status") || "all"
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const blogData = volunteerBlogSchema.parse(body)
 
-    await dbConnect()
+    await connectDB()
 
     // Check if user is an approved volunteer
     const volunteer = await Volunteer.findOne({

@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Contact from "@/lib/models/Contact"
 import { sendContactNotification } from "@/lib/email"
 import { z } from "zod"
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const contactData = contactSchema.parse(body)
 
-    await dbConnect()
+    await connectDB()
 
     const contact = await Contact.create({
       ...contactData,

@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { connectToDatabase } from "@/lib/mongodb"
+import { connectDB } from "@/lib/mongodb"
 import Fundraiser from "@/lib/models/Fundraiser"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    await connectToDatabase()
+    await connectDB()
     const fundraiser = await Fundraiser.findById(params.id)
 
     if (!fundraiser) {
@@ -28,7 +28,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    await connectToDatabase()
+    await connectDB()
     const data = await req.json()
 
     const fundraiser = await Fundraiser.findById(params.id)
@@ -60,7 +60,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    await connectToDatabase()
+    await connectDB()
 
     const fundraiser = await Fundraiser.findById(params.id)
 

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Volunteer from "@/lib/models/Volunteer"
 import { authOptions } from "@/lib/auth"
 
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    await dbConnect()
+    await connectDB()
 
     // Get volunteer profile
     const volunteer = await Volunteer.findOne({ userId: session.user.id }).populate("userId", "name email").lean()

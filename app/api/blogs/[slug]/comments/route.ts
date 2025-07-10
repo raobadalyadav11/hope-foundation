@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Blog from "@/lib/models/Blog"
 import { authOptions } from "@/lib/auth"
 import { z } from "zod"
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
     const body = await request.json()
     const { content } = commentSchema.parse(body)
 
-    await dbConnect()
+    await connectDB()
 
     const blog = await Blog.findOne({ slug: params.slug })
 

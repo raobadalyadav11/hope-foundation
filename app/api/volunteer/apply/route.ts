@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Volunteer from "@/lib/models/Volunteer"
 import User from "@/lib/models/User"
 import { authOptions } from "@/lib/auth"
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const applicationData = volunteerApplicationSchema.parse(body)
 
-    await dbConnect()
+    await connectDB()
 
     // Check if user already applied
     const existingApplication = await Volunteer.findOne({ userId: session.user.id })

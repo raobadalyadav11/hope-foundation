@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import crypto from "crypto"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Donation from "@/lib/models/Donation"
 import Campaign from "@/lib/models/Campaign"
 import { sendDonationConfirmation } from "@/lib/email"
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
     }
 
-    await dbConnect()
+    await connectDB()
 
     // Update donation status
     const donation = await Donation.findOneAndUpdate(

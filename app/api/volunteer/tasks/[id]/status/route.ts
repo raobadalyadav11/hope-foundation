@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import VolunteerTask from "@/lib/models/VolunteerTask"
 import Volunteer from "@/lib/models/Volunteer"
 import { authOptions } from "@/lib/auth"
@@ -16,7 +16,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     const body = await request.json()
     const { status, actualHours } = body
 
-    await dbConnect()
+    await connectDB()
 
     const task = await VolunteerTask.findOne({
       _id: params.id,

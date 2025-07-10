@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Event from "@/lib/models/Event"
 import User from "@/lib/models/User"
 import { authOptions } from "@/lib/auth"
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       return NextResponse.json({ error: "Authentication required" }, { status: 401 })
     }
 
-    await dbConnect()
+    await connectDB()
 
     const event = await Event.findById(params.id)
 
@@ -78,7 +78,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       return NextResponse.json({ error: "Authentication required" }, { status: 401 })
     }
 
-    await dbConnect()
+    await connectDB()
 
     const event = await Event.findById(params.id)
 

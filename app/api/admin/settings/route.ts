@@ -1,8 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { connectDB } from "@/lib/mongodb"
-
+import connectDB from "@/lib/mongodb"
 // Mock settings data - in production, this would be stored in database
 const defaultSettings = {
   general: {

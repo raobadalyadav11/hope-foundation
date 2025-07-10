@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { connectToDatabase } from "@/lib/mongodb"
+import { connectDB } from "@/lib/mongodb"
 import Sponsor from "@/lib/models/Sponsor"
 import { sendEmail } from "@/lib/email"
 
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase()
+    await connectDB()
     const data = await req.json()
 
     // Validate required fields

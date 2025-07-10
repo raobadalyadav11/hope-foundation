@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import User from "@/lib/models/User"
 import Donation from "@/lib/models/Donation"
 import { authOptions } from "@/lib/auth"
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 })
     }
 
-    await dbConnect()
+    await connectDB()
 
     // Get user profile
     const user = await User.findById(session.user.id).select("-password")
@@ -95,7 +95,7 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json()
 
-    await dbConnect()
+    await connectDB()
 
     const updatedUser = await User.findByIdAndUpdate(
       session.user.id,

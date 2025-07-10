@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Event from "@/lib/models/Event"
 import { authOptions } from "@/lib/auth"
 import { z } from "zod"
@@ -56,7 +56,7 @@ const eventSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    await dbConnect()
+    await connectDB()
 
     const { searchParams } = new URL(request.url)
     const category = searchParams.get("category")
@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "End date must be after start date" }, { status: 400 })
     }
 
-    await dbConnect()
+    await connectDB()
 
     const event = await Event.create({
       ...eventData,

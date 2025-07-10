@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Blog from "@/lib/models/Blog"
 import { authOptions } from "@/lib/auth"
 
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
       return NextResponse.json({ error: "Authentication required" }, { status: 401 })
     }
 
-    await dbConnect()
+    await connectDB()
 
     const blog = await Blog.findOne({ slug: params.slug })
 

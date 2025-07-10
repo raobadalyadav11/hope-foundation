@@ -5,7 +5,7 @@ import Donation from "@/lib/models/Donation"
 import { authOptions } from "@/lib/auth"
 import { sendCampaignUpdate } from "@/lib/email"
 import { z } from "zod"
-import connectToDatabase from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 
 const updateSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const body = await request.json()
     const updateData = updateSchema.parse(body)
 
-    await dbConnect()
+    await connectDB()
 
     const campaign = await Campaign.findById(params.id)
 

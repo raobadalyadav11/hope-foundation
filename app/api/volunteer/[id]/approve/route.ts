@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Volunteer from "@/lib/models/Volunteer"
 import { authOptions } from "@/lib/auth"
 import { sendVolunteerApproval } from "@/lib/email"
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    await dbConnect()
+    await connectDB()
 
     const volunteer = await Volunteer.findByIdAndUpdate(
       params.id,

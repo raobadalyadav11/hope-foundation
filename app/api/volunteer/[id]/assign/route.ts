@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Volunteer from "@/lib/models/Volunteer"
 import { authOptions } from "@/lib/auth"
 import { z } from "zod"
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const body = await request.json()
     const assignmentData = assignmentSchema.parse(body)
 
-    await dbConnect()
+    await connectDB()
 
     const volunteer = await Volunteer.findByIdAndUpdate(
       params.id,

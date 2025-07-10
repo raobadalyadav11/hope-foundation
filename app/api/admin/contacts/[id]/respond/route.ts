@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Contact from "@/lib/models/Contact"
 import { authOptions } from "@/lib/auth"
 import { sendContactResponse } from "@/lib/email"
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const body = await request.json()
     const { response, status } = responseSchema.parse(body)
 
-    await dbConnect()
+    await connectDB()
 
     const contact = await Contact.findByIdAndUpdate(
       params.id,

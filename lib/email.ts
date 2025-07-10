@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer"
 
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number.parseInt(process.env.SMTP_PORT || "587"),
   secure: false,
@@ -68,3 +68,45 @@ export async function sendEventConfirmation(event: any, user: any, status: strin
 
   await transporter.sendMail(mailOptions)
 }
+
+export async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
+  const mailOptions = {
+    from: process.env.FROM_EMAIL,
+    to,
+    subject,
+    html,
+  }
+
+  await transporter.sendMail(mailOptions)
+}
+
+export async function sendCampaignUpdate(campaign: any, updateData: any, donorEmails: string[]) {
+  const mailOptions = {
+    from: process.env.FROM_EMAIL,
+    to: donorEmails,
+    subject: `Campaign Update: ${campaign.title}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #2563eb;">Campaign Update</h1>
+        <h2>${campaign.title}</h2>
+        <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3>${updateData.title}</h3>
+          <p>${updateData.content}</p>
+          ${updateData.image ? `<img src="${updateData.image}" alt="Update image" style="max-width: 100%; height: auto; border-radius: 8px;">` : ''}
+        </div>
+        <div style="background-color: #e0f2fe; padding: 15px; border-radius: 8px; margin: 20px 0;">
+          <p><strong>Campaign Progress:</strong></p>
+          <p>Raised: $${campaign.currentAmount} of $${campaign.goalAmount}</p>
+          <div style="background-color: #fff; height: 10px; border-radius: 5px; overflow: hidden;">
+            <div style="background-color: #2563eb; height: 100%; width: ${(campaign.currentAmount / campaign.goalAmount) * 100}%;"></div>
+          </div>
+        </div>
+        <p>Thank you for your continued support!</p>
+        <p>Best regards,<br>The Hope Foundation Team</p>
+      </div>
+    `,
+  }
+
+  await transporter.sendMail(mailOptions)
+}
+ 

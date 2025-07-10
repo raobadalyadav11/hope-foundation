@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Subscription from "@/lib/models/Subscription"
 import { authOptions } from "@/lib/auth"
 import razorpay from "@/lib/razorpay"
@@ -20,7 +20,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       return NextResponse.json({ error: "Invalid status" }, { status: 400 })
     }
 
-    await dbConnect()
+    await connectDB()
 
     const subscription = await Subscription.findById(params.id)
 

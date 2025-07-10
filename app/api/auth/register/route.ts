@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import User from "@/lib/models/User"
 import { z } from "zod"
 import crypto from "crypto"
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { name, email, password, role = "donor", phone } = registerSchema.parse(body)
 
-    await dbConnect()
+    await connectDB()
 
     // Check if user already exists
     const existingUser = await User.findOne({ email })

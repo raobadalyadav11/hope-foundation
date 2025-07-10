@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Event from "@/lib/models/Event"
 import { authOptions } from "@/lib/auth"
 
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 })
     }
 
-    await dbConnect()
+    await connectDB()
 
     const { searchParams } = new URL(request.url)
     const search = searchParams.get("search") || ""

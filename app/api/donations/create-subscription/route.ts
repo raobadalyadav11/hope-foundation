@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Subscription from "@/lib/models/Subscription"
 import Campaign from "@/lib/models/Campaign"
 import { authOptions } from "@/lib/auth"
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const { amount, frequency, campaignId, donorName, donorEmail, donorPhone, isAnonymous } =
       subscriptionSchema.parse(body)
 
-    await dbConnect()
+    await connectDB()
 
     // Validate campaign if provided
     if (campaignId) {

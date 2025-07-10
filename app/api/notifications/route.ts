@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import { authOptions } from "@/lib/auth"
 import { sendEmail } from "@/lib/email"
 import { z } from "zod"
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { type, recipients, subject, message, template } = notificationSchema.parse(body)
 
-    await dbConnect()
+    await connectDB()
 
     if (type === "email") {
       // Send bulk emails

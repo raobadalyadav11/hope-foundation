@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import User from "@/lib/models/User"
 import Campaign from "@/lib/models/Campaign"
 import Donation from "@/lib/models/Donation"
@@ -8,7 +8,7 @@ import Volunteer from "@/lib/models/Volunteer"
 
 export async function GET() {
   try {
-    await dbConnect()
+    await connectDB()
 
     const [
       totalVolunteers,

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Blog from "@/lib/models/Blog"
 import { authOptions } from "@/lib/auth"
 import { z } from "zod"
@@ -34,7 +34,7 @@ const blogSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    await dbConnect()
+    await connectDB()
 
     const { searchParams } = new URL(request.url)
     const status = searchParams.get("status")
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const blogData = blogSchema.parse(body)
 
-    await dbConnect()
+    await connectDB()
 
     const blog = await Blog.create({
       ...blogData,

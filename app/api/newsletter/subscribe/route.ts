@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Newsletter from "@/lib/models/Newsletter"
 import { sendNewsletterWelcome } from "@/lib/email"
 import { z } from "zod"
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { email, name, preferences } = subscribeSchema.parse(body)
 
-    await dbConnect()
+    await connectDB()
 
     // Check if already subscribed
     const existingSubscriber = await Newsletter.findOne({ email })

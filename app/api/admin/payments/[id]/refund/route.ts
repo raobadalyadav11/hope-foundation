@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import dbConnect from "@/lib/mongodb"
+import connectDB from "@/lib/mongodb"
 import Payment from "@/lib/models/Payment"
 import Donation from "@/lib/models/Donation"
 import { authOptions } from "@/lib/auth"
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const body = await request.json()
     const { amount, reason } = refundSchema.parse(body)
 
-    await dbConnect()
+    await connectDB()
 
     // Get payment details
     const payment = await Payment.findById(params.id).populate("donationId")
