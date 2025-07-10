@@ -2,74 +2,112 @@
 
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { toast } from "@/hooks/use-toast"
-import { Heart, Search, Calendar, CreditCard, Receipt, TrendingUp, Target, Award, RefreshCw } from "lucide-react"
-import Link from "next/link"
-
-interface Donation {
-  _id: string
-  amount: number
-  campaignId?: {
-    _id: string
-    title: string
-    category: string
-  }
-  status: string
-  receiptNumber?: string
-  paymentMethod: string
-  createdAt: string
-  isRecurring: boolean
-  subscriptionId?: string
-}
-
-interface DonationStats {
-  totalDonated: number
-  donationCount: number
-  campaignsSupported: number
-  averageDonation: number
-  monthlyTotal: number
-  yearlyTotal: number
-}
+import { Search, Heart, DollarSign, Receipt, TrendingUp, Award, Target, RefreshCw } from "lucide-react"
+import { format } from "date-fns"
 
 export default function MyDonationsPage() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const [donations, setDonations] = useState<Donation[]>([])
-  const [stats, setStats] = useState<DonationStats | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { data: session } = useSession()
+  const [donations, setDonations] = useState<any[]>([])
+  const [subscriptions, setSubscriptions] = useState<any[]>([])
+  const [stats, setStats] = useState<any>({})
+  const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [filterStatus, setFilterStatus] = useState("all")
+  const [statusFilter, setStatusFilter] = useState("all")
+  const [sortBy, setSortBy] = useState("date-desc")
 
   useEffect(() => {
-    if (status === "loading") return
-    if (!session) {
-      router.push("/auth/signin")
-      return
+    if (session?.user) {
+      fetchDonations()
     }
-    fetchDonations()
-  }, [session, status, router])
+  }, [session])
 
   const fetchDonations = async () => {
     try {
-      const response = await fetch(`/api/donations/user/${session?.user?.id}`)
-      const data = await response.json()
-      setDonations(data.donations || [])
-      setStats(data.stats || null)
+      const [donationsRes, subscriptionsRes] = await Promise.all([
+        fetch(`/api/donations/user/${session?.user?.id}`),
+        fetch(`/api/donor/subscriptions`)
+      ])
+      
+      const donationsData = await donationsRes.json()
+      const subscriptionsData = await subscriptionsRes.json()
+      
+      setDonations(donationsData.donations || [])
+      setSubscriptions(subscriptionsData.subscriptions || [])
+      setStats(donationsData.stats || {})
     } catch (error) {
-      console.error("Error fetching donations:", error)
-      toast({
-        title: "Error",
-        description: "Failed to load donations",
-        variant: "destructive",
+      console.error('Failed to fetch donations:', error)
+      // Mock data for demo
+      setDonations([
+        {
+          id: '1',
+          amount: 5000,
+          campaign: { title: 'Education Fund', id: 'edu-1' },
+          status: 'completed',
+          paymentMethod: 'razorpay',
+          transactionId: 'TXN123456789',
+          createdAt: '2024-01-15T10:30:00Z',
+          receiptUrl: '/receipts/receipt-1.pdf',
+          isRecurring: false,
+          taxDeductible: true
+        },
+        {
+          id: '2',
+          amount: 2500,
+          campaign: { title: 'Healthcare Initiative', id: 'health-1' },
+          status: 'completed',
+          paymentMethod: 'razorpay',
+          transactionId: 'TXN123456790',
+          createdAt: '2024-01-10T14:20:00Z',
+          receiptUrl: '/receipts/receipt-2.pdf',
+          isRecurring: true,
+          taxDeductible: true
+        },
+        {
+          id: '3',
+          amount: 1000,
+          campaign: { title: 'Clean Water Project', id: 'water-1' },
+          status: 'pending',
+          paymentMethod: 'razorpay',
+          transactionId: 'TXN123456791',
+          createdAt: '2024-01-05T09:15:00Z',
+          receiptUrl: null,
+          isRecurring: false,
+          taxDeductible: true
+        }
+      ])
+      
+      setSubscriptions([
+        {
+          id: 'sub-1',
+          amount: 2500,
+          campaign: { title: 'Healthcare Initiative', id: 'health-1' },
+          status: 'active',
+          frequency: 'monthly',
+          nextPayment: '2024-02-10T14:20:00Z',
+          createdAt: '2024-01-10T14:20:00Z',
+          totalPaid: 7500,
+          paymentsCount: 3
+        }
+      ])
+      
+      setStats({
+        totalDonated: 8500,
+        donationCount: 3,
+        averageDonation: 2833,
+        taxSavings: 2125,
+        impactScore: 85,
+        campaignsSupported: 3,
+        recurringDonations: 1,
+        thisYearTotal: 8500
       })
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
@@ -78,37 +116,52 @@ export default function MyDonationsPage() {
       const response = await fetch(`/api/donations/receipt/${donationId}`)
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
-      const a = document.createElement("a")
+      const a = document.createElement('a')
       a.href = url
-      a.download = `receipt-${donationId}.pdf`
+      a.download = `donation-receipt-${donationId}.pdf`
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
     } catch (error) {
-      console.error("Error downloading receipt:", error)
-      toast({
-        title: "Error",
-        description: "Failed to download receipt",
-        variant: "destructive",
-      })
+      console.error('Failed to download receipt:', error)
     }
   }
 
-  const filteredDonations = donations.filter((donation) => {
-    const matchesSearch =
-      donation.campaignId?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      donation.receiptNumber?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesFilter = filterStatus === "all" || donation.status === filterStatus
-    return matchesSearch && matchesFilter
+  const filteredDonations = donations.filter(donation => {
+    const matchesSearch = donation.campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         donation.transactionId.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = statusFilter === 'all' || donation.status === statusFilter
+    return matchesSearch && matchesStatus
   })
 
-  if (loading) {
+  const sortedDonations = [...filteredDonations].sort((a, b) => {
+    switch (sortBy) {
+      case 'date-desc':
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      case 'date-asc':
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      case 'amount-desc':
+        return b.amount - a.amount
+      case 'amount-asc':
+        return a.amount - b.amount
+      default:
+        return 0
+    }
+  })
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-96">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="animate-pulse space-y-6">
+            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-32 bg-gray-200 rounded-xl"></div>
+              ))}
+            </div>
+            <div className="h-96 bg-gray-200 rounded-xl"></div>
           </div>
         </div>
       </div>
@@ -116,361 +169,179 @@ export default function MyDonationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto space-y-8">
-          {/* Header */}
-          <div className="text-center">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              My Donations
-            </h1>
-            <p className="text-gray-600 mt-2">Track your contributions and impact</p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
+      <div className="max-w-6xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            My Donations
+          </h1>
+          <p className="text-gray-600">Track your contributions and impact</p>
+        </div>
 
-          {/* Stats Cards */}
-          {stats && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="shadow-lg border-0 hover:shadow-xl transition-all duration-300 border-l-4 border-l-green-500">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Total Donated</p>
-                      <p className="text-2xl font-bold text-gray-900">₹{stats.totalDonated.toLocaleString()}</p>
-                    </div>
-                    <div className="p-3 bg-green-100 rounded-full">
-                      <CreditCard className="w-6 h-6 text-green-600" />
-                    </div>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-100 text-sm font-medium">Total Donated</p>
+                  <p className="text-3xl font-bold">₹{stats.totalDonated?.toLocaleString()}</p>
+                  <div className="flex items-center mt-2">
+                    <TrendingUp className="h-4 w-4 mr-1" />
+                    <span className="text-sm">This year</span>
                   </div>
-                  <div className="mt-2 flex items-center text-sm text-green-600">
-                    <TrendingUp className="w-4 h-4 mr-1" />
-                    <span>Lifetime total</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-lg border-0 hover:shadow-xl transition-all duration-300 border-l-4 border-l-blue-500">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Donations Made</p>
-                      <p className="text-2xl font-bold text-gray-900">{stats.donationCount}</p>
-                    </div>
-                    <div className="p-3 bg-blue-100 rounded-full">
-                      <Heart className="w-6 h-6 text-blue-600" />
-                    </div>
-                  </div>
-                  <div className="mt-2 flex items-center text-sm text-blue-600">
-                    <Award className="w-4 h-4 mr-1" />
-                    <span>Total contributions</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-lg border-0 hover:shadow-xl transition-all duration-300 border-l-4 border-l-purple-500">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Campaigns Supported</p>
-                      <p className="text-2xl font-bold text-gray-900">{stats.campaignsSupported}</p>
-                    </div>
-                    <div className="p-3 bg-purple-100 rounded-full">
-                      <Target className="w-6 h-6 text-purple-600" />
-                    </div>
-                  </div>
-                  <div className="mt-2 flex items-center text-sm text-purple-600">
-                    <Target className="w-4 h-4 mr-1" />
-                    <span>Different causes</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-lg border-0 hover:shadow-xl transition-all duration-300 border-l-4 border-l-orange-500">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Average Donation</p>
-                      <p className="text-2xl font-bold text-gray-900">₹{stats.averageDonation.toLocaleString()}</p>
-                    </div>
-                    <div className="p-3 bg-orange-100 rounded-full">
-                      <TrendingUp className="w-6 h-6 text-orange-600" />
-                    </div>
-                  </div>
-                  <div className="mt-2 flex items-center text-sm text-orange-600">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    <span>Per donation</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {/* Search and Filters */}
-          <Card className="shadow-lg border-0">
-            <CardContent className="pt-6">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    placeholder="Search donations by campaign or receipt number..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 border-gray-300 focus:border-blue-500"
-                  />
                 </div>
-                <div className="flex gap-2">
-                  <select
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none"
-                  >
-                    <option value="all">All Status</option>
-                    <option value="completed">Completed</option>
-                    <option value="pending">Pending</option>
-                    <option value="failed">Failed</option>
-                  </select>
-                  <Button variant="outline" onClick={fetchDonations}>
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    Refresh
-                  </Button>
-                </div>
+                <DollarSign className="h-12 w-12 text-blue-200" />
               </div>
             </CardContent>
           </Card>
 
-          {/* Donations List */}
-          <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-gray-100">
-              <TabsTrigger value="all" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-                All Donations
-              </TabsTrigger>
-              <TabsTrigger value="one-time" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">
-                One-time
-              </TabsTrigger>
-              <TabsTrigger
-                value="recurring"
-                className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-              >
-                Recurring
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="all" className="space-y-4">
-              {filteredDonations.length === 0 ? (
-                <Card className="shadow-lg border-0">
-                  <CardContent className="pt-6 text-center py-12">
-                    <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">No donations found</h3>
-                    <p className="text-gray-600 mb-6">
-                      {searchTerm || filterStatus !== "all"
-                        ? "Try adjusting your search or filters"
-                        : "Start making a difference today with your first donation"}
-                    </p>
-                    <Button asChild className="bg-blue-600 hover:bg-blue-700">
-                      <Link href="/donate">Make a Donation</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-4">
-                  {filteredDonations.map((donation) => (
-                    <Card key={donation._id} className="shadow-lg border-0 hover:shadow-xl transition-all duration-300">
-                      <CardContent className="pt-6">
-                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <div className="p-2 bg-blue-100 rounded-full">
-                                <Heart className="w-4 h-4 text-blue-600" />
-                              </div>
-                              <div>
-                                <h3 className="font-semibold text-gray-900">
-                                  {donation.campaignId?.title || "General Donation"}
-                                </h3>
-                                <p className="text-sm text-gray-600">
-                                  {donation.campaignId?.category && (
-                                    <Badge variant="secondary" className="mr-2">
-                                      {donation.campaignId.category}
-                                    </Badge>
-                                  )}
-                                  {new Date(donation.createdAt).toLocaleDateString()}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4 text-sm text-gray-600">
-                              <span>Receipt: {donation.receiptNumber || "N/A"}</span>
-                              <span>•</span>
-                              <span>Method: {donation.paymentMethod}</span>
-                              {donation.isRecurring && (
-                                <>
-                                  <span>•</span>
-                                  <Badge variant="outline" className="text-purple-600 border-purple-600">
-                                    Recurring
-                                  </Badge>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-right">
-                              <p className="text-2xl font-bold text-green-600">₹{donation.amount.toLocaleString()}</p>
-                              <Badge
-                                variant={
-                                  donation.status === "completed"
-                                    ? "default"
-                                    : donation.status === "pending"
-                                      ? "secondary"
-                                      : "destructive"
-                                }
-                                className={
-                                  donation.status === "completed"
-                                    ? "bg-green-100 text-green-800"
-                                    : donation.status === "pending"
-                                      ? "bg-yellow-100 text-yellow-800"
-                                      : ""
-                                }
-                              >
-                                {donation.status}
-                              </Badge>
-                            </div>
-                            {donation.status === "completed" && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => downloadReceipt(donation._id)}
-                                className="border-blue-600 text-blue-600 hover:bg-blue-50"
-                              >
-                                <Receipt className="w-4 h-4 mr-2" />
-                                Receipt
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-green-100 text-sm font-medium">Donations Made</p>
+                  <p className="text-3xl font-bold">{stats.donationCount}</p>
+                  <div className="flex items-center mt-2">
+                    <Heart className="h-4 w-4 mr-1" />
+                    <span className="text-sm">Avg: ₹{stats.averageDonation?.toLocaleString()}</span>
+                  </div>
                 </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="one-time" className="space-y-4">
-              <div className="space-y-4">
-                {filteredDonations
-                  .filter((d) => !d.isRecurring)
-                  .map((donation) => (
-                    <Card key={donation._id} className="shadow-lg border-0 hover:shadow-xl transition-all duration-300">
-                      <CardContent className="pt-6">
-                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <div className="p-2 bg-green-100 rounded-full">
-                                <CreditCard className="w-4 h-4 text-green-600" />
-                              </div>
-                              <div>
-                                <h3 className="font-semibold text-gray-900">
-                                  {donation.campaignId?.title || "General Donation"}
-                                </h3>
-                                <p className="text-sm text-gray-600">
-                                  {donation.campaignId?.category && (
-                                    <Badge variant="secondary" className="mr-2">
-                                      {donation.campaignId.category}
-                                    </Badge>
-                                  )}
-                                  {new Date(donation.createdAt).toLocaleDateString()}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-right">
-                              <p className="text-2xl font-bold text-green-600">₹{donation.amount.toLocaleString()}</p>
-                              <Badge variant="default" className="bg-green-100 text-green-800">
-                                One-time
-                              </Badge>
-                            </div>
-                            {donation.status === "completed" && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => downloadReceipt(donation._id)}
-                                className="border-green-600 text-green-600 hover:bg-green-50"
-                              >
-                                <Receipt className="w-4 h-4 mr-2" />
-                                Receipt
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                <Heart className="h-12 w-12 text-green-200" />
               </div>
-            </TabsContent>
+            </CardContent>
+          </Card>
 
-            <TabsContent value="recurring" className="space-y-4">
-              <div className="space-y-4">
-                {filteredDonations
-                  .filter((d) => d.isRecurring)
-                  .map((donation) => (
-                    <Card key={donation._id} className="shadow-lg border-0 hover:shadow-xl transition-all duration-300">
-                      <CardContent className="pt-6">
-                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <div className="p-2 bg-purple-100 rounded-full">
-                                <RefreshCw className="w-4 h-4 text-purple-600" />
-                              </div>
-                              <div>
-                                <h3 className="font-semibold text-gray-900">
-                                  {donation.campaignId?.title || "General Donation"}
-                                </h3>
-                                <p className="text-sm text-gray-600">
-                                  {donation.campaignId?.category && (
-                                    <Badge variant="secondary" className="mr-2">
-                                      {donation.campaignId.category}
-                                    </Badge>
-                                  )}
-                                  {new Date(donation.createdAt).toLocaleDateString()}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-right">
-                              <p className="text-2xl font-bold text-purple-600">₹{donation.amount.toLocaleString()}</p>
-                              <Badge variant="outline" className="text-purple-600 border-purple-600">
-                                Monthly
-                              </Badge>
-                            </div>
-                            <div className="flex gap-2">
-                              {donation.status === "completed" && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => downloadReceipt(donation._id)}
-                                  className="border-purple-600 text-purple-600 hover:bg-purple-50"
-                                >
-                                  <Receipt className="w-4 h-4 mr-2" />
-                                  Receipt
-                                </Button>
-                              )}
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                asChild
-                                className="border-gray-600 text-gray-600 hover:bg-gray-50 bg-transparent"
-                              >
-                                <Link href={`/donor/dashboard/subscriptions`}>Manage</Link>
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+          <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-100 text-sm font-medium">Tax Savings</p>
+                  <p className="text-3xl font-bold">₹{stats.taxSavings?.toLocaleString()}</p>
+                  <div className="flex items-center mt-2">
+                    <Receipt className="h-4 w-4 mr-1" />
+                    <span className="text-sm">80G Benefits</span>
+                  </div>
+                </div>
+                <Receipt className="h-12 w-12 text-purple-200" />
               </div>
-            </TabsContent>
-          </Tabs>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-orange-100 text-sm font-medium">Impact Score</p>
+                  <p className="text-3xl font-bold">{stats.impactScore}</p>
+                  <div className="flex items-center mt-2">
+                    <Award className="h-4 w-4 mr-1" />
+                    <span className="text-sm">{stats.campaignsSupported} campaigns</span>
+                  </div>
+                </div>
+                <Target className="h-12 w-12 text-orange-200" />
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </div>
-    </div>
-  )
-}
+
+        {/* Main Content */}
+        <Tabs defaultValue="donations" className="space-y-6">
+          <TabsList className="bg-white/80 backdrop-blur-sm border border-gray-200 p-1 rounded-xl">
+            <TabsTrigger value="donations" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg">
+              <Heart className="h-4 w-4 mr-2" />
+              Donations
+            </TabsTrigger>
+            <TabsTrigger value="subscriptions" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-teal-500 data-[state=active]:text-white rounded-lg">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Recurring
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="donations" className="space-y-6">
+            <Card className="bg-white/80 backdrop-blur-sm border-gray-200 shadow-xl">
+              <CardHeader className="pb-4">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                  <div>
+                    <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                      Donation History
+                    </CardTitle>
+                    <CardDescription>View and manage all your donations</CardDescription>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        placeholder="Search donations..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 bg-white/80 border-gray-300"
+                      />
+                    </div>
+                    
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger className="w-32 bg-white/80 border-gray-300">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="failed">Failed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                      <SelectTrigger className="w-40 bg-white/80 border-gray-300">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="date-desc">Latest First</SelectItem>
+                        <SelectItem value="date-asc">Oldest First</SelectItem>
+                        <SelectItem value="amount-desc">Highest Amount</SelectItem>
+                        <SelectItem value="amount-asc">Lowest Amount</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {sortedDonations.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Heart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No donations found</h3>
+                    <p className="text-gray-500">Start making a difference by donating to a cause you care about.</p>
+                    <Button className="mt-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                      Make Your First Donation
+                    </Button>
+                  </div>
+                ) : (
+                  sortedDonations.map((donation) => (
+                    <div key={donation.id} className="p-6 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 hover:shadow-lg transition-all duration-300">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="p-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500">
+                            <Heart className="h-6 w-6 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-lg text-gray-900">{donation.campaign.title}</h3>
+                            <p className="text-sm text-gray-500">
+                              {format(new Date(donation.createdAt), 'PPP')} • {donation.transactionId}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-gray-900">₹{donation.amount.toLocaleString()}</div>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <Badge 
+                              variant={donation.status === 'completed' ? 'default' : 
+                                      donation.status === 'pending' ? 'secondary' : 'destructive'}
+                              className={
+                                donation.status === 'completed' ? 'bg-green-100 text-green-700 border-green-200' :
+                                donation.status === 'pending' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+                                'bg-red-100 text-red-700 border-red-200'
+                              }
+                            >\

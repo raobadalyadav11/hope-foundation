@@ -1,11 +1,26 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import type React from "react"
+
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Heart, Users, Target, ArrowRight, Globe, Handshake, BookOpen, Calendar, MapPin, Star } from "lucide-react"
+import { Progress } from "@/components/ui/progress"
+import { Input } from "@/components/ui/input"
+import {
+  Heart,
+  Users,
+  Target,
+  Calendar,
+  ArrowRight,
+  Globe,
+  Star,
+  TrendingUp,
+  Award,
+  BookOpen,
+  Mail,
+} from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
@@ -17,11 +32,19 @@ interface Campaign {
   raised: number
   image: string
   category: string
-  progressPercentage: number
   daysLeft: number
-  isExpired: boolean
-  location: string
+  progressPercentage: number
   beneficiaries: number
+}
+
+interface BlogPost {
+  _id: string
+  title: string
+  excerpt: string
+  image: string
+  author: { name: string }
+  createdAt: string
+  readTime: string
 }
 
 interface Event {
@@ -31,624 +54,598 @@ interface Event {
   date: string
   location: string
   image: string
-  category: string
   currentAttendees: number
-  maxAttendees?: number
-  isFree: boolean
-  ticketPrice?: number
-}
-
-interface BlogPost {
-  _id: string
-  title: string
-  excerpt: string
-  image: string
-  author: {
-    name: string
-    image: string
-  }
-  publishedAt: string
-  readTime: number
-  category: string
-}
-
-interface Stats {
-  totalDonations: number
-  totalVolunteers: number
-  totalCampaigns: number
-  totalBeneficiaries: number
-  impactMetrics: {
-    livesImpacted: number
-    projectsCompleted: number
-    countriesServed: number
-    volunteersActive: number
-  }
+  maxAttendees: number
 }
 
 export default function HomePage() {
-  const { data: campaigns, isLoading: campaignsLoading } = useQuery({
-    queryKey: ["campaigns", "featured"],
-    queryFn: async () => {
-      const response = await fetch("/api/campaigns?featured=true&limit=3&status=active")
-      if (!response.ok) throw new Error("Failed to fetch campaigns")
-      const data = await response.json()
-      return data.campaigns as Campaign[]
-    },
+  const [campaigns, setCampaigns] = useState<Campaign[]>([])
+  const [blogs, setBlogs] = useState<BlogPost[]>([])
+  const [events, setEvents] = useState<Event[]>([])
+  const [stats, setStats] = useState({
+    totalDonations: 0,
+    totalVolunteers: 0,
+    activeCampaigns: 0,
+    beneficiaries: 0,
   })
+  const [email, setEmail] = useState("")
+  const [loading, setLoading] = useState(true)
 
-  const { data: events, isLoading: eventsLoading } = useQuery({
-    queryKey: ["events", "upcoming"],
-    queryFn: async () => {
-      const response = await fetch("/api/events?upcoming=true&limit=3")
-      if (!response.ok) throw new Error("Failed to fetch events")
-      const data = await response.json()
-      return data.events as Event[]
-    },
-  })
+  useEffect(() => {
+    fetchData()
+  }, [])
 
-  const { data: blogs, isLoading: blogsLoading } = useQuery({
-    queryKey: ["blogs", "recent"],
-    queryFn: async () => {
-      const response = await fetch("/api/blogs?status=published&limit=3")
-      if (!response.ok) throw new Error("Failed to fetch blogs")
-      const data = await response.json()
-      return data.blogs as BlogPost[]
-    },
-  })
+  const fetchData = async () => {
+    try {
+      const [campaignsRes, blogsRes, eventsRes, statsRes] = await Promise.all([
+        fetch("/api/campaigns?featured=true&limit=3"),
+        fetch("/api/blogs?featured=true&limit=3"),
+        fetch("/api/events?upcoming=true&limit=3"),
+        fetch("/api/stats"),
+      ])
 
-  const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ["stats"],
-    queryFn: async () => {
-      const response = await fetch("/api/stats")
-      if (!response.ok) throw new Error("Failed to fetch stats")
-      return response.json() as Promise<Stats>
-    },
-  })
+      const [campaignsData, blogsData, eventsData, statsData] = await Promise.all([
+        campaignsRes.json(),
+        blogsRes.json(),
+        eventsRes.json(),
+        statsRes.json(),
+      ])
 
-  const statsDisplay = [
-    {
-      label: "Lives Impacted",
-      value: `${stats?.impactMetrics.livesImpacted?.toLocaleString() || "50,000"}+`,
-      icon: Heart,
-      color: "text-red-600",
-      bgColor: "bg-red-100",
-    },
-    {
-      label: "Active Volunteers",
-      value: `${stats?.impactMetrics.volunteersActive?.toLocaleString() || "2,500"}+`,
-      icon: Users,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
-    },
-    {
-      label: "Projects Completed",
-      value: `${stats?.impactMetrics.projectsCompleted?.toLocaleString() || "150"}+`,
-      icon: Target,
-      color: "text-green-600",
-      bgColor: "bg-green-100",
-    },
-    {
-      label: "Countries Served",
-      value: stats?.impactMetrics.countriesServed?.toString() || "12",
-      icon: Globe,
-      color: "text-purple-600",
-      bgColor: "bg-purple-100",
-    },
-  ]
+      setCampaigns(campaignsData.campaigns || [])
+      setBlogs(blogsData.blogs || [])
+      setEvents(eventsData.events || [])
+      setStats(statsData || stats)
+    } catch (error) {
+      console.error("Error fetching data:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  const testimonials = [
-    {
-      name: "Sarah Johnson",
-      role: "Volunteer",
-      content: "Being part of Hope Foundation has been life-changing. The impact we make together is incredible.",
-      image: "/placeholder.svg?height=60&width=60",
-      rating: 5,
-    },
-    {
-      name: "Michael Chen",
-      role: "Donor",
-      content: "I love how transparent they are with donations. I can see exactly how my money is being used.",
-      image: "/placeholder.svg?height=60&width=60",
-      rating: 5,
-    },
-    {
-      name: "Dr. Priya Sharma",
-      role: "Beneficiary",
-      content: "The education program changed my community. Now our children have access to quality education.",
-      image: "/placeholder.svg?height=60&width=60",
-      rating: 5,
-    },
-  ]
+  const handleNewsletterSignup = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const response = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
 
-  if (campaignsLoading || eventsLoading || statsLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading amazing content...</p>
-        </div>
-      </div>
-    )
+      if (response.ok) {
+        setEmail("")
+        // Show success message
+      }
+    } catch (error) {
+      console.error("Newsletter signup error:", error)
+    }
   }
 
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-600 via-purple-700 to-blue-800 text-white py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-black/30"></div>
-        <div className="absolute inset-0 bg-[url('/placeholder.svg?height=800&width=1200')] bg-cover bg-center opacity-20"></div>
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <div className="space-y-4">
-                <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30">
-                  🌟 Making a Difference Since 2010
-                </Badge>
-                <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
-                  Creating Hope,
-                  <span className="text-yellow-300"> Changing Lives</span>
-                </h1>
-                <p className="text-xl lg:text-2xl opacity-90 leading-relaxed max-w-2xl">
-                  Join us in our mission to create positive change in communities worldwide. Together, we can build a
-                  better tomorrow through sustainable development and humanitarian aid.
-                </p>
-              </div>
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-700 to-pink-600">
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
+        </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 font-semibold text-lg px-8 py-4">
-                  <Link href="/donate" className="flex items-center gap-2">
-                    Donate Now <Heart className="w-5 h-5" />
-                  </Link>
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white text-white hover:bg-white hover:text-blue-600 font-semibold text-lg px-8 py-4"
-                >
-                  <Link href="/volunteer" className="flex items-center gap-2">
-                    Volunteer <Users className="w-5 h-5" />
-                  </Link>
-                </Button>
-              </div>
+        {/* Floating Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 left-20 w-32 h-32 bg-white/10 rounded-full blur-xl animate-pulse"></div>
+          <div className="absolute top-40 right-32 w-24 h-24 bg-yellow-400/20 rounded-full blur-lg animate-bounce"></div>
+          <div className="absolute bottom-32 left-1/4 w-40 h-40 bg-green-400/10 rounded-full blur-2xl animate-pulse delay-1000"></div>
+        </div>
 
-              <div className="flex items-center gap-8 pt-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold">₹{(stats?.totalDonations || 5000000).toLocaleString()}</div>
-                  <div className="text-sm opacity-80">Raised This Year</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{(stats?.totalVolunteers || 2500).toLocaleString()}</div>
-                  <div className="text-sm opacity-80">Active Volunteers</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{(stats?.totalCampaigns || 45).toLocaleString()}</div>
-                  <div className="text-sm opacity-80">Active Campaigns</div>
-                </div>
-              </div>
+        <div className="relative z-10 container mx-auto px-4 text-center text-white">
+          <div className="max-w-4xl mx-auto">
+            <Badge className="mb-6 bg-white/20 text-white border-white/30 hover:bg-white/30 transition-all duration-300">
+              <Star className="w-4 h-4 mr-2" />
+              Transforming Lives Since 2020
+            </Badge>
+
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent leading-tight">
+              Building Hope,
+              <br />
+              <span className="text-yellow-300">Creating Change</span>
+            </h1>
+
+            <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto leading-relaxed">
+              Join thousands of changemakers in our mission to create lasting impact through education, healthcare, and
+              community development across the globe.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-semibold px-8 py-4 rounded-full shadow-2xl hover:shadow-yellow-500/25 transition-all duration-300 transform hover:scale-105"
+                asChild
+              >
+                <Link href="/donate">
+                  <Heart className="w-5 h-5 mr-2" />
+                  Donate Now
+                </Link>
+              </Button>
+
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm px-8 py-4 rounded-full transition-all duration-300 bg-transparent"
+                asChild
+              >
+                <Link href="/campaigns">
+                  <Target className="w-5 h-5 mr-2" />
+                  View Campaigns
+                </Link>
+              </Button>
             </div>
 
-            <div className="relative">
-              <div className="relative z-10">
-                <Image
-                  src="/placeholder.svg?height=500&width=600"
-                  alt="NGO Impact"
-                  width={600}
-                  height={500}
-                  className="rounded-2xl shadow-2xl"
-                />
-                <div className="absolute -bottom-6 -left-6 bg-white text-gray-900 p-4 rounded-xl shadow-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                      <Heart className="w-6 h-6 text-green-600" />
-                    </div>
-                    <div>
-                      <div className="font-bold text-lg">50,000+</div>
-                      <div className="text-sm text-gray-600">Lives Impacted</div>
-                    </div>
-                  </div>
+            {/* Stats Preview */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
+              {[
+                { label: "Lives Impacted", value: stats.beneficiaries.toLocaleString(), icon: Users },
+                { label: "Donations", value: `₹${(stats.totalDonations / 100000).toFixed(1)}L`, icon: Heart },
+                { label: "Volunteers", value: stats.totalVolunteers.toLocaleString(), icon: Award },
+                { label: "Active Campaigns", value: stats.activeCampaigns.toString(), icon: Target },
+              ].map((stat, index) => (
+                <div
+                  key={index}
+                  className="text-center p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20"
+                >
+                  <stat.icon className="w-8 h-8 mx-auto mb-2 text-yellow-300" />
+                  <div className="text-2xl font-bold">{stat.value}</div>
+                  <div className="text-sm text-blue-100">{stat.label}</div>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Stats Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Impact in Numbers</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              See the tangible difference we're making together in communities around the world
-            </p>
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {statsDisplay.map((stat, index) => (
-              <div key={index} className="text-center group">
-                <div
-                  className={`inline-flex items-center justify-center w-20 h-20 ${stat.bgColor} rounded-full mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
-                >
-                  <stat.icon className={`w-10 h-10 ${stat.color}`} />
-                </div>
-                <div className="text-4xl font-bold text-gray-900 mb-2">{stat.value}</div>
-                <div className="text-gray-600 font-medium text-lg">{stat.label}</div>
-              </div>
-            ))}
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-white/70 rounded-full mt-2 animate-pulse"></div>
           </div>
         </div>
       </section>
 
       {/* Featured Campaigns */}
-      <section className="py-20">
+      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Featured Campaigns</h2>
+            <Badge className="mb-4 bg-blue-100 text-blue-700 hover:bg-blue-200">
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Featured Campaigns
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Make a <span className="text-blue-600">Difference</span> Today
+            </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Support our most urgent initiatives that are creating meaningful change in communities worldwide. Every
-              contribution brings us closer to our goals.
+              Support our ongoing campaigns and help us reach our goals to create meaningful change in communities
+              worldwide.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
-            {campaigns?.map((campaign) => (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {campaigns.map((campaign) => (
               <Card
                 key={campaign._id}
-                className="overflow-hidden hover:shadow-2xl transition-all duration-300 group border-0 shadow-lg"
+                className="group hover:shadow-2xl transition-all duration-500 border-0 shadow-lg overflow-hidden bg-white hover:scale-105"
               >
-                <div className="relative h-64 overflow-hidden">
+                <div className="relative overflow-hidden">
                   <Image
-                    src={campaign.image || "/placeholder.svg?height=250&width=400"}
+                    src={campaign.image || "/placeholder.svg?height=200&width=400"}
                     alt={campaign.title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    width={400}
+                    height={200}
+                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                   <div className="absolute top-4 left-4">
-                    <Badge className="bg-red-500 hover:bg-red-600 text-white">Featured</Badge>
-                  </div>
-                  <div className="absolute top-4 right-4">
-                    <Badge variant="secondary" className="bg-white/90 text-gray-900">
+                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white">
                       {campaign.category}
                     </Badge>
                   </div>
-                  <div className="absolute bottom-4 left-4 text-white">
-                    <div className="flex items-center gap-2 text-sm">
-                      <MapPin className="w-4 h-4" />
-                      <span>{campaign.location}</span>
-                    </div>
+                  <div className="absolute top-4 right-4">
+                    <Badge variant="secondary" className="bg-white/90 text-gray-700">
+                      {campaign.daysLeft} days left
+                    </Badge>
                   </div>
                 </div>
+
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-xl line-clamp-2 group-hover:text-blue-600 transition-colors">
+                  <CardTitle className="text-xl group-hover:text-blue-600 transition-colors line-clamp-2">
                     {campaign.title}
                   </CardTitle>
-                  <CardDescription className="line-clamp-3 text-base">{campaign.description}</CardDescription>
+                  <CardDescription className="text-gray-600 line-clamp-2">{campaign.description}</CardDescription>
                 </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between text-sm text-gray-600">
-                      <span className="flex items-center gap-1">
-                        <Users className="w-4 h-4" />
-                        {campaign.beneficiaries} beneficiaries
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        {campaign.daysLeft} days left
-                      </span>
-                    </div>
 
-                    <div>
-                      <div className="flex justify-between text-sm mb-2">
-                        <span className="font-semibold text-gray-900">₹{campaign.raised.toLocaleString()} raised</span>
-                        <span className="text-gray-600">₹{campaign.goal.toLocaleString()} goal</span>
-                      </div>
-                      <Progress value={campaign.progressPercentage} className="h-3" />
-                      <div className="flex justify-between text-xs text-gray-500 mt-2">
-                        <span className="font-medium">{campaign.progressPercentage}% funded</span>
-                        <span>{((campaign.goal - campaign.raised) / 1000).toFixed(0)}k needed</span>
-                      </div>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-semibold text-green-600">₹{campaign.raised.toLocaleString()}</span>
+                      <span className="text-gray-500">₹{campaign.goal.toLocaleString()}</span>
                     </div>
-
-                    <Button className="w-full group-hover:bg-blue-700 transition-colors text-lg py-6">
-                      <Link href={`/campaigns/${campaign._id}`} className="flex items-center gap-2">
-                        Support This Cause <ArrowRight className="w-5 h-5" />
-                      </Link>
-                    </Button>
+                    <Progress value={campaign.progressPercentage} className="h-2" />
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>{campaign.progressPercentage}% funded</span>
+                      <span>{campaign.beneficiaries} beneficiaries</span>
+                    </div>
                   </div>
+
+                  <Button
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-full transition-all duration-300"
+                    asChild
+                  >
+                    <Link href={`/campaigns/${campaign._id}`}>
+                      Support Campaign
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
 
           <div className="text-center mt-12">
-            <Button variant="outline" size="lg" className="font-semibold text-lg px-8 py-4">
-              <Link href="/campaigns">View All Campaigns</Link>
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-blue-200 text-blue-600 hover:bg-blue-50 rounded-full px-8 bg-transparent"
+              asChild
+            >
+              <Link href="/campaigns">
+                View All Campaigns
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Link>
             </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Impact Section */}
+      <section className="py-20 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-10"></div>
+
+        <div className="relative z-10 container mx-auto px-4 text-white">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-white/20 text-white border-white/30">
+              <Globe className="w-4 h-4 mr-2" />
+              Our Impact
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Creating <span className="text-yellow-300">Real Change</span>
+            </h2>
+            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+              See how your contributions are making a tangible difference in communities around the world.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                icon: Users,
+                title: "Lives Transformed",
+                value: "50,000+",
+                description: "People directly impacted by our programs",
+                color: "from-yellow-400 to-orange-500",
+              },
+              {
+                icon: BookOpen,
+                title: "Education Access",
+                value: "15,000+",
+                description: "Children provided with quality education",
+                color: "from-green-400 to-emerald-500",
+              },
+              {
+                icon: Heart,
+                title: "Healthcare Support",
+                value: "25,000+",
+                description: "Medical treatments and health checkups",
+                color: "from-pink-400 to-rose-500",
+              },
+              {
+                icon: Globe,
+                title: "Communities Served",
+                value: "200+",
+                description: "Villages and urban areas reached",
+                color: "from-blue-400 to-cyan-500",
+              },
+            ].map((item, index) => (
+              <Card
+                key={index}
+                className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 transition-all duration-300 hover:scale-105"
+              >
+                <CardContent className="p-6 text-center">
+                  <div
+                    className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r ${item.color} flex items-center justify-center`}
+                  >
+                    <item.icon className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-3xl font-bold mb-2">{item.value}</h3>
+                  <h4 className="text-lg font-semibold mb-2">{item.title}</h4>
+                  <p className="text-blue-100 text-sm">{item.description}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Upcoming Events */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Upcoming Events</h2>
+            <Badge className="mb-4 bg-purple-100 text-purple-700 hover:bg-purple-200">
+              <Calendar className="w-4 h-4 mr-2" />
+              Upcoming Events
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Join Our <span className="text-purple-600">Community</span>
+            </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Join us at our upcoming events and be part of the change you want to see in the world. Connect with
-              like-minded individuals and make a real impact.
+              Participate in our events and connect with like-minded individuals who are passionate about making a
+              difference.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
-            {events?.map((event) => (
-              <Card key={event._id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
-                <div className="relative h-48">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {events.map((event) => (
+              <Card
+                key={event._id}
+                className="group hover:shadow-2xl transition-all duration-500 border-0 shadow-lg overflow-hidden bg-white hover:scale-105"
+              >
+                <div className="relative overflow-hidden">
                   <Image
                     src={event.image || "/placeholder.svg?height=200&width=400"}
                     alt={event.title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    width={400}
+                    height={200}
+                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                   <div className="absolute top-4 right-4">
-                    <Badge variant="secondary" className="bg-white/90 text-gray-900">
-                      {event.category}
+                    <Badge className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
+                      {new Date(event.date).toLocaleDateString()}
                     </Badge>
                   </div>
-                  <div className="absolute bottom-4 left-4 text-white">
-                    <div className="text-sm font-medium">{event.isFree ? "Free Event" : `₹${event.ticketPrice}`}</div>
-                  </div>
                 </div>
-                <CardHeader>
-                  <CardTitle className="text-xl line-clamp-2 group-hover:text-blue-600 transition-colors">
+
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-xl group-hover:text-purple-600 transition-colors line-clamp-2">
                     {event.title}
                   </CardTitle>
-                  <CardDescription className="line-clamp-3">{event.description}</CardDescription>
+                  <CardDescription className="text-gray-600 line-clamp-2">{event.description}</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Calendar className="w-4 h-4 text-blue-600" />
-                      <span className="font-medium">
-                        {new Date(event.date).toLocaleDateString("en-US", {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <MapPin className="w-4 h-4 text-green-600" />
-                      <span>{event.location}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Users className="w-4 h-4 text-purple-600" />
-                      <span>
-                        {event.currentAttendees} registered
-                        {event.maxAttendees && ` / ${event.maxAttendees} max`}
-                      </span>
-                    </div>
-                    <Button className="w-full mt-4">
-                      <Link href={`/events/${event._id}`}>Learn More & Register</Link>
-                    </Button>
+
+                <CardContent className="space-y-4">
+                  <div className="flex items-center text-sm text-gray-500">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    {new Date(event.date).toLocaleDateString("en-US", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
                   </div>
+
+                  <div className="flex items-center text-sm text-gray-500">
+                    <Users className="w-4 h-4 mr-2" />
+                    {event.currentAttendees} / {event.maxAttendees} attendees
+                  </div>
+
+                  <Button
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-full transition-all duration-300"
+                    asChild
+                  >
+                    <Link href={`/events/${event._id}`}>
+                      Register Now
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
 
           <div className="text-center mt-12">
-            <Button variant="outline" size="lg" className="font-semibold text-lg px-8 py-4">
-              <Link href="/events">View All Events</Link>
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-purple-200 text-purple-600 hover:bg-purple-50 rounded-full px-8 bg-transparent"
+              asChild
+            >
+              <Link href="/events">
+                View All Events
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Link>
             </Button>
           </div>
         </div>
       </section>
 
-      {/* How We Help */}
-      <section className="py-20">
+      {/* Latest Blogs */}
+      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">How We Make an Impact</h2>
+            <Badge className="mb-4 bg-green-100 text-green-700 hover:bg-green-200">
+              <BookOpen className="w-4 h-4 mr-2" />
+              Latest Stories
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Stories of <span className="text-green-600">Impact</span>
+            </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our comprehensive approach ensures sustainable change in the communities we serve through proven
-              methodologies and dedicated partnerships.
+              Read inspiring stories from the field and stay updated with our latest initiatives and achievements.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-12">
-            <div className="text-center group">
-              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-red-100 to-red-200 rounded-full mb-8 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <Heart className="w-12 h-12 text-red-600" />
-              </div>
-              <h3 className="text-2xl font-semibold mb-4">Direct Aid & Relief</h3>
-              <p className="text-gray-600 leading-relaxed text-lg">
-                Providing immediate relief and support to those in urgent need through our emergency response programs
-                and direct assistance initiatives. We ensure help reaches those who need it most.
-              </p>
-              <div className="mt-6">
-                <Badge variant="outline" className="text-red-600 border-red-200">
-                  Emergency Response
-                </Badge>
-              </div>
-            </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {blogs.map((blog) => (
+              <Card
+                key={blog._id}
+                className="group hover:shadow-2xl transition-all duration-500 border-0 shadow-lg overflow-hidden bg-white hover:scale-105"
+              >
+                <div className="relative overflow-hidden">
+                  <Image
+                    src={blog.image || "/placeholder.svg?height=200&width=400"}
+                    alt={blog.title}
+                    width={400}
+                    height={200}
+                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                </div>
 
-            <div className="text-center group">
-              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-green-100 to-green-200 rounded-full mb-8 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <Handshake className="w-12 h-12 text-green-600" />
-              </div>
-              <h3 className="text-2xl font-semibold mb-4">Community Building</h3>
-              <p className="text-gray-600 leading-relaxed text-lg">
-                Empowering local communities through skill development, infrastructure projects, and sustainable
-                programs that create lasting change and self-sufficiency.
-              </p>
-              <div className="mt-6">
-                <Badge variant="outline" className="text-green-600 border-green-200">
-                  Sustainable Development
-                </Badge>
-              </div>
-            </div>
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-xl group-hover:text-green-600 transition-colors line-clamp-2">
+                    {blog.title}
+                  </CardTitle>
+                  <CardDescription className="text-gray-600 line-clamp-3">{blog.excerpt}</CardDescription>
+                </CardHeader>
 
-            <div className="text-center group">
-              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full mb-8 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <BookOpen className="w-12 h-12 text-purple-600" />
-              </div>
-              <h3 className="text-2xl font-semibold mb-4">Education & Awareness</h3>
-              <p className="text-gray-600 leading-relaxed text-lg">
-                Creating lasting change through education, training, and awareness programs that promote sustainable
-                development and social progress for future generations.
-              </p>
-              <div className="mt-6">
-                <Badge variant="outline" className="text-purple-600 border-purple-200">
-                  Knowledge Transfer
-                </Badge>
-              </div>
-            </div>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between text-sm text-gray-500">
+                    <span>By {blog.author.name}</span>
+                    <span>{blog.readTime}</span>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    className="w-full border-green-200 text-green-600 hover:bg-green-50 rounded-full transition-all duration-300 bg-transparent"
+                    asChild
+                  >
+                    <Link href={`/blog/${blog._id}`}>
+                      Read More
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-green-200 text-green-600 hover:bg-green-50 rounded-full px-8 bg-transparent"
+              asChild
+            >
+              <Link href="/blog">
+                View All Stories
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* Recent Blog Posts */}
-      {blogs && blogs.length > 0 && (
-        <section className="py-20 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">Latest Stories</h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Read inspiring stories from the field and stay updated with our latest initiatives and impact.
-              </p>
-            </div>
+      {/* Newsletter Section */}
+      <section className="py-20 bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="absolute inset-0 bg-[url('/waves.svg')] opacity-20"></div>
 
-            <div className="grid lg:grid-cols-3 gap-8">
-              {blogs.map((blog) => (
-                <Card key={blog._id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
-                  <div className="relative h-48">
-                    <Image
-                      src={blog.image || "/placeholder.svg?height=200&width=400"}
-                      alt={blog.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute top-4 right-4">
-                      <Badge variant="secondary" className="bg-white/90 text-gray-900">
-                        {blog.category}
-                      </Badge>
-                    </div>
-                  </div>
-                  <CardHeader>
-                    <CardTitle className="text-xl line-clamp-2 group-hover:text-blue-600 transition-colors">
-                      {blog.title}
-                    </CardTitle>
-                    <CardDescription className="line-clamp-3">{blog.excerpt}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <div className="flex items-center gap-2">
-                        <Image
-                          src={blog.author.image || "/placeholder.svg?height=24&width=24"}
-                          alt={blog.author.name}
-                          width={24}
-                          height={24}
-                          className="rounded-full"
-                        />
-                        <span>{blog.author.name}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span>{blog.readTime} min read</span>
-                        <span>•</span>
-                        <span>{new Date(blog.publishedAt).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                    <Button variant="ghost" className="w-full mt-4 group-hover:bg-blue-50" asChild>
-                      <Link href={`/blog/${blog._id}`}>Read More</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+        <div className="relative z-10 container mx-auto px-4 text-center text-white">
+          <div className="max-w-3xl mx-auto">
+            <Badge className="mb-6 bg-white/20 text-white border-white/30">
+              <Mail className="w-4 h-4 mr-2" />
+              Stay Connected
+            </Badge>
 
-            <div className="text-center mt-12">
-              <Button variant="outline" size="lg" className="font-semibold text-lg px-8 py-4">
-                <Link href="/blog">Read All Stories</Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-      )}
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Get <span className="text-yellow-300">Updates</span> & Stories
+            </h2>
 
-      {/* Testimonials */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">What People Say</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Hear from the people whose lives have been touched by our work and community.
+            <p className="text-xl text-blue-100 mb-8">
+              Subscribe to our newsletter and be the first to know about new campaigns, events, and impact stories.
             </p>
-          </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="p-6 hover:shadow-lg transition-shadow">
-                <CardContent className="pt-0">
-                  <div className="flex items-center gap-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <p className="text-gray-600 mb-6 italic text-lg leading-relaxed">"{testimonial.content}"</p>
-                  <div className="flex items-center gap-3">
-                    <Image
-                      src={testimonial.image || "/placeholder.svg"}
-                      alt={testimonial.name}
-                      width={48}
-                      height={48}
-                      className="rounded-full"
-                    />
-                    <div>
-                      <div className="font-semibold">{testimonial.name}</div>
-                      <div className="text-sm text-gray-500">{testimonial.role}</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            <form onSubmit={handleNewsletterSignup} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="flex-1 bg-white/10 border-white/30 text-white placeholder:text-white/70 rounded-full px-6"
+                required
+              />
+              <Button
+                type="submit"
+                className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-semibold rounded-full px-8"
+              >
+                Subscribe
+              </Button>
+            </form>
+
+            <p className="text-sm text-blue-200 mt-4">Join 10,000+ subscribers. Unsubscribe anytime.</p>
           </div>
         </div>
       </section>
 
       {/* Call to Action */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-700 text-white">
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl lg:text-5xl font-bold mb-6">Ready to Make a Difference?</h2>
-          <p className="text-xl lg:text-2xl mb-12 opacity-90 max-w-3xl mx-auto leading-relaxed">
-            Join thousands of supporters who are helping us create positive change. Every contribution, big or small,
-            makes a meaningful impact in someone's life. Start your journey with us today.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 font-semibold text-lg px-8 py-4">
-              <Link href="/donate" className="flex items-center gap-2">
-                Start Donating <Heart className="w-5 h-5" />
-              </Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-white text-white hover:bg-white hover:text-blue-600 font-semibold text-lg px-8 py-4"
-            >
-              <Link href="/volunteer" className="flex items-center gap-2">
-                Become a Volunteer <Users className="w-5 h-5" />
-              </Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-white text-white hover:bg-white hover:text-blue-600 font-semibold text-lg px-8 py-4"
-            >
-              <Link href="/about" className="flex items-center gap-2">
-                Learn More <ArrowRight className="w-5 h-5" />
-              </Link>
-            </Button>
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Ready to Make a <span className="text-blue-600">Difference</span>?
+            </h2>
+
+            <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
+              Whether you want to donate, volunteer, or start your own campaign, there are many ways to get involved and
+              create positive change.
+            </p>
+
+            <div className="grid md:grid-cols-3 gap-8 mb-12">
+              {[
+                {
+                  icon: Heart,
+                  title: "Donate",
+                  description: "Support our causes with a one-time or recurring donation",
+                  action: "Start Donating",
+                  href: "/donate",
+                  color: "from-red-500 to-pink-600",
+                },
+                {
+                  icon: Users,
+                  title: "Volunteer",
+                  description: "Join our team and contribute your time and skills",
+                  action: "Become a Volunteer",
+                  href: "/volunteer",
+                  color: "from-blue-500 to-indigo-600",
+                },
+                {
+                  icon: Target,
+                  title: "Start Campaign",
+                  description: "Create your own fundraising campaign for a cause you care about",
+                  action: "Create Campaign",
+                  href: "/fundraise",
+                  color: "from-green-500 to-emerald-600",
+                },
+              ].map((item, index) => (
+                <Card
+                  key={index}
+                  className="group hover:shadow-2xl transition-all duration-500 border-0 shadow-lg hover:scale-105"
+                >
+                  <CardContent className="p-8 text-center">
+                    <div
+                      className={`w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r ${item.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+                    >
+                      <item.icon className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">{item.title}</h3>
+                    <p className="text-gray-600 mb-6">{item.description}</p>
+                    <Button
+                      className={`bg-gradient-to-r ${item.color} hover:scale-105 text-white rounded-full px-6 transition-all duration-300`}
+                      asChild
+                    >
+                      <Link href={item.href}>
+                        {item.action}
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </section>
