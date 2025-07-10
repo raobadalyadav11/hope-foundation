@@ -26,7 +26,6 @@ export function Navbar() {
     { href: "/campaigns", label: "Campaigns" },
     { href: "/events", label: "Events" },
     { href: "/blog", label: "Blog" },
-    { href: "/volunteer", label: "Volunteer" },
     { href: "/contact", label: "Contact" },
   ]
 
@@ -80,7 +79,7 @@ export function Navbar() {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    {["admin", "creator"].includes(session.user?.role) && (
+                    {session.user?.role && ["admin", "creator"].includes(session.user.role) && (
                       <>
                         <DropdownMenuItem asChild>
                           <Link href="/admin">
@@ -120,7 +119,7 @@ export function Navbar() {
             ) : (
               <>
                 <Button variant="outline" size="sm" asChild>
-                  <Link href="/auth/signin">
+                  <Link href="/signin">
                     <User className="w-4 h-4 mr-2" />
                     Sign In
                   </Link>
@@ -166,7 +165,7 @@ export function Navbar() {
                         </div>
                       </div>
 
-                      {["admin", "creator"].includes(session.user?.role) && (
+                      {session.user?.role && ["admin", "creator"].includes(session.user.role) && (
                         <Button variant="outline" className="w-full" asChild>
                           <Link href="/admin">Admin Dashboard</Link>
                         </Button>
@@ -187,7 +186,7 @@ export function Navbar() {
                   ) : (
                     <>
                       <Button variant="outline" className="w-full" asChild>
-                        <Link href="/auth/signin">Sign In</Link>
+                        <Link href="/signin">Sign In</Link>
                       </Button>
                       <Button className="w-full" asChild>
                         <Link href="/donate">Donate Now</Link>
