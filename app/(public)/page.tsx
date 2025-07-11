@@ -17,6 +17,8 @@ import {
   MapPin,
   Star,
   CheckCircle,
+  Play,
+  TrendingUp,
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -81,12 +83,11 @@ export default function HomePage() {
   const { data: campaigns, isLoading: campaignsLoading } = useQuery({
     queryKey: ["campaigns", "featured"],
     queryFn: async () => {
-      // Mock data for demonstration
       return [
         {
           _id: "1",
           title: "Clean Water for Rural Communities",
-          description: "Providing access to clean drinking water for remote villages in need.",
+          description: "Providing access to clean drinking water for remote villages in need of sustainable solutions.",
           goal: 500000,
           raised: 325000,
           image: "/placeholder.svg?height=300&width=400",
@@ -100,7 +101,7 @@ export default function HomePage() {
         {
           _id: "2",
           title: "Education for Underprivileged Children",
-          description: "Supporting quality education and school supplies for children in need.",
+          description: "Supporting quality education and school supplies for children in underserved communities.",
           goal: 300000,
           raised: 180000,
           image: "/placeholder.svg?height=300&width=400",
@@ -114,7 +115,7 @@ export default function HomePage() {
         {
           _id: "3",
           title: "Healthcare Access Initiative",
-          description: "Mobile healthcare units bringing medical care to remote areas.",
+          description: "Mobile healthcare units bringing essential medical care to remote and underserved areas.",
           goal: 750000,
           raised: 450000,
           image: "/placeholder.svg?height=300&width=400",
@@ -132,12 +133,11 @@ export default function HomePage() {
   const { data: events, isLoading: eventsLoading } = useQuery({
     queryKey: ["events", "upcoming"],
     queryFn: async () => {
-      // Mock data for demonstration
       return [
         {
           _id: "1",
           title: "Annual Charity Marathon",
-          description: "Join us for our annual charity marathon to raise funds for education.",
+          description: "Join us for our annual charity marathon to raise funds for education initiatives.",
           date: "2024-03-15T09:00:00Z",
           location: "Mumbai Marine Drive",
           image: "/placeholder.svg?height=200&width=300",
@@ -150,7 +150,7 @@ export default function HomePage() {
         {
           _id: "2",
           title: "Community Health Camp",
-          description: "Free health checkups and medical consultations for the community.",
+          description: "Free health checkups and medical consultations for the entire community.",
           date: "2024-03-20T08:00:00Z",
           location: "Community Center, Pune",
           image: "/placeholder.svg?height=200&width=300",
@@ -162,7 +162,7 @@ export default function HomePage() {
         {
           _id: "3",
           title: "Volunteer Training Workshop",
-          description: "Training session for new volunteers joining our programs.",
+          description: "Comprehensive training session for new volunteers joining our programs.",
           date: "2024-03-25T10:00:00Z",
           location: "Hope Foundation Office",
           image: "/placeholder.svg?height=200&width=300",
@@ -178,7 +178,6 @@ export default function HomePage() {
   const { data: blogs, isLoading: blogsLoading } = useQuery({
     queryKey: ["blogs", "recent"],
     queryFn: async () => {
-      // Mock data for demonstration
       return [
         {
           _id: "1",
@@ -227,7 +226,6 @@ export default function HomePage() {
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["stats"],
     queryFn: async () => {
-      // Mock data for demonstration
       return {
         totalDonations: 5000000,
         totalVolunteers: 2500,
@@ -248,9 +246,10 @@ export default function HomePage() {
       label: "Lives Impacted",
       value: `${stats?.impactMetrics.livesImpacted?.toLocaleString() || "50,000"}+`,
       icon: Heart,
-      color: "text-red-600",
-      bgColor: "bg-red-50",
-      borderColor: "border-red-200",
+      color: "text-rose-600",
+      bgColor: "bg-rose-50",
+      borderColor: "border-rose-200",
+      gradient: "from-rose-500 to-pink-500",
     },
     {
       label: "Active Volunteers",
@@ -259,6 +258,7 @@ export default function HomePage() {
       color: "text-blue-600",
       bgColor: "bg-blue-50",
       borderColor: "border-blue-200",
+      gradient: "from-blue-500 to-cyan-500",
     },
     {
       label: "Projects Completed",
@@ -267,6 +267,7 @@ export default function HomePage() {
       color: "text-green-600",
       bgColor: "bg-green-50",
       borderColor: "border-green-200",
+      gradient: "from-green-500 to-emerald-500",
     },
     {
       label: "Countries Served",
@@ -275,6 +276,7 @@ export default function HomePage() {
       color: "text-purple-600",
       bgColor: "bg-purple-50",
       borderColor: "border-purple-200",
+      gradient: "from-purple-500 to-violet-500",
     },
   ]
 
@@ -307,32 +309,45 @@ export default function HomePage() {
 
   if (campaignsLoading || eventsLoading || statsLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="text-gray-600 text-lg">Loading amazing content...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="text-center space-y-6">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-20 w-20 border-4 border-blue-200 border-t-blue-600 mx-auto"></div>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 opacity-20 animate-pulse"></div>
+          </div>
+          <div className="space-y-2">
+            <p className="text-gray-700 text-xl font-semibold">Loading amazing content...</p>
+            <p className="text-gray-500">Preparing inspiring stories for you</p>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white overflow-hidden">
-        <div className="absolute inset-0 bg-black/20"></div>
+      <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 to-indigo-700/90"></div>
         <div className="absolute inset-0 bg-[url('/placeholder.svg?height=800&width=1200')] bg-cover bg-center opacity-10"></div>
 
-        <div className="relative container mx-auto px-4 py-20 lg:py-32">
+        {/* Floating Elements */}
+        <div className="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full animate-bounce delay-1000"></div>
+        <div className="absolute top-40 right-20 w-16 h-16 bg-yellow-300/20 rounded-full animate-pulse"></div>
+        <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-green-400/20 rounded-full animate-bounce delay-500"></div>
+
+        <div className="relative container mx-auto px-4 py-24 lg:py-32">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
               <div className="space-y-6">
-                <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30 text-sm px-4 py-2">
+                <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30 text-sm px-6 py-3 rounded-full backdrop-blur-sm">
                   🌟 Making a Difference Since 2010
                 </Badge>
-                <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
+                <h1 className="text-5xl lg:text-7xl font-bold leading-tight">
                   Creating Hope,
-                  <span className="text-yellow-300 block"> Changing Lives</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400 block">
+                    Changing Lives
+                  </span>
                 </h1>
                 <p className="text-xl lg:text-2xl opacity-90 leading-relaxed max-w-2xl">
                   Join us in our mission to create positive change in communities worldwide. Together, we can build a
@@ -343,33 +358,35 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button
                   size="lg"
-                  className="bg-white text-blue-600 hover:bg-gray-100 font-semibold text-lg px-8 py-4 h-auto"
+                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold text-lg px-8 py-6 h-auto rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
                 >
                   <Link href="/donate" className="flex items-center gap-2">
-                    Donate Now <Heart className="w-5 h-5" />
+                    <Heart className="w-5 h-5" />
+                    Donate Now
                   </Link>
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold text-lg px-8 py-4 h-auto bg-transparent"
+                  className="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold text-lg px-8 py-6 h-auto rounded-full bg-transparent backdrop-blur-sm hover:shadow-lg transform hover:scale-105 transition-all duration-300"
                 >
                   <Link href="/volunteer" className="flex items-center gap-2">
-                    Volunteer <Users className="w-5 h-5" />
+                    <Users className="w-5 h-5" />
+                    Volunteer
                   </Link>
                 </Button>
               </div>
 
               <div className="grid grid-cols-3 gap-6 pt-8">
-                <div className="text-center">
+                <div className="text-center p-4 bg-white/10 rounded-2xl backdrop-blur-sm">
                   <div className="text-3xl font-bold">₹{(stats?.totalDonations || 5000000).toLocaleString()}</div>
                   <div className="text-sm opacity-80">Raised This Year</div>
                 </div>
-                <div className="text-center">
+                <div className="text-center p-4 bg-white/10 rounded-2xl backdrop-blur-sm">
                   <div className="text-3xl font-bold">{(stats?.totalVolunteers || 2500).toLocaleString()}</div>
                   <div className="text-sm opacity-80">Active Volunteers</div>
                 </div>
-                <div className="text-center">
+                <div className="text-center p-4 bg-white/10 rounded-2xl backdrop-blur-sm">
                   <div className="text-3xl font-bold">{(stats?.totalCampaigns || 45).toLocaleString()}</div>
                   <div className="text-sm opacity-80">Active Campaigns</div>
                 </div>
@@ -378,23 +395,35 @@ export default function HomePage() {
 
             <div className="relative">
               <div className="relative z-10">
-                <Image
-                  src="/placeholder.svg?height=500&width=600"
-                  alt="NGO Impact"
-                  width={600}
-                  height={500}
-                  className="rounded-2xl shadow-2xl"
-                />
-                <div className="absolute -bottom-6 -left-6 bg-white text-gray-900 p-6 rounded-xl shadow-lg max-w-xs">
+                <div className="relative overflow-hidden rounded-3xl shadow-2xl">
+                  <Image
+                    src="/placeholder.svg?height=500&width=600"
+                    alt="NGO Impact"
+                    width={600}
+                    height={500}
+                    className="w-full h-auto"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-blue-900/50 to-transparent"></div>
+                </div>
+
+                {/* Floating Stats Card */}
+                <div className="absolute -bottom-8 -left-8 bg-white text-gray-900 p-6 rounded-2xl shadow-2xl max-w-xs">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                      <CheckCircle className="w-6 h-6 text-green-600" />
+                    <div className="w-14 h-14 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center">
+                      <CheckCircle className="w-7 h-7 text-white" />
                     </div>
                     <div>
-                      <div className="font-bold text-2xl">50,000+</div>
+                      <div className="font-bold text-3xl text-gray-900">50,000+</div>
                       <div className="text-sm text-gray-600">Lives Impacted</div>
                     </div>
                   </div>
+                </div>
+
+                {/* Play Button Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Button className="w-20 h-20 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm border-2 border-white/50">
+                    <Play className="w-8 h-8 text-white ml-1" />
+                  </Button>
                 </div>
               </div>
             </div>
@@ -403,9 +432,10 @@ export default function HomePage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gradient-to-r from-gray-50 to-blue-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
+            <Badge className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full mb-4">📊 Our Impact</Badge>
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Impact in Numbers</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               See the tangible difference we're making together in communities around the world
@@ -415,16 +445,16 @@ export default function HomePage() {
             {statsDisplay.map((stat, index) => (
               <Card
                 key={index}
-                className={`text-center group hover:shadow-lg transition-all duration-300 ${stat.bgColor} ${stat.borderColor} border-2`}
+                className={`text-center group hover:shadow-2xl transition-all duration-500 ${stat.bgColor} ${stat.borderColor} border-2 hover:scale-105 transform`}
               >
-                <CardContent className="pt-6">
+                <CardContent className="pt-8 pb-6">
                   <div
-                    className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 group-hover:scale-110 transition-transform duration-300 ${stat.bgColor}`}
+                    className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-6 group-hover:scale-110 transition-transform duration-300 bg-gradient-to-r ${stat.gradient} shadow-lg`}
                   >
-                    <stat.icon className={`w-8 h-8 ${stat.color}`} />
+                    <stat.icon className="w-10 h-10 text-white" />
                   </div>
-                  <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
-                  <div className="text-gray-600 font-medium">{stat.label}</div>
+                  <div className="text-4xl font-bold text-gray-900 mb-2">{stat.value}</div>
+                  <div className="text-gray-600 font-medium text-lg">{stat.label}</div>
                 </CardContent>
               </Card>
             ))}
@@ -433,10 +463,11 @@ export default function HomePage() {
       </section>
 
       {/* Featured Campaigns */}
-      <section className="py-20">
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Featured Campaigns</h2>
+            <Badge className="bg-orange-100 text-orange-800 px-4 py-2 rounded-full mb-4">🎯 Featured Campaigns</Badge>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Support Our Campaigns</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Support our most urgent initiatives that are creating meaningful change in communities worldwide. Every
               contribution brings us closer to our goals.
@@ -444,24 +475,26 @@ export default function HomePage() {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {campaigns?.map((campaign) => (
+            {campaigns?.map((campaign, index) => (
               <Card
                 key={campaign._id}
-                className="overflow-hidden hover:shadow-xl transition-all duration-300 group border-0 shadow-lg"
+                className="overflow-hidden hover:shadow-2xl transition-all duration-500 group border-0 shadow-lg hover:scale-105 transform"
               >
                 <div className="relative h-64 overflow-hidden">
                   <Image
                     src={campaign.image || "/placeholder.svg?height=250&width=400"}
                     alt={campaign.title}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent"></div>
                   <div className="absolute top-4 left-4">
-                    <Badge className="bg-red-500 hover:bg-red-600 text-white">Featured</Badge>
+                    <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white border-0 shadow-lg">
+                      Featured
+                    </Badge>
                   </div>
                   <div className="absolute top-4 right-4">
-                    <Badge variant="secondary" className="bg-white/90 text-gray-900">
+                    <Badge variant="secondary" className="bg-white/95 text-gray-900 shadow-lg">
                       {campaign.category}
                     </Badge>
                   </div>
@@ -496,14 +529,14 @@ export default function HomePage() {
                         <span className="font-semibold text-gray-900">₹{campaign.raised.toLocaleString()} raised</span>
                         <span className="text-gray-600">₹{campaign.goal.toLocaleString()} goal</span>
                       </div>
-                      <Progress value={campaign.progressPercentage} className="h-3" />
+                      <Progress value={campaign.progressPercentage} className="h-3 bg-gray-200" />
                       <div className="flex justify-between text-xs text-gray-500 mt-2">
                         <span className="font-medium">{campaign.progressPercentage}% funded</span>
                         <span>{((campaign.goal - campaign.raised) / 1000).toFixed(0)}k needed</span>
                       </div>
                     </div>
 
-                    <Button className="w-full group-hover:bg-blue-700 transition-colors text-lg py-6 h-auto">
+                    <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-lg py-6 h-auto rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
                       <Link href={`/campaigns/${campaign._id}`} className="flex items-center gap-2">
                         Support This Cause <ArrowRight className="w-5 h-5" />
                       </Link>
@@ -515,7 +548,11 @@ export default function HomePage() {
           </div>
 
           <div className="text-center mt-12">
-            <Button variant="outline" size="lg" className="font-semibold text-lg px-8 py-4 h-auto bg-transparent">
+            <Button
+              variant="outline"
+              size="lg"
+              className="font-semibold text-lg px-8 py-4 h-auto rounded-full border-2 hover:shadow-lg transform hover:scale-105 transition-all duration-300 bg-transparent"
+            >
               <Link href="/campaigns">View All Campaigns</Link>
             </Button>
           </div>
@@ -523,9 +560,10 @@ export default function HomePage() {
       </section>
 
       {/* How We Help */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
+            <Badge className="bg-green-100 text-green-800 px-4 py-2 rounded-full mb-4">🤝 Our Approach</Badge>
             <h2 className="text-4xl font-bold text-gray-900 mb-4">How We Make an Impact</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Our comprehensive approach ensures sustainable change in the communities we serve through proven
@@ -534,49 +572,49 @@ export default function HomePage() {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-12">
-            <Card className="text-center group hover:shadow-lg transition-all duration-300 border-0 bg-white">
+            <Card className="text-center group hover:shadow-2xl transition-all duration-500 border-0 bg-white hover:scale-105 transform">
               <CardContent className="pt-8">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-full mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                  <Heart className="w-10 h-10 text-red-600" />
+                <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-red-400 to-pink-500 rounded-full mb-8 group-hover:scale-110 transition-transform duration-300 shadow-xl">
+                  <Heart className="w-12 h-12 text-white" />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4">Direct Aid & Relief</h3>
+                <h3 className="text-2xl font-semibold mb-4 text-gray-900">Direct Aid & Relief</h3>
                 <p className="text-gray-600 leading-relaxed text-lg mb-6">
                   Providing immediate relief and support to those in urgent need through our emergency response programs
                   and direct assistance initiatives.
                 </p>
-                <Badge variant="outline" className="text-red-600 border-red-200">
+                <Badge variant="outline" className="text-red-600 border-red-200 bg-red-50">
                   Emergency Response
                 </Badge>
               </CardContent>
             </Card>
 
-            <Card className="text-center group hover:shadow-lg transition-all duration-300 border-0 bg-white">
+            <Card className="text-center group hover:shadow-2xl transition-all duration-500 border-0 bg-white hover:scale-105 transform">
               <CardContent className="pt-8">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-full mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                  <Handshake className="w-10 h-10 text-green-600" />
+                <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full mb-8 group-hover:scale-110 transition-transform duration-300 shadow-xl">
+                  <Handshake className="w-12 h-12 text-white" />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4">Community Building</h3>
+                <h3 className="text-2xl font-semibold mb-4 text-gray-900">Community Building</h3>
                 <p className="text-gray-600 leading-relaxed text-lg mb-6">
                   Empowering local communities through skill development, infrastructure projects, and sustainable
                   programs that create lasting change.
                 </p>
-                <Badge variant="outline" className="text-green-600 border-green-200">
+                <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
                   Sustainable Development
                 </Badge>
               </CardContent>
             </Card>
 
-            <Card className="text-center group hover:shadow-lg transition-all duration-300 border-0 bg-white">
+            <Card className="text-center group hover:shadow-2xl transition-all duration-500 border-0 bg-white hover:scale-105 transform">
               <CardContent className="pt-8">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                  <BookOpen className="w-10 h-10 text-purple-600" />
+                <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-purple-400 to-violet-500 rounded-full mb-8 group-hover:scale-110 transition-transform duration-300 shadow-xl">
+                  <BookOpen className="w-12 h-12 text-white" />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4">Education & Awareness</h3>
+                <h3 className="text-2xl font-semibold mb-4 text-gray-900">Education & Awareness</h3>
                 <p className="text-gray-600 leading-relaxed text-lg mb-6">
                   Creating lasting change through education, training, and awareness programs that promote sustainable
                   development and social progress.
                 </p>
-                <Badge variant="outline" className="text-purple-600 border-purple-200">
+                <Badge variant="outline" className="text-purple-600 border-purple-200 bg-purple-50">
                   Knowledge Transfer
                 </Badge>
               </CardContent>
@@ -586,10 +624,11 @@ export default function HomePage() {
       </section>
 
       {/* Upcoming Events */}
-      <section className="py-20">
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Upcoming Events</h2>
+            <Badge className="bg-purple-100 text-purple-800 px-4 py-2 rounded-full mb-4">📅 Upcoming Events</Badge>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Join Our Events</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Join us at our upcoming events and be part of the change you want to see in the world. Connect with
               like-minded individuals and make a real impact.
@@ -598,22 +637,27 @@ export default function HomePage() {
 
           <div className="grid lg:grid-cols-3 gap-8">
             {events?.map((event) => (
-              <Card key={event._id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
+              <Card
+                key={event._id}
+                className="overflow-hidden hover:shadow-2xl transition-all duration-500 group hover:scale-105 transform"
+              >
                 <div className="relative h-48">
                   <Image
                     src={event.image || "/placeholder.svg?height=200&width=400"}
                     alt={event.title}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/50 to-transparent"></div>
                   <div className="absolute top-4 right-4">
-                    <Badge variant="secondary" className="bg-white/90 text-gray-900">
+                    <Badge variant="secondary" className="bg-white/95 text-gray-900 shadow-lg">
                       {event.category}
                     </Badge>
                   </div>
                   <div className="absolute bottom-4 left-4 text-white">
-                    <div className="text-sm font-medium">{event.isFree ? "Free Event" : `₹${event.ticketPrice}`}</div>
+                    <div className="text-sm font-medium bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                      {event.isFree ? "Free Event" : `₹${event.ticketPrice}`}
+                    </div>
                   </div>
                 </div>
                 <CardHeader>
@@ -646,7 +690,7 @@ export default function HomePage() {
                         {event.maxAttendees && ` / ${event.maxAttendees} max`}
                       </span>
                     </div>
-                    <Button className="w-full mt-4 h-auto py-3">
+                    <Button className="w-full mt-4 h-auto py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
                       <Link href={`/events/${event._id}`}>Learn More & Register</Link>
                     </Button>
                   </div>
@@ -656,7 +700,11 @@ export default function HomePage() {
           </div>
 
           <div className="text-center mt-12">
-            <Button variant="outline" size="lg" className="font-semibold text-lg px-8 py-4 h-auto bg-transparent">
+            <Button
+              variant="outline"
+              size="lg"
+              className="font-semibold text-lg px-8 py-4 h-auto rounded-full border-2 hover:shadow-lg transform hover:scale-105 transition-all duration-300 bg-transparent"
+            >
               <Link href="/events">View All Events</Link>
             </Button>
           </div>
@@ -665,10 +713,11 @@ export default function HomePage() {
 
       {/* Recent Blog Posts */}
       {blogs && blogs.length > 0 && (
-        <section className="py-20 bg-gray-50">
+        <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">Latest Stories</h2>
+              <Badge className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full mb-4">📖 Latest Stories</Badge>
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">Inspiring Stories</h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                 Read inspiring stories from the field and stay updated with our latest initiatives and impact.
               </p>
@@ -676,16 +725,19 @@ export default function HomePage() {
 
             <div className="grid lg:grid-cols-3 gap-8">
               {blogs.map((blog) => (
-                <Card key={blog._id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
+                <Card
+                  key={blog._id}
+                  className="overflow-hidden hover:shadow-2xl transition-all duration-500 group hover:scale-105 transform"
+                >
                   <div className="relative h-48">
                     <Image
                       src={blog.image || "/placeholder.svg?height=200&width=400"}
                       alt={blog.title}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                     <div className="absolute top-4 right-4">
-                      <Badge variant="secondary" className="bg-white/90 text-gray-900">
+                      <Badge variant="secondary" className="bg-white/95 text-gray-900 shadow-lg">
                         {blog.category}
                       </Badge>
                     </div>
@@ -714,7 +766,11 @@ export default function HomePage() {
                         <span>{new Date(blog.publishedAt).toLocaleDateString()}</span>
                       </div>
                     </div>
-                    <Button variant="ghost" className="w-full group-hover:bg-blue-50 h-auto py-3" asChild>
+                    <Button
+                      variant="ghost"
+                      className="w-full group-hover:bg-blue-50 h-auto py-3 rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                      asChild
+                    >
                       <Link href={`/blog/${blog._id}`}>Read More</Link>
                     </Button>
                   </CardContent>
@@ -723,7 +779,11 @@ export default function HomePage() {
             </div>
 
             <div className="text-center mt-12">
-              <Button variant="outline" size="lg" className="font-semibold text-lg px-8 py-4 h-auto bg-transparent">
+              <Button
+                variant="outline"
+                size="lg"
+                className="font-semibold text-lg px-8 py-4 h-auto rounded-full border-2 hover:shadow-lg transform hover:scale-105 transition-all duration-300 bg-transparent"
+              >
                 <Link href="/blog">Read All Stories</Link>
               </Button>
             </div>
@@ -732,9 +792,10 @@ export default function HomePage() {
       )}
 
       {/* Testimonials */}
-      <section className="py-20">
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
+            <Badge className="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-full mb-4">💬 Testimonials</Badge>
             <h2 className="text-4xl font-bold text-gray-900 mb-4">What People Say</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Hear from the people whose lives have been touched by our work and community.
@@ -743,7 +804,7 @@ export default function HomePage() {
 
           <div className="grid lg:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="p-6 hover:shadow-lg transition-shadow">
+              <Card key={index} className="p-6 hover:shadow-2xl transition-all duration-500 hover:scale-105 transform">
                 <CardContent className="pt-0">
                   <div className="flex items-center gap-1 mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
@@ -760,7 +821,7 @@ export default function HomePage() {
                       className="rounded-full"
                     />
                     <div>
-                      <div className="font-semibold">{testimonial.name}</div>
+                      <div className="font-semibold text-gray-900">{testimonial.name}</div>
                       <div className="text-sm text-gray-500">{testimonial.role}</div>
                     </div>
                   </div>
@@ -772,9 +833,16 @@ export default function HomePage() {
       </section>
 
       {/* Call to Action */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl lg:text-5xl font-bold mb-6">Ready to Make a Difference?</h2>
+      <section className="py-20 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 to-purple-700/90"></div>
+        <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full animate-pulse"></div>
+        <div className="absolute bottom-10 right-10 w-24 h-24 bg-yellow-300/20 rounded-full animate-bounce"></div>
+
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <Badge className="bg-white/20 text-white px-4 py-2 rounded-full mb-6 backdrop-blur-sm">
+            🚀 Join Our Mission
+          </Badge>
+          <h2 className="text-4xl lg:text-6xl font-bold mb-6">Ready to Make a Difference?</h2>
           <p className="text-xl lg:text-2xl mb-12 opacity-90 max-w-3xl mx-auto leading-relaxed">
             Join thousands of supporters who are helping us create positive change. Every contribution, big or small,
             makes a meaningful impact in someone's life. Start your journey with us today.
@@ -782,28 +850,31 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Button
               size="lg"
-              className="bg-white text-blue-600 hover:bg-gray-100 font-semibold text-lg px-8 py-4 h-auto"
+              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold text-lg px-8 py-6 h-auto rounded-full shadow-xl hover:shadow-2xl transform hover:scale-110 transition-all duration-300"
             >
               <Link href="/donate" className="flex items-center gap-2">
-                Start Donating <Heart className="w-5 h-5" />
+                <Heart className="w-5 h-5" />
+                Start Donating
               </Link>
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold text-lg px-8 py-4 h-auto bg-transparent"
+              className="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold text-lg px-8 py-6 h-auto rounded-full bg-transparent backdrop-blur-sm shadow-xl hover:shadow-2xl transform hover:scale-110 transition-all duration-300"
             >
               <Link href="/volunteer" className="flex items-center gap-2">
-                Become a Volunteer <Users className="w-5 h-5" />
+                <Users className="w-5 h-5" />
+                Become a Volunteer
               </Link>
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold text-lg px-8 py-4 h-auto bg-transparent"
+              className="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold text-lg px-8 py-6 h-auto rounded-full bg-transparent backdrop-blur-sm shadow-xl hover:shadow-2xl transform hover:scale-110 transition-all duration-300"
             >
               <Link href="/about" className="flex items-center gap-2">
-                Learn More <ArrowRight className="w-5 h-5" />
+                <TrendingUp className="w-5 h-5" />
+                Learn More
               </Link>
             </Button>
           </div>
