@@ -26,12 +26,12 @@ export function Navbar() {
   const [open, setOpen] = useState(false)
 
   const navItems = [
-    { href: "/", label: "Home", icon: Home },
-    { href: "/about", label: "About", icon: Heart },
-    { href: "/campaigns", label: "Campaigns", icon: Target },
-    { href: "/events", label: "Events", icon: Calendar },
-    { href: "/blog", label: "Blog", icon: BookOpen },
-    { href: "/contact", label: "Contact", icon: Mail },
+    { href: "/", label: "Home" },
+    { href: "/about", label: "About" },
+    { href: "/campaigns", label: "Campaigns" },
+    { href: "/events", label: "Events"},
+    { href: "/blog", label: "Blog"},
+    { href: "/contact", label: "Contact"},
   ]
 
   return (
@@ -55,7 +55,6 @@ export function Navbar() {
               href={item.href}
               className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors font-medium group"
             >
-              <item.icon className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
               {item.label}
             </Link>
           ))}
@@ -133,7 +132,6 @@ export function Navbar() {
                   onClick={() => setOpen(false)}
                 >
                   <div className="w-10 h-10 bg-white/70 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                    <item.icon className="w-5 h-5 text-blue-600" />
                   </div>
                   <span className="font-medium text-gray-700">{item.label}</span>
                 </Link>

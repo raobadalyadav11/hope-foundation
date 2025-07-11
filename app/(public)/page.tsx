@@ -183,7 +183,7 @@ export default function HomePage() {
           _id: "1",
           title: "Impact Story: How Clean Water Changed a Village",
           excerpt: "Discover how our water project transformed the lives of 1,000 villagers in rural Maharashtra.",
-          image: "/placeholder.svg?height=200&width=300",
+          image: "/placeholder.png?height=200&width=300",
           author: {
             name: "Priya Sharma",
             image: "/placeholder.svg?height=40&width=40",
@@ -395,9 +395,9 @@ export default function HomePage() {
 
             <div className="relative">
               <div className="relative z-10">
-                <div className="relative overflow-hidden rounded-3xl shadow-2xl">
+                <div className="relative overflow-hidden rounded-3xl">
                   <Image
-                    src="/placeholder.svg?height=500&width=600"
+                    src="/placeholder.png?height=500&width=600"
                     alt="NGO Impact"
                     width={600}
                     height={500}
@@ -802,7 +802,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-3 gap-8 bg-white">
             {testimonials.map((testimonial, index) => (
               <Card key={index} className="p-6 hover:shadow-2xl transition-all duration-500 hover:scale-105 transform">
                 <CardContent className="pt-0">
@@ -811,7 +811,7 @@ export default function HomePage() {
                       <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
-                  <p className="text-gray-600 mb-6 italic text-lg leading-relaxed">"{testimonial.content}"</p>
+                  <p className=" mb-6 italic text-lg leading-relaxed">"{testimonial.content}"</p>
                   <div className="flex items-center gap-3">
                     <Image
                       src={testimonial.image || "/placeholder.svg"}
