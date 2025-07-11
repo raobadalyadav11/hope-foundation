@@ -279,4 +279,3 @@ export async function sendVolunteerApproval(volunteer: any) {
 
   await transporter.sendMail(mailOptions)
 }
- 
