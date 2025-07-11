@@ -3,16 +3,16 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useSession, signOut } from "next-auth/react"
-import { useMobile } from "@/hooks/use-mobile"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Menu, Home, Heart, Calendar, BookOpen, Mail, LogOut, LogIn, UserPlus, Settings, Target } from "lucide-react"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 export function Navbar() {
   const { data: session } = useSession()
   const [open, setOpen] = useState(false)
-  const isMobile = useMobile()
+  const isMobile = useIsMobile()
 
   const navItems = [
     { href: "/", label: "Home", icon: Home },
