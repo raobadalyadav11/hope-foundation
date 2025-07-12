@@ -27,14 +27,13 @@ interface BlogPost {
     email: string
     profileImage?: string
   }
+  authorName: string
   status: string
   tags: string[]
   category: string
-  image: string
-  gallery: string[]
-  readTime: string
+  featuredImage: string
   views: number
-  likes: string[]
+  likes: number
   comments: Array<{
     _id: string
     userId: {
@@ -46,7 +45,6 @@ interface BlogPost {
     createdAt: string
     isApproved: boolean
   }>
-  featured: boolean
   publishedAt: string
   createdAt: string
   relatedBlogs: Array<{
@@ -54,8 +52,7 @@ interface BlogPost {
     title: string
     slug: string
     excerpt: string
-    image: string
-    readTime: string
+    featuredImage: string
     publishedAt: string
     authorId: {
       name: string
@@ -76,7 +73,7 @@ export default function BlogPostPage() {
       const response = await fetch(`/api/blogs/${params.slug}`)
       if (!response.ok) throw new Error("Failed to fetch blog")
       const data = (await response.json()) as BlogPost
-      setIsLiked(data.likes.includes(session?.user?.id || ""))
+      setIsLiked(false) // For now, since we don't track individual likes
       return data
     },
   })
@@ -198,7 +195,7 @@ export default function BlogPostPage() {
               {/* Hero Image */}
               <div className="relative h-96">
                 <Image
-                  src={blog.image || "/placeholder.svg?height=400&width=800"}
+                  src={blog.featuredImage || "/placeholder.svg?height=400&width=800"}
                   alt={blog.title}
                   fill
                   className="object-cover"
@@ -278,7 +275,7 @@ export default function BlogPostPage() {
                     disabled={likeMutation.isPending}
                   >
                     <Heart className={`w-4 h-4 mr-2 ${isLiked ? "fill-current" : ""}`} />
-                    {blog.likes.length} Likes
+                    {blog.likes} Likes
                   </Button>
                   <Button variant="outline" onClick={handleShare}>
                     <Share2 className="w-4 h-4 mr-2" />

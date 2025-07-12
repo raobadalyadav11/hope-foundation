@@ -31,49 +31,18 @@ export default function ProfilePage() {
   const fetchProfile = async () => {
     try {
       const response = await fetch("/api/user/profile")
-      const data = await response.json()
-      setProfile(data)
+      if (response.ok) {
+        const data = await response.json()
+        setProfile(data)
+      } else {
+        throw new Error('Failed to fetch profile')
+      }
     } catch (error) {
       console.error("Failed to fetch profile:", error)
-      // Mock data for demo
-      setProfile({
-        personal: {
-          name: session?.user?.name || "",
-          email: session?.user?.email || "",
-          phone: "+91 98765 43210",
-          dateOfBirth: "1990-01-01",
-          gender: "prefer-not-to-say",
-          address: "123 Main Street, Mumbai, India",
-          bio: "Passionate about making a difference in the world through charitable giving and community involvement.",
-          avatar: session?.user?.image || "",
-        },
-        preferences: {
-          emailNotifications: true,
-          smsNotifications: false,
-          newsletter: true,
-          donationReminders: true,
-          eventUpdates: true,
-          campaignUpdates: true,
-          language: "en",
-          timezone: "Asia/Kolkata",
-          currency: "INR",
-        },
-        privacy: {
-          profileVisibility: "public",
-          showDonations: false,
-          showVolunteerHours: true,
-          allowMessages: true,
-          showEmail: false,
-          showPhone: false,
-        },
-        stats: {
-          totalDonations: 15000,
-          donationCount: 12,
-          volunteerHours: 48,
-          campaignsSupported: 8,
-          eventsAttended: 5,
-          memberSince: "2022-01-15",
-        },
+      toast({
+        title: "Error",
+        description: "Failed to load profile data. Please refresh the page.",
+        variant: "destructive",
       })
     } finally {
       setIsLoading(false)

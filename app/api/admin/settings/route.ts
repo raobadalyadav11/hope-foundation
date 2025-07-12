@@ -17,7 +17,7 @@ const defaultSettings = {
   },
   email: {
     smtpHost: "smtp.gmail.com",
-    smtpPort: 587,
+    smtpPort: 465,
     smtpUser: "",
     smtpPassword: "",
     fromEmail: "noreply@hopefoundation.org",

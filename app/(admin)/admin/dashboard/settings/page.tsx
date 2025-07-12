@@ -59,7 +59,7 @@ export default function SettingsPage() {
         },
         email: {
           smtpHost: "smtp.gmail.com",
-          smtpPort: "587",
+          smtpPort: "465",
           smtpUser: "noreply@hopefoundation.org",
           smtpSecure: true,
           fromName: "Hope Foundation",

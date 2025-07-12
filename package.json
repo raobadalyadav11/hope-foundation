@@ -5,7 +5,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "seed":"npx tsx scripts/seed-database.ts",
+    "seed":"npx tsx scripts/seed.ts",
     "lint": "next lint",
     "start": "next start"
   },

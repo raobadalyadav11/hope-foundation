@@ -1,104 +1,97 @@
+"use client"
+
+import { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Calendar, User, Search, ArrowRight, BookOpen } from "lucide-react"
+import { Calendar, User, Search, ArrowRight, BookOpen, Eye } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
-export default function BlogPage() {
-  const featuredPost = {
-    id: 1,
-    title: "Transforming Lives Through Clean Water: A Year in Review",
-    excerpt:
-      "Discover how our clean water initiative has impacted over 10,000 lives across 50 villages in the past year. From well construction to community education, see the remarkable transformation happening in rural communities.",
-    content: "Our clean water initiative has been one of our most successful programs...",
-    author: "Dr. Sarah Johnson",
-    date: "2024-01-15",
-    readTime: "8 min read",
-    category: "Impact Stories",
-    image: "/placeholder.svg?height=400&width=600",
-    featured: true,
+interface Blog {
+  _id: string
+  title: string
+  slug: string
+  excerpt: string
+  featuredImage: string
+  authorId: {
+    _id: string
+    name: string
+    profileImage?: string
   }
+  authorName: string
+  category: string
+  tags: string[]
+  views: number
+  likes: number
+  publishedAt: string
+  createdAt: string
+}
 
-  const blogPosts = [
-    {
-      id: 2,
-      title: "The Power of Education: Building Schools in Remote Areas",
-      excerpt:
-        "Learn about our education program that has established 25 new schools and trained over 200 teachers in underserved communities.",
-      author: "Michael Chen",
-      date: "2024-01-10",
-      readTime: "6 min read",
-      category: "Education",
-      image: "/placeholder.svg?height=250&width=350",
+interface BlogsResponse {
+  blogs: Blog[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    pages: number
+  }
+}
+
+export default function BlogPage() {
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const { data: blogsData, isLoading } = useQuery({
+    queryKey: ["blogs", selectedCategory, searchTerm, currentPage],
+    queryFn: async (): Promise<BlogsResponse> => {
+      const params = new URLSearchParams({
+        category: selectedCategory === "all" ? "" : selectedCategory,
+        search: searchTerm,
+        page: currentPage.toString(),
+        limit: "9",
+        status: "published",
+      })
+
+      const response = await fetch(`/api/blogs?${params}`)
+      if (!response.ok) throw new Error("Failed to fetch blogs")
+      return response.json()
     },
-    {
-      id: 3,
-      title: "Healthcare Heroes: Mobile Medical Units Making a Difference",
-      excerpt:
-        "Meet the dedicated medical professionals bringing healthcare to remote villages through our mobile medical unit program.",
-      author: "Dr. Priya Sharma",
-      date: "2024-01-08",
-      readTime: "5 min read",
-      category: "Healthcare",
-      image: "/placeholder.svg?height=250&width=350",
+  })
+
+  const { data: featuredBlogs } = useQuery({
+    queryKey: ["blogs", "featured"],
+    queryFn: async (): Promise<Blog[]> => {
+      const response = await fetch("/api/blogs?featured=true&limit=1&status=published")
+      if (!response.ok) throw new Error("Failed to fetch featured blogs")
+      const data = await response.json()
+      return data.blogs
     },
-    {
-      id: 4,
-      title: "Volunteer Spotlight: Stories from the Field",
-      excerpt:
-        "Hear inspiring stories from our volunteers who are making a difference in communities around the world.",
-      author: "David Rodriguez",
-      date: "2024-01-05",
-      readTime: "4 min read",
-      category: "Volunteers",
-      image: "/placeholder.svg?height=250&width=350",
-    },
-    {
-      id: 5,
-      title: "Sustainable Development: Building for the Future",
-      excerpt: "Explore our approach to sustainable development and how we're creating lasting change in communities.",
-      author: "Dr. Sarah Johnson",
-      date: "2024-01-03",
-      readTime: "7 min read",
-      category: "Sustainability",
-      image: "/placeholder.svg?height=250&width=350",
-    },
-    {
-      id: 6,
-      title: "Emergency Response: Lessons from Recent Disasters",
-      excerpt:
-        "Learn about our emergency response protocols and how we've helped communities recover from recent natural disasters.",
-      author: "Michael Chen",
-      date: "2023-12-28",
-      readTime: "6 min read",
-      category: "Emergency Relief",
-      image: "/placeholder.svg?height=250&width=350",
-    },
-    {
-      id: 7,
-      title: "Women Empowerment: Creating Economic Opportunities",
-      excerpt:
-        "Discover how our women empowerment programs are creating economic opportunities and fostering leadership in communities.",
-      author: "Dr. Priya Sharma",
-      date: "2023-12-25",
-      readTime: "5 min read",
-      category: "Women's Rights",
-      image: "/placeholder.svg?height=250&width=350",
-    },
-  ]
+  })
+
+  const blogs = blogsData?.blogs || []
+  const pagination = blogsData?.pagination
+  const featuredPost = featuredBlogs?.[0]
 
   const categories = [
-    "All Posts",
-    "Impact Stories",
-    "Education",
-    "Healthcare",
-    "Volunteers",
-    "Sustainability",
-    "Emergency Relief",
-    "Women's Rights",
+    { value: "all", label: "All Posts" },
+    { value: "Impact Stories", label: "Impact Stories" },
+    { value: "Educational Content", label: "Educational Content" },
+    { value: "Community News", label: "Community News" },
+    { value: "Volunteer Spotlights", label: "Volunteer Spotlights" },
+    { value: "Fundraising Updates", label: "Fundraising Updates" },
+    { value: "Event Coverage", label: "Event Coverage" },
   ]
+
+  const calculateReadTime = (content: string) => {
+    const wordsPerMinute = 200
+    const wordCount = content.split(' ').length
+    const readTime = Math.ceil(wordCount / wordsPerMinute)
+    return `${readTime} min read`
+  }
 
   return (
     <div className="min-h-screen">
@@ -120,107 +113,185 @@ export default function BlogPage() {
         <div className="flex flex-col md:flex-row gap-4 mb-12">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <Input placeholder="Search blog posts..." className="pl-10" />
+            <Input 
+              placeholder="Search blog posts..." 
+              className="pl-10" 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
           <div className="flex gap-2 flex-wrap">
             {categories.map((category) => (
-              <Button key={category} variant="outline" size="sm" className="hover:bg-blue-50 hover:border-blue-300">
-                {category}
+              <Button 
+                key={category.value} 
+                variant={selectedCategory === category.value ? "default" : "outline"} 
+                size="sm" 
+                className="hover:bg-blue-50 hover:border-blue-300"
+                onClick={() => setSelectedCategory(category.value)}
+              >
+                {category.label}
               </Button>
             ))}
           </div>
         </div>
 
         {/* Featured Post */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Featured Story</h2>
-          <Card className="overflow-hidden hover:shadow-xl transition-shadow">
-            <div className="grid md:grid-cols-2 gap-0">
-              <div className="relative h-64 md:h-auto">
-                <Image
-                  src={featuredPost.image || "/placeholder.svg"}
-                  alt={featuredPost.title}
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute top-4 left-4">
-                  <Badge className="bg-red-500 hover:bg-red-600">Featured</Badge>
+        {featuredPost && (
+          <div className="mb-16">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8">Featured Story</h2>
+            <Card className="overflow-hidden hover:shadow-xl transition-shadow">
+              <div className="grid md:grid-cols-2 gap-0">
+                <div className="relative h-64 md:h-auto">
+                  <Image
+                    src={featuredPost.featuredImage || "/placeholder.svg"}
+                    alt={featuredPost.title}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute top-4 left-4">
+                    <Badge className="bg-red-500 hover:bg-red-600">Featured</Badge>
+                  </div>
+                </div>
+                <div className="p-8 flex flex-col justify-center">
+                  <div className="mb-4">
+                    <Badge variant="secondary">{featuredPost.category}</Badge>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">{featuredPost.title}</h3>
+                  <p className="text-gray-600 mb-6">{featuredPost.excerpt}</p>
+                  <div className="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                    <div className="flex items-center gap-1">
+                      <User className="w-4 h-4" />
+                      {featuredPost.authorName}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      {new Date(featuredPost.publishedAt).toLocaleDateString()}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Eye className="w-4 h-4" />
+                      {featuredPost.views} views
+                    </div>
+                  </div>
+                  <Button>
+                    <Link href={`/blog/${featuredPost.slug}`} className="flex items-center gap-2">
+                      Read Full Story <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </Button>
                 </div>
               </div>
-              <div className="p-8 flex flex-col justify-center">
-                <div className="mb-4">
-                  <Badge variant="secondary">{featuredPost.category}</Badge>
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">{featuredPost.title}</h3>
-                <p className="text-gray-600 mb-6">{featuredPost.excerpt}</p>
-                <div className="flex items-center gap-4 text-sm text-gray-500 mb-6">
-                  <div className="flex items-center gap-1">
-                    <User className="w-4 h-4" />
-                    {featuredPost.author}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    {new Date(featuredPost.date).toLocaleDateString()}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <BookOpen className="w-4 h-4" />
-                    {featuredPost.readTime}
-                  </div>
-                </div>
-                <Button>
-                  <Link href={`/blog/${featuredPost.id}`} className="flex items-center gap-2">
-                    Read Full Story <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </Card>
-        </div>
+            </Card>
+          </div>
+        )}
 
         {/* Blog Posts Grid */}
         <div>
           <h2 className="text-3xl font-bold text-gray-900 mb-8">Latest Posts</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts.map((post) => (
-              <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="relative h-48">
-                  <Image src={post.image || "/placeholder.svg"} alt={post.title} fill className="object-cover" />
-                  <div className="absolute top-4 right-4">
-                    <Badge variant="secondary">{post.category}</Badge>
+          
+          {isLoading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="bg-gray-200 h-48 rounded-t-lg"></div>
+                  <div className="bg-white p-6 rounded-b-lg border">
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded mb-4"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
                   </div>
                 </div>
-                <CardHeader>
-                  <CardTitle className="text-xl line-clamp-2">{post.title}</CardTitle>
-                  <CardDescription className="line-clamp-3">{post.excerpt}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                    <div className="flex items-center gap-1">
-                      <User className="w-4 h-4" />
-                      {post.author}
+              ))}
+            </div>
+          ) : blogs.length === 0 ? (
+            <div className="text-center py-12">
+              <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-2xl font-semibold text-gray-900 mb-2">No blog posts found</h3>
+              <p className="text-gray-600">Try adjusting your search criteria or check back later for new posts.</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {blogs.map((post) => (
+                  <Card key={post._id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                    <div className="relative h-48">
+                      <Image 
+                        src={post.featuredImage || "/placeholder.svg"} 
+                        alt={post.title} 
+                        fill 
+                        className="object-cover" 
+                      />
+                      <div className="absolute top-4 right-4">
+                        <Badge variant="secondary">{post.category}</Badge>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      {new Date(post.date).toLocaleDateString()}
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500">{post.readTime}</span>
-                    <Button variant="outline" size="sm">
-                      <Link href={`/blog/${post.id}`}>Read More</Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+                    <CardHeader>
+                      <CardTitle className="text-xl line-clamp-2">{post.title}</CardTitle>
+                      <CardDescription className="line-clamp-3">{post.excerpt}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                        <div className="flex items-center gap-1">
+                          <User className="w-4 h-4" />
+                          {post.authorName}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          {new Date(post.publishedAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                          <div className="flex items-center gap-1">
+                            <Eye className="w-4 h-4" />
+                            {post.views}
+                          </div>
+                          <span>{post.likes} likes</span>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          <Link href={`/blog/${post.slug}`}>Read More</Link>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
 
-        {/* Load More */}
-        <div className="text-center mt-12">
-          <Button variant="outline" size="lg">
-            Load More Posts
-          </Button>
+              {/* Pagination */}
+              {pagination && pagination.pages > 1 && (
+                <div className="flex justify-center items-center gap-4 mt-12">
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </Button>
+                  
+                  <div className="flex gap-2">
+                    {Array.from({ length: Math.min(5, pagination.pages) }, (_, i) => {
+                      const page = i + 1
+                      return (
+                        <Button
+                          key={page}
+                          variant={currentPage === page ? "default" : "outline"}
+                          onClick={() => setCurrentPage(page)}
+                          className="w-10"
+                        >
+                          {page}
+                        </Button>
+                      )
+                    })}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentPage(Math.min(pagination.pages, currentPage + 1))}
+                    disabled={currentPage === pagination.pages}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
 

@@ -8,11 +8,33 @@ export interface IUser extends mongoose.Document {
   role: "admin" | "donor" | "volunteer" | "creator"
   phone?: string
   address?: string
+  dateOfBirth?: string
+  gender?: string
+  bio?: string
   skills?: string[]
   availability?: string
   experience?: string
   motivation?: string
   profileImage?: string
+  preferences?: {
+    emailNotifications?: boolean
+    smsNotifications?: boolean
+    newsletter?: boolean
+    donationReminders?: boolean
+    eventUpdates?: boolean
+    campaignUpdates?: boolean
+    language?: string
+    timezone?: string
+    currency?: string
+  }
+  privacy?: {
+    profileVisibility?: string
+    showDonations?: boolean
+    showVolunteerHours?: boolean
+    allowMessages?: boolean
+    showEmail?: boolean
+    showPhone?: boolean
+  }
   isActive: boolean
   isVerified: boolean
   verificationToken?: string
@@ -80,9 +102,42 @@ const userSchema = new mongoose.Schema(
       trim: true,
       maxlength: [1000, "Motivation cannot exceed 1000 characters"],
     },
+    dateOfBirth: {
+      type: String,
+      trim: true,
+    },
+    gender: {
+      type: String,
+      enum: ["male", "female", "other", "prefer-not-to-say"],
+      default: "prefer-not-to-say",
+    },
+    bio: {
+      type: String,
+      trim: true,
+      maxlength: [500, "Bio cannot exceed 500 characters"],
+    },
     profileImage: {
       type: String,
       default: "",
+    },
+    preferences: {
+      emailNotifications: { type: Boolean, default: true },
+      smsNotifications: { type: Boolean, default: false },
+      newsletter: { type: Boolean, default: true },
+      donationReminders: { type: Boolean, default: true },
+      eventUpdates: { type: Boolean, default: true },
+      campaignUpdates: { type: Boolean, default: true },
+      language: { type: String, default: "en" },
+      timezone: { type: String, default: "Asia/Kolkata" },
+      currency: { type: String, default: "INR" },
+    },
+    privacy: {
+      profileVisibility: { type: String, default: "public" },
+      showDonations: { type: Boolean, default: false },
+      showVolunteerHours: { type: Boolean, default: true },
+      allowMessages: { type: Boolean, default: true },
+      showEmail: { type: Boolean, default: false },
+      showPhone: { type: Boolean, default: false },
     },
     isActive: {
       type: Boolean,

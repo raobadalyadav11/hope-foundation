@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
     // Verify signature
     const sign = razorpay_order_id + "|" + razorpay_payment_id
-    const expectedSign = crypto.createHmac("sha256", process.env.RAZORPAY_SECRET!).update(sign.toString()).digest("hex")
+    const expectedSign = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!).update(sign.toString()).digest("hex")
 
     if (razorpay_signature !== expectedSign) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Send confirmation email
-    await sendDonationConfirmation(donation)
+    // await sendDonationConfirmation(donation) // Temporarily disabled
 
     return NextResponse.json({
       message: "Payment verified successfully",

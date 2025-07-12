@@ -3,27 +3,68 @@
 import type React from "react"
 
 import { useState } from "react"
+import { useMutation } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MapPin, Phone, Mail, Clock, Send } from "lucide-react"
+import { MapPin, Phone, Mail, Clock, Send, CheckCircle } from "lucide-react"
+import { toast } from "sonner"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     subject: "",
     message: "",
-    inquiryType: "",
+  })
+  const [isSubmitted, setIsSubmitted] = useState(false)
+
+  const contactMutation = useMutation({
+    mutationFn: async (data: typeof formData) => {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+      
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to send message')
+      }
+      
+      return response.json()
+    },
+    onSuccess: () => {
+      setIsSubmitted(true)
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: "",
+      })
+      toast.success("Thank you for your message! We'll get back to you soon.")
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to send message. Please try again.")
+    },
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission
-    alert("Thank you for your message! We will get back to you soon.")
+    
+    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+      toast.error("Please fill in all required fields.")
+      return
+    }
+    
+    contactMutation.mutate(formData)
   }
 
   return (
@@ -80,20 +121,14 @@ export default function ContactPage() {
                   </div>
 
                   <div>
-                    <Label htmlFor="inquiryType">Inquiry Type</Label>
-                    <Select onValueChange={(value) => setFormData({ ...formData, inquiryType: value })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select inquiry type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="general">General Inquiry</SelectItem>
-                        <SelectItem value="volunteer">Volunteer Opportunities</SelectItem>
-                        <SelectItem value="donation">Donation Questions</SelectItem>
-                        <SelectItem value="partnership">Partnership</SelectItem>
-                        <SelectItem value="media">Media Inquiry</SelectItem>
-                        <SelectItem value="support">Support</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      placeholder="+91 98765 43210"
+                    />
                   </div>
 
                   <div>
@@ -118,10 +153,30 @@ export default function ContactPage() {
                     />
                   </div>
 
-                  <Button type="submit" className="w-full h-12 text-lg">
-                    <Send className="w-5 h-5 mr-2" />
-                    Send Message
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 text-lg" 
+                    disabled={contactMutation.isPending}
+                  >
+                    {contactMutation.isPending ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-5 h-5 mr-2" />
+                        Send Message
+                      </>
+                    )}
                   </Button>
+                  
+                  {isSubmitted && (
+                    <div className="flex items-center justify-center gap-2 text-green-600 mt-4">
+                      <CheckCircle className="w-5 h-5" />
+                      <span>Message sent successfully!</span>
+                    </div>
+                  )}
                 </form>
               </CardContent>
             </Card>

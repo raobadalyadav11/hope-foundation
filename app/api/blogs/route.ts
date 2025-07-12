@@ -10,26 +10,17 @@ const blogSchema = z.object({
   content: z.string().min(1, "Content is required"),
   excerpt: z.string().min(1, "Excerpt is required").max(300, "Excerpt cannot exceed 300 characters"),
   category: z.enum([
-    "impact-stories",
-    "news",
-    "education",
-    "healthcare",
-    "environment",
-    "volunteer-stories",
-    "fundraising",
+    "Impact Stories",
+    "Educational Content",
+    "Community News",
+    "Volunteer Spotlights",
+    "Fundraising Updates",
+    "Event Coverage",
   ]),
-  image: z.string().url("Invalid image URL"),
-  gallery: z.array(z.string().url()).optional(),
+  featuredImage: z.string().url("Invalid image URL").optional(),
   tags: z.array(z.string()).optional(),
   status: z.enum(["draft", "published", "archived"]).optional(),
   featured: z.boolean().optional(),
-  readTime: z.string().min(1, "Read time is required"),
-  seoTitle: z.string().max(60, "SEO title cannot exceed 60 characters").optional(),
-  seoDescription: z.string().max(160, "SEO description cannot exceed 160 characters").optional(),
-  scheduledAt: z
-    .string()
-    .transform((str) => new Date(str))
-    .optional(),
 })
 
 export async function GET(request: NextRequest) {
@@ -118,9 +109,17 @@ export async function POST(request: NextRequest) {
 
     await connectDB()
 
+    // Calculate read time based on content
+    const wordsPerMinute = 200
+    const wordCount = blogData.content.split(' ').length
+    const readTime = Math.ceil(wordCount / wordsPerMinute)
+
     const blog = await Blog.create({
       ...blogData,
       authorId: session.user.id,
+      authorName: session.user.name,
+      authorEmail: session.user.email,
+      readTime: `${readTime} min read`,
     })
 
     const populatedBlog = await Blog.findById(blog._id).populate("authorId", "name email")

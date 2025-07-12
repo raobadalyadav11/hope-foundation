@@ -21,30 +21,47 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user stats
-    const donations = await Donation.find({ userId: session.user.id, status: "completed" })
-    const totalDonated = donations.reduce((sum, donation) => sum + donation.amount, 0)
+    const donations = await Donation.find({ donorId: session.user.id, status: "completed" })
+    const totalDonations = donations.reduce((sum, donation) => sum + donation.amount, 0)
     const campaignsSupported = new Set(donations.map((d) => d.campaignId?.toString()).filter(Boolean)).size
 
     const profile = {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      address: user.address,
-      bio: user.bio,
-      avatar: user.avatar,
-      role: user.role,
-      joinedAt: user.createdAt,
-      stats: {
-        totalDonated,
-        donationCount: donations.length,
-        campaignsSupported,
-        volunteerHours: user.volunteerHours || 0,
+      personal: {
+        name: user.name,
+        email: user.email,
+        phone: user.phone || "",
+        dateOfBirth: user.dateOfBirth || "",
+        gender: user.gender || "prefer-not-to-say",
+        address: user.address || "",
+        bio: user.bio || "",
+        avatar: user.profileImage || "",
       },
       preferences: {
         emailNotifications: user.preferences?.emailNotifications ?? true,
         smsNotifications: user.preferences?.smsNotifications ?? false,
         newsletter: user.preferences?.newsletter ?? true,
+        donationReminders: user.preferences?.donationReminders ?? true,
+        eventUpdates: user.preferences?.eventUpdates ?? true,
+        campaignUpdates: user.preferences?.campaignUpdates ?? true,
+        language: user.preferences?.language || "en",
+        timezone: user.preferences?.timezone || "Asia/Kolkata",
+        currency: user.preferences?.currency || "INR",
+      },
+      privacy: {
+        profileVisibility: user.privacy?.profileVisibility || "public",
+        showDonations: user.privacy?.showDonations ?? false,
+        showVolunteerHours: user.privacy?.showVolunteerHours ?? true,
+        allowMessages: user.privacy?.allowMessages ?? true,
+        showEmail: user.privacy?.showEmail ?? false,
+        showPhone: user.privacy?.showPhone ?? false,
+      },
+      stats: {
+        totalDonations,
+        donationCount: donations.length,
+        volunteerHours: 0,
+        campaignsSupported,
+        eventsAttended: 0,
+        memberSince: user.createdAt,
       },
     }
 
@@ -63,18 +80,30 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const updates = await request.json()
+    const { section, data } = await request.json()
     await connectDB()
+
+    let updateFields = {}
+    
+    if (section === "personal") {
+      updateFields = {
+        name: data.name,
+        phone: data.phone,
+        address: data.address,
+        dateOfBirth: data.dateOfBirth,
+        gender: data.gender,
+        bio: data.bio,
+        profileImage: data.avatar,
+      }
+    } else if (section === "preferences") {
+      updateFields = { preferences: data }
+    } else if (section === "privacy") {
+      updateFields = { privacy: data }
+    }
 
     const user = await User.findByIdAndUpdate(
       session.user.id,
-      {
-        name: updates.name,
-        phone: updates.phone,
-        address: updates.address,
-        bio: updates.bio,
-        preferences: updates.preferences,
-      },
+      updateFields,
       { new: true },
     ).select("-password")
 

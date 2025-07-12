@@ -4,41 +4,32 @@ import connectDB from "@/lib/mongodb"
 import Blog from "@/lib/models/Blog"
 import { authOptions } from "@/lib/auth"
 
-export async function POST(request: NextRequest, { params }: { params: { slug: string } }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { slug: string } }
+) {
   try {
     const session = await getServerSession(authOptions)
-
+    
     if (!session) {
-      return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     await connectDB()
 
-    const blog = await Blog.findOne({ slug: params.slug })
-
+    const blog = await Blog.findOne({ slug: params.slug, status: "published" })
+    
     if (!blog) {
       return NextResponse.json({ error: "Blog not found" }, { status: 404 })
     }
 
-    const userId = session.user.id
-    const isLiked = blog.likes.includes(userId)
+    // For now, just increment likes count
+    // In a full implementation, you'd track individual user likes
+    await Blog.findByIdAndUpdate(blog._id, { $inc: { likes: 1 } })
 
-    if (isLiked) {
-      // Unlike
-      blog.likes = blog.likes.filter((id: string) => id !== userId)
-    } else {
-      // Like
-      blog.likes.push(userId)
-    }
-
-    await blog.save()
-
-    return NextResponse.json({
-      liked: !isLiked,
-      likesCount: blog.likes.length,
-    })
+    return NextResponse.json({ message: "Blog liked successfully" })
   } catch (error) {
-    console.error("Error toggling like:", error)
+    console.error("Error liking blog:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
