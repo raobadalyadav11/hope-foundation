@@ -3,6 +3,7 @@ import mongoose from "mongoose"
 export interface IDonation extends mongoose.Document {
   donorId: mongoose.Types.ObjectId
   campaignId?: mongoose.Types.ObjectId
+  cause?: string
   amount: number
   currency: string
   orderId: string
@@ -36,6 +37,10 @@ const donationSchema = new mongoose.Schema(
     campaignId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Campaign",
+    },
+    cause: {
+      type: String,
+      enum: ["education", "healthcare", "community", "emergency"],
     },
     amount: {
       type: Number,

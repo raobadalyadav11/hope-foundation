@@ -6,6 +6,7 @@ import Campaign from "@/lib/models/Campaign"
 import { authOptions } from "@/lib/auth"
 import razorpay from "@/lib/razorpay"
 import { z } from "zod"
+import { Types } from "mongoose"
 
 const orderSchema = z.object({
   amount: z.number().min(1, "Amount must be greater than 0"),
@@ -34,14 +35,20 @@ export async function POST(request: NextRequest) {
 
     // Validate campaign if provided
     if (campaignId) {
-      const campaign = await Campaign.findById(campaignId)
-      if (!campaign || !campaign.isActive || campaign.status !== "active") {
-        return NextResponse.json({ error: "Campaign not found or not active" }, { status: 400 })
-      }
+      // Check if campaignId is a valid ObjectId
+      if (!Types.ObjectId.isValid(campaignId)) {
+        // If not a valid ObjectId, treat as cause category (skip campaign validation)
+        console.log(`Campaign ID "${campaignId}" is not a valid ObjectId, treating as cause category`)
+      } else {
+        const campaign = await Campaign.findById(campaignId)
+        if (!campaign || !campaign.isActive || campaign.status !== "active") {
+          return NextResponse.json({ error: "Campaign not found or not active" }, { status: 400 })
+        }
 
-      // Check if campaign has ended
-      if (new Date(campaign.endDate) < new Date()) {
-        return NextResponse.json({ error: "Campaign has ended" }, { status: 400 })
+        // Check if campaign has ended
+        if (new Date(campaign.endDate) < new Date()) {
+          return NextResponse.json({ error: "Campaign has ended" }, { status: 400 })
+        }
       }
     }
 
@@ -49,7 +56,7 @@ export async function POST(request: NextRequest) {
     const options = {
       amount: amount * 100, // Convert to paise
       currency: "INR",
-      receipt: `receipt_${Date.now()}_${session.user.id}`,
+      receipt: `rcpt_${Date.now().toString().slice(-8)}`,
       notes: {
         donorId: session.user.id,
         campaignId: campaignId || "",
@@ -63,7 +70,8 @@ export async function POST(request: NextRequest) {
     // Save donation record
     const donation = await Donation.create({
       donorId: session.user.id,
-      campaignId: campaignId || undefined,
+      campaignId: (campaignId && Types.ObjectId.isValid(campaignId)) ? campaignId : undefined,
+      cause: (campaignId && !Types.ObjectId.isValid(campaignId)) ? campaignId : undefined,
       amount,
       orderId: order.id,
       donorName,

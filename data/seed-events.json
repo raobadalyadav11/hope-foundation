@@ -1,0 +1,257 @@
+[
+  {
+    "title": "Annual Fundraising Gala 2024",
+    "description": "Join us for an evening of inspiration, entertainment, and fundraising to support our ongoing campaigns and initiatives.",
+    "longDescription": "Our Annual Fundraising Gala is the highlight of our year, bringing together donors, volunteers, beneficiaries, and supporters for an unforgettable evening. This year's theme is 'Hope in Action' and will feature inspiring stories from our beneficiaries, cultural performances, a silent auction, and keynote speeches from renowned social activists. All proceeds will go directly to our active campaigns including Clean Water, Education for Every Child, and Women Empowerment initiatives.",
+    "date": "2024-12-15T18:00:00.000Z",
+    "endDate": "2024-12-15T22:00:00.000Z",
+    "location": "Grand Ballroom, Hotel Taj Palace",
+    "address": "Sardar Patel Marg, Diplomatic Enclave, New Delhi, 110021",
+    "coordinates": {
+      "latitude": 28.5975,
+      "longitude": 77.1825
+    },
+    "maxAttendees": 500,
+    "currentAttendees": 0,
+    "attendees": [],
+    "image": "/placeholder.jpg",
+    "gallery": ["/placeholder.jpg", "/placeholder.png"],
+    "category": "fundraiser",
+    "tags": ["fundraising", "gala", "annual event", "networking"],
+    "isActive": true,
+    "status": "upcoming",
+    "isFree": false,
+    "ticketPrice": 5000,
+    "requirements": ["Formal attire required", "Valid ID for entry", "Advance registration mandatory"],
+    "agenda": [
+      {
+        "time": "6:00 PM",
+        "activity": "Registration and Welcome Drinks",
+        "speaker": ""
+      },
+      {
+        "time": "7:00 PM",
+        "activity": "Opening Ceremony and Welcome Address",
+        "speaker": "Dr. Rajesh Gupta, Founder"
+      },
+      {
+        "time": "7:30 PM",
+        "activity": "Impact Stories Presentation",
+        "speaker": "Beneficiaries"
+      },
+      {
+        "time": "8:00 PM",
+        "activity": "Dinner and Cultural Program",
+        "speaker": "Local Artists"
+      },
+      {
+        "time": "9:00 PM",
+        "activity": "Silent Auction and Fundraising",
+        "speaker": ""
+      },
+      {
+        "time": "10:00 PM",
+        "activity": "Closing Remarks and Vote of Thanks",
+        "speaker": "Board Members"
+      }
+    ],
+    "contactPerson": {
+      "name": "Priya Sharma",
+      "email": "events@hopefoundation.org",
+      "phone": "+91-9876543210"
+    }
+  },
+  {
+    "title": "Community Health Camp - Gurgaon",
+    "description": "Free health checkups, vaccinations, and health awareness sessions for the local community.",
+    "longDescription": "Our monthly community health camps provide free medical services to underserved populations. This camp will offer general health checkups, blood pressure and diabetes screening, eye examinations, dental checkups, and vaccinations for children. We'll also conduct health awareness sessions on topics like nutrition, hygiene, and preventive healthcare. Our team of qualified doctors, nurses, and volunteers will ensure quality care for all attendees.",
+    "date": "2024-11-25T09:00:00.000Z",
+    "endDate": "2024-11-25T16:00:00.000Z",
+    "location": "Community Center, Sector 14",
+    "address": "Sector 14, Gurgaon, Haryana, 122001",
+    "coordinates": {
+      "latitude": 28.4595,
+      "longitude": 77.0266
+    },
+    "maxAttendees": 300,
+    "currentAttendees": 0,
+    "attendees": [],
+    "image": "/placeholder.png",
+    "gallery": ["/placeholder.png"],
+    "category": "community-service",
+    "tags": ["health camp", "free checkup", "community service", "healthcare"],
+    "isActive": true,
+    "status": "upcoming",
+    "isFree": true,
+    "requirements": ["Bring valid ID", "Fasting for blood tests (optional)", "Bring previous medical reports if any"],
+    "agenda": [
+      {
+        "time": "9:00 AM",
+        "activity": "Registration and Initial Screening",
+        "speaker": "Nursing Staff"
+      },
+      {
+        "time": "10:00 AM",
+        "activity": "General Health Checkups",
+        "speaker": "Dr. Amit Verma"
+      },
+      {
+        "time": "11:00 AM",
+        "activity": "Specialized Consultations",
+        "speaker": "Specialist Doctors"
+      },
+      {
+        "time": "12:00 PM",
+        "activity": "Health Awareness Session",
+        "speaker": "Dr. Sunita Rao"
+      },
+      {
+        "time": "2:00 PM",
+        "activity": "Vaccination Drive for Children",
+        "speaker": "Pediatric Team"
+      },
+      {
+        "time": "3:00 PM",
+        "activity": "Distribution of Medicines",
+        "speaker": "Pharmacy Team"
+      }
+    ],
+    "contactPerson": {
+      "name": "Dr. Kavitha Reddy",
+      "email": "health@hopefoundation.org",
+      "phone": "+91-9876543211"
+    }
+  },
+  {
+    "title": "Volunteer Training Workshop",
+    "description": "Comprehensive training session for new volunteers covering our programs, methodologies, and field work preparation.",
+    "longDescription": "This intensive training workshop is designed for new volunteers who want to actively participate in our field programs. The session will cover our organizational mission and values, detailed overview of all our programs, field work methodologies, safety protocols, and hands-on training modules. Participants will learn about community engagement, data collection, report writing, and emergency procedures. The workshop includes interactive sessions, case studies, and practical exercises to prepare volunteers for effective field work.",
+    "date": "2024-11-30T10:00:00.000Z",
+    "endDate": "2024-11-30T17:00:00.000Z",
+    "location": "Hope Foundation Training Center",
+    "address": "Block A, Sector 18, Noida, Uttar Pradesh, 201301",
+    "coordinates": {
+      "latitude": 28.5706,
+      "longitude": 77.3272
+    },
+    "maxAttendees": 50,
+    "currentAttendees": 0,
+    "attendees": [],
+    "image": "/placeholder.jpg",
+    "gallery": ["/placeholder.jpg"],
+    "category": "training",
+    "tags": ["volunteer training", "capacity building", "workshop", "orientation"],
+    "isActive": true,
+    "status": "upcoming",
+    "isFree": true,
+    "requirements": ["Laptop/notebook for taking notes", "Comfortable clothing", "Lunch will be provided"],
+    "agenda": [
+      {
+        "time": "10:00 AM",
+        "activity": "Welcome and Introduction",
+        "speaker": "Volunteer Coordinator"
+      },
+      {
+        "time": "10:30 AM",
+        "activity": "Organization Overview and Mission",
+        "speaker": "Dr. Rajesh Gupta"
+      },
+      {
+        "time": "11:30 AM",
+        "activity": "Program Deep Dive - Education & Healthcare",
+        "speaker": "Program Managers"
+      },
+      {
+        "time": "1:00 PM",
+        "activity": "Lunch Break",
+        "speaker": ""
+      },
+      {
+        "time": "2:00 PM",
+        "activity": "Field Work Methodologies",
+        "speaker": "Field Coordinators"
+      },
+      {
+        "time": "3:30 PM",
+        "activity": "Safety Protocols and Emergency Procedures",
+        "speaker": "Safety Officer"
+      },
+      {
+        "time": "4:30 PM",
+        "activity": "Hands-on Training and Role Play",
+        "speaker": "Training Team"
+      },
+      {
+        "time": "5:00 PM",
+        "activity": "Q&A and Certification",
+        "speaker": "All Staff"
+      }
+    ],
+    "contactPerson": {
+      "name": "Rajesh Kumar",
+      "email": "volunteers@hopefoundation.org",
+      "phone": "+91-9876543212"
+    }
+  },
+  {
+    "title": "Environmental Awareness Drive",
+    "description": "Tree plantation drive and environmental awareness campaign in partnership with local schools and communities.",
+    "longDescription": "Join us for a day dedicated to environmental conservation and awareness. This event combines a tree plantation drive with educational sessions about climate change, sustainable living, and environmental protection. We'll plant native trees in designated areas, conduct workshops for students and community members, and distribute eco-friendly materials. The event aims to create environmental consciousness and encourage sustainable practices in daily life.",
+    "date": "2024-12-05T08:00:00.000Z",
+    "endDate": "2024-12-05T14:00:00.000Z",
+    "location": "Central Park, Connaught Place",
+    "address": "Connaught Place, New Delhi, 110001",
+    "coordinates": {
+      "latitude": 28.6315,
+      "longitude": 77.2167
+    },
+    "maxAttendees": 200,
+    "currentAttendees": 0,
+    "attendees": [],
+    "image": "/placeholder.png",
+    "gallery": ["/placeholder.png", "/placeholder.jpg"],
+    "category": "awareness",
+    "tags": ["environment", "tree plantation", "awareness", "sustainability"],
+    "isActive": true,
+    "status": "upcoming",
+    "isFree": true,
+    "requirements": ["Wear comfortable clothes and closed shoes", "Bring water bottle", "Gloves will be provided"],
+    "agenda": [
+      {
+        "time": "8:00 AM",
+        "activity": "Registration and Welcome",
+        "speaker": "Event Coordinators"
+      },
+      {
+        "time": "8:30 AM",
+        "activity": "Environmental Awareness Session",
+        "speaker": "Dr. Green Sharma"
+      },
+      {
+        "time": "9:30 AM",
+        "activity": "Tree Plantation Drive Begins",
+        "speaker": "Forestry Expert"
+      },
+      {
+        "time": "11:00 AM",
+        "activity": "Student Workshop on Sustainability",
+        "speaker": "Environmental Educator"
+      },
+      {
+        "time": "12:00 PM",
+        "activity": "Community Pledge for Environment",
+        "speaker": "Community Leaders"
+      },
+      {
+        "time": "1:00 PM",
+        "activity": "Closing Ceremony and Group Photo",
+        "speaker": "All Participants"
+      }
+    ],
+    "contactPerson": {
+      "name": "Meera Patel",
+      "email": "environment@hopefoundation.org",
+      "phone": "+91-9876543213"
+    }
+  }
+]
