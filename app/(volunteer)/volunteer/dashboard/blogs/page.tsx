@@ -16,6 +16,7 @@ import Link from "next/link"
 
 interface Blog {
   _id: string
+  slug:string
   title: string
   excerpt: string
   status: string
@@ -349,7 +350,7 @@ export default function VolunteerBlogsPage() {
                       )}
                       {blog.status === "published" && (
                         <Button variant="outline" size="sm" asChild>
-                          <Link href={`/blog/${blog._id}`}>
+                          <Link href={`/blog/${blog.slug}`}>
                             <Eye className="h-4 w-4" />
                           </Link>
                         </Button>
