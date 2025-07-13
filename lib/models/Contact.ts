@@ -6,6 +6,7 @@ export interface IContact extends mongoose.Document {
   phone?: string
   subject: string
   message: string
+  inquiryType: "general" | "volunteer" | "donation" | "partnership" | "media" | "support"
   status: "new" | "in-progress" | "resolved" | "closed"
   priority: "low" | "medium" | "high" | "urgent"
   assignedTo?: mongoose.Types.ObjectId
@@ -50,6 +51,11 @@ const contactSchema = new mongoose.Schema(
       trim: true,
       maxlength: [2000, "Message cannot exceed 2000 characters"],
     },
+    inquiryType: {
+      type: String,
+      enum: ["general", "volunteer", "donation", "partnership", "media", "support"],
+      default: "general",
+    },
     status: {
       type: String,
       enum: ["new", "in-progress", "resolved", "closed"],
@@ -89,5 +95,7 @@ const contactSchema = new mongoose.Schema(
 contactSchema.index({ status: 1, priority: -1 })
 contactSchema.index({ assignedTo: 1, status: 1 })
 contactSchema.index({ createdAt: -1 })
+contactSchema.index({ inquiryType: 1 })
+contactSchema.index({ tags: 1 })
 
 export default mongoose.models.Contact || mongoose.model<IContact>("Contact", contactSchema)

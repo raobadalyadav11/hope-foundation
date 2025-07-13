@@ -20,6 +20,7 @@ export default function ContactPage() {
     phone: "",
     subject: "",
     message: "",
+    inquiryType: "general"
   })
   const [isSubmitted, setIsSubmitted] = useState(false)
 
@@ -120,15 +121,36 @@ export default function ContactPage() {
                     </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+91 98765 43210"
-                    />
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="phone">Phone Number</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder="+919876543210"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="inquiryType">Inquiry Type *</Label>
+                      <Select 
+                        value={formData.inquiryType} 
+                        onValueChange={(value) => setFormData({ ...formData, inquiryType: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select inquiry type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="general">General Inquiry</SelectItem>
+                          <SelectItem value="volunteer">Volunteer Opportunities</SelectItem>
+                          <SelectItem value="donation">Donation Questions</SelectItem>
+                          <SelectItem value="partnership">Partnership</SelectItem>
+                          <SelectItem value="media">Media Inquiry</SelectItem>
+                          <SelectItem value="support">Support</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
                   <div>

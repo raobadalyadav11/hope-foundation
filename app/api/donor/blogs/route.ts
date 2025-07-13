@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if user has content creator role
-    if (!session.user.roles?.includes("content_creator")) {
+    if (!session.user.role?.includes("creator")) {
       return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 })
     }
 
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user has content creator role
-    if (!session.user.roles?.includes("content_creator")) {
+    if (!session.user.role?.includes("creator")) {
       return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 })
     }
 

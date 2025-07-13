@@ -80,152 +80,70 @@ interface Stats {
 }
 
 export default function HomePage() {
-  const { data: campaigns, isLoading: campaignsLoading } = useQuery({
+  const { data: campaignsData, isLoading: campaignsLoading } = useQuery({
     queryKey: ["campaigns", "featured"],
     queryFn: async () => {
-      return [
-        {
-          _id: "1",
-          title: "Clean Water for Rural Communities",
-          description: "Providing access to clean drinking water for remote villages in need of sustainable solutions.",
-          goal: 500000,
-          raised: 325000,
-          image: "/placeholder.svg?height=300&width=400",
-          category: "Water & Sanitation",
-          progressPercentage: 65,
-          daysLeft: 45,
-          isExpired: false,
-          location: "Rural Maharashtra",
-          beneficiaries: 2500,
-        },
-        {
-          _id: "2",
-          title: "Education for Underprivileged Children",
-          description: "Supporting quality education and school supplies for children in underserved communities.",
-          goal: 300000,
-          raised: 180000,
-          image: "/placeholder.svg?height=300&width=400",
-          category: "Education",
-          progressPercentage: 60,
-          daysLeft: 30,
-          isExpired: false,
-          location: "Urban Slums, Delhi",
-          beneficiaries: 500,
-        },
-        {
-          _id: "3",
-          title: "Healthcare Access Initiative",
-          description: "Mobile healthcare units bringing essential medical care to remote and underserved areas.",
-          goal: 750000,
-          raised: 450000,
-          image: "/placeholder.svg?height=300&width=400",
-          category: "Healthcare",
-          progressPercentage: 60,
-          daysLeft: 60,
-          isExpired: false,
-          location: "Tribal Areas, Odisha",
-          beneficiaries: 5000,
-        },
-      ] as Campaign[]
+      const response = await fetch("/api/campaigns?featured=true&limit=3&status=active")
+      if (!response.ok) throw new Error("Failed to fetch featured campaigns")
+      return response.json()
     },
   })
+  
+  const campaigns = campaignsData?.campaigns || []
 
-  const { data: events, isLoading: eventsLoading } = useQuery({
+  const { data: eventsData, isLoading: eventsLoading } = useQuery({
     queryKey: ["events", "upcoming"],
     queryFn: async () => {
-      return [
-        {
-          _id: "1",
-          title: "Annual Charity Marathon",
-          description: "Join us for our annual charity marathon to raise funds for education initiatives.",
-          date: "2024-03-15T09:00:00Z",
-          location: "Mumbai Marine Drive",
-          image: "/placeholder.svg?height=200&width=300",
-          category: "Fundraising",
-          currentAttendees: 250,
-          maxAttendees: 500,
-          isFree: false,
-          ticketPrice: 500,
-        },
-        {
-          _id: "2",
-          title: "Community Health Camp",
-          description: "Free health checkups and medical consultations for the entire community.",
-          date: "2024-03-20T08:00:00Z",
-          location: "Community Center, Pune",
-          image: "/placeholder.svg?height=200&width=300",
-          category: "Healthcare",
-          currentAttendees: 150,
-          maxAttendees: 300,
-          isFree: true,
-        },
-        {
-          _id: "3",
-          title: "Volunteer Training Workshop",
-          description: "Comprehensive training session for new volunteers joining our programs.",
-          date: "2024-03-25T10:00:00Z",
-          location: "Hope Foundation Office",
-          image: "/placeholder.svg?height=200&width=300",
-          category: "Training",
-          currentAttendees: 45,
-          maxAttendees: 50,
-          isFree: true,
-        },
-      ] as Event[]
+      const params = new URLSearchParams({
+        upcoming: "true",
+        limit: "3"
+      })
+      const response = await fetch(`/api/events?${params}`)
+      if (!response.ok) throw new Error("Failed to fetch upcoming events")
+      return response.json()
     },
   })
+  
+  const events = eventsData?.events || []
 
-  const { data: blogs, isLoading: blogsLoading } = useQuery({
+  const { data: blogsData, isLoading: blogsLoading } = useQuery({
     queryKey: ["blogs", "recent"],
     queryFn: async () => {
-      return [
-        {
-          _id: "1",
-          title: "Impact Story: How Clean Water Changed a Village",
-          excerpt: "Discover how our water project transformed the lives of 1,000 villagers in rural Maharashtra.",
-          image: "/placeholder.png?height=200&width=300",
-          author: {
-            name: "Priya Sharma",
-            image: "/placeholder.svg?height=40&width=40",
-          },
-          publishedAt: "2024-02-15T10:00:00Z",
-          readTime: 5,
-          category: "Impact Stories",
-        },
-        {
-          _id: "2",
-          title: "Building Schools in Remote Areas: Our Journey",
-          excerpt:
-            "Learn about our education initiative and how we're bringing quality education to remote communities.",
-          image: "/placeholder.svg?height=200&width=300",
-          author: {
-            name: "Rajesh Kumar",
-            image: "/placeholder.svg?height=40&width=40",
-          },
-          publishedAt: "2024-02-10T14:30:00Z",
-          readTime: 7,
-          category: "Education",
-        },
-        {
-          _id: "3",
-          title: "Volunteer Spotlight: Meet Our Amazing Team",
-          excerpt: "Get to know the dedicated volunteers who make our work possible and hear their inspiring stories.",
-          image: "/placeholder.svg?height=200&width=300",
-          author: {
-            name: "Anita Desai",
-            image: "/placeholder.svg?height=40&width=40",
-          },
-          publishedAt: "2024-02-05T16:00:00Z",
-          readTime: 4,
-          category: "Volunteers",
-        },
-      ] as BlogPost[]
+      const params = new URLSearchParams({
+        status: "published",
+        limit: "3",
+        sort: "publishedAt",
+        order: "desc"
+      })
+      const response = await fetch(`/api/blogs?${params}`)
+      if (!response.ok) throw new Error("Failed to fetch recent blogs")
+      return response.json()
     },
   })
+  
+  const blogs = blogsData?.blogs?.map((blog: any) => ({
+    ...blog,
+    image: blog.featuredImage,
+    author: {
+      name: blog.authorName,
+      image: blog.authorId?.profileImage || "/placeholder-user.jpg"
+    },
+    readTime: blog.readTime || "5 min read"
+  })) || []
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["stats"],
     queryFn: async () => {
+      try {
+        const response = await fetch("/api/stats")
+        if (response.ok) {
+          return await response.json()
+        }
+      } catch (error) {
+        console.error("Error fetching stats:", error)
+      }
+      
+      // Fallback stats if API fails
       return {
         totalDonations: 5000000,
         totalVolunteers: 2500,
@@ -771,7 +689,7 @@ export default function HomePage() {
                       className="w-full group-hover:bg-blue-50 h-auto py-3 rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-300"
                       asChild
                     >
-                      <Link href={`/blog/${blog._id}`}>Read More</Link>
+                      <Link href={`/blog/${blog.slug}`}>Read More</Link>
                     </Button>
                   </CardContent>
                 </Card>

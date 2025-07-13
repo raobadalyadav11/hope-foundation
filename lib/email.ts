@@ -1,14 +1,31 @@
 import nodemailer from "nodemailer"
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number.parseInt(process.env.SMTP_PORT || "465"),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-})
+// Create a transporter based on environment
+let transporter: nodemailer.Transporter
+
+if (process.env.NODE_ENV === "production" && process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+  // Production transporter with real SMTP
+  transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number.parseInt(process.env.SMTP_PORT || "465"),
+    secure: process.env.SMTP_SECURE === "true",
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  })
+} else {
+  // Development transporter that logs emails instead of sending
+  transporter = {
+    sendMail: async (mailOptions: any) => {
+      console.log("📧 Email would be sent in production:")
+      console.log("To:", mailOptions.to)
+      console.log("Subject:", mailOptions.subject)
+      console.log("Content:", mailOptions.html ? "[HTML Content]" : mailOptions.text)
+      return { messageId: `mock_${Date.now()}` }
+    },
+  } as any
+}
 
 export async function sendVolunteerWelcome(volunteer: any, user: any) {
   const mailOptions = {

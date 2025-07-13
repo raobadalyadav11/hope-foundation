@@ -10,6 +10,7 @@ const contactSchema = z.object({
   phone: z.string().optional(),
   subject: z.string().min(1, "Subject is required").max(200, "Subject cannot exceed 200 characters"),
   message: z.string().min(1, "Message is required").max(2000, "Message cannot exceed 2000 characters"),
+  inquiryType: z.enum(["general", "volunteer", "donation", "partnership", "media", "support"]).default("general"),
 })
 
 export async function POST(request: NextRequest) {
@@ -19,13 +20,30 @@ export async function POST(request: NextRequest) {
 
     await connectDB()
 
+    // Set priority based on inquiry type
+    let priority = "medium";
+    if (contactData.inquiryType === "support" || contactData.inquiryType === "donation") {
+      priority = "high";
+    }
+    
+    // Create tags based on inquiry type
+    const tags = [contactData.inquiryType];
+    
     const contact = await Contact.create({
       ...contactData,
       source: "website",
+      priority,
+      tags,
+      status: "new"
     })
 
     // Send notification to admin
-    await sendContactNotification(contact)
+    try {
+      await sendContactNotification(contact)
+    } catch (emailError) {
+      console.error("Failed to send contact notification email:", emailError)
+      // Continue with the response even if email fails
+    }
 
     return NextResponse.json(
       {

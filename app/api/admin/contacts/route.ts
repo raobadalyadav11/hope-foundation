@@ -3,17 +3,12 @@ import { getServerSession } from "next-auth"
 import connectDB from "@/lib/mongodb"
 import Contact from "@/lib/models/Contact"
 import { authOptions } from "@/lib/auth"
-import { z } from "zod"
-
-const responseSchema = z.object({
-  response: z.string().min(1, "Response is required"),
-})
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !["admin", "creator"].includes(session.user.role)) {
+    if (!session?.user?.id || session.user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -23,10 +18,11 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status") || "all"
     const priority = searchParams.get("priority") || "all"
     const search = searchParams.get("search") || ""
+    const limit = Number.parseInt(searchParams.get("limit") || "20")
     const page = Number.parseInt(searchParams.get("page") || "1")
-    const limit = Number.parseInt(searchParams.get("limit") || "10")
+    const sort = searchParams.get("sort") || "createdAt"
+    const order = searchParams.get("order") || "desc"
 
-    // Build query
     const query: any = {}
 
     if (status !== "all") {
@@ -42,28 +38,23 @@ export async function GET(request: NextRequest) {
         { name: { $regex: search, $options: "i" } },
         { email: { $regex: search, $options: "i" } },
         { subject: { $regex: search, $options: "i" } },
+        { message: { $regex: search, $options: "i" } },
       ]
     }
 
+    const sortOrder = order === "desc" ? -1 : 1
+    const sortObj: any = {}
+    sortObj[sort] = sortOrder
+
     const contacts = await Contact.find(query)
-      .populate("assignedTo", "name email")
-      .populate("respondedBy", "name email")
-      .sort({ priority: -1, createdAt: -1 })
+      .sort(sortObj)
       .limit(limit)
       .skip((page - 1) * limit)
+      .populate("assignedTo", "name email")
+      .populate("respondedBy", "name email")
       .lean()
 
     const total = await Contact.countDocuments(query)
-
-    // Get contact statistics
-    const stats = await Contact.aggregate([
-      {
-        $group: {
-          _id: "$status",
-          count: { $sum: 1 },
-        },
-      },
-    ])
 
     return NextResponse.json({
       contacts,
@@ -73,7 +64,6 @@ export async function GET(request: NextRequest) {
         total,
         pages: Math.ceil(total / limit),
       },
-      stats,
     })
   } catch (error) {
     console.error("Error fetching contacts:", error)

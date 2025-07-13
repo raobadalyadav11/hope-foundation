@@ -199,7 +199,7 @@ export default function AboutPage() {
               </Button>
               <Button
                 size="lg"
-                variant="outline"
+                variant="destructive"
                 className="border-white text-white hover:bg-white hover:text-blue-600 font-semibold"
               >
                 <Link href="/contact">Get in Touch</Link>
@@ -427,15 +427,15 @@ export default function AboutPage() {
             </Button>
             <Button
               size="lg"
-              variant="outline"
+              variant="destructive"
               className="border-white text-white hover:bg-white hover:text-blue-600 font-semibold"
             >
               <Link href="/donate">Make a Donation</Link>
             </Button>
             <Button
               size="lg"
-              variant="outline"
-              className="border-white text-white hover:bg-white hover:text-blue-600 font-semibold"
+              variant="secondary"
+              className="border-white text-white text-blue-600 hover:bg-white hover:text-blue-600 font-semibold"
             >
               <Link href="/contact">Contact Us</Link>
             </Button>
