@@ -33,12 +33,17 @@ export function DonationHistory({ userId }: DonationHistoryProps) {
     }
   }
 
-  const downloadReceipt = async (donationId: string) => {
+  const downloadReceipt = async (donationId: string, isRecurring = false, subscriptionId?: string) => {
     try {
-      const response = await fetch("/api/donations/receipt", {
+      // Use different endpoint for recurring donations
+      const endpoint = isRecurring && subscriptionId 
+        ? "/api/donations/recurring-receipt" 
+        : "/api/donations/receipt"
+      
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ donationId }),
+        body: JSON.stringify(isRecurring && subscriptionId ? { subscriptionId } : { donationId }),
       })
 
       const data = await response.json()
@@ -104,6 +109,14 @@ export function DonationHistory({ userId }: DonationHistoryProps) {
                 key={donation._id}
                 className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between"
               >
+                {/* Add a badge for recurring donations */}
+                {donation.isRecurring && (
+                  <div className="absolute top-2 right-2">
+                    <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">
+                      Recurring
+                    </span>
+                  </div>
+                )}
                 <div className="space-y-1 mb-3 md:mb-0">
                   <div className="font-medium">
                     ₹{donation.amount.toLocaleString()} - {donation.cause ? donation.cause : "General Fund"}
@@ -116,7 +129,15 @@ export function DonationHistory({ userId }: DonationHistoryProps) {
                   )}
                 </div>
                 {donation.status === "completed" && (
-                  <Button size="sm" variant="outline" onClick={() => downloadReceipt(donation._id)}>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => downloadReceipt(
+                      donation._id, 
+                      donation.isRecurring || false, 
+                      donation.subscriptionId
+                    )}
+                  >
                     <Download className="w-4 h-4 mr-2" />
                     Receipt
                   </Button>

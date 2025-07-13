@@ -7,6 +7,7 @@ import { authOptions } from "@/lib/auth"
 import razorpay from "@/lib/razorpay"
 import { z } from "zod"
 import { Types } from "mongoose"
+import { sendRecurringDonationConfirmation } from "@/lib/email"
 
 const subscriptionSchema = z.object({
   amount: z.number().min(100, "Minimum amount is ₹100 for recurring donations"),
@@ -114,6 +115,13 @@ export async function POST(request: NextRequest) {
       failedPayments: 0,
     })
 
+    // Send confirmation email
+    try {
+      await sendRecurringDonationConfirmation(subscriptionRecord)
+    } catch (emailError) {
+      console.error("Error sending subscription confirmation email:", emailError)
+    }
+    
     return NextResponse.json({
       subscriptionId,
       planId,

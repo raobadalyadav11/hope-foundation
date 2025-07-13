@@ -4,6 +4,7 @@ import connectDB from "@/lib/mongodb"
 import Subscription from "@/lib/models/Subscription"
 import Donation from "@/lib/models/Donation"
 import Campaign from "@/lib/models/Campaign"
+import { sendDonationReceipt } from "@/lib/email"
 
 // This webhook handles Razorpay payment events for recurring donations
 export async function POST(request: NextRequest) {
@@ -74,6 +75,13 @@ export async function POST(request: NextRequest) {
               $inc: { raised: payment.amount / 100 },
             })
           }
+          
+          // Send receipt email
+          try {
+            await sendDonationReceipt(donation)
+          } catch (emailError) {
+            console.error("Error sending receipt email:", emailError)
+          }
         }
       }
     } else if (event === "subscription.charged") {
@@ -118,6 +126,13 @@ export async function POST(request: NextRequest) {
           await Campaign.findByIdAndUpdate(subscriptionRecord.campaignId, {
             $inc: { raised: payment.amount / 100 },
           })
+        }
+        
+        // Send receipt email
+        try {
+          await sendDonationReceipt(donation)
+        } catch (emailError) {
+          console.error("Error sending receipt email:", emailError)
         }
       }
     } else if (event === "subscription.cancelled") {

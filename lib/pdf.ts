@@ -12,6 +12,9 @@ import { format } from "date-fns"
  * Generate an HTML receipt for a donation that can be printed as PDF
  */
 export async function generateDonationReceipt(donation: any): Promise<string> {
+  // Check if this is a recurring donation
+  const isRecurring = donation.isRecurring || false
+  const frequency = donation.frequency || ""
   // Format the donation date
   const donationDate = format(
     donation.createdAt || new Date(),
@@ -159,8 +162,14 @@ export async function generateDonationReceipt(donation: any): Promise<string> {
           </div>
           <div class="info-row">
             <div class="info-label">Payment Method:</div>
-            <div class="info-value">${donation.paymentMethod === 'razorpay' ? 'Online Payment (Razorpay)' : donation.paymentMethod}</div>
+            <div class="info-value">${donation.paymentMethod === 'razorpay' ? 'Online Payment (Razorpay)' : donation.paymentMethod}${isRecurring ? ` (${frequency.charAt(0).toUpperCase() + frequency.slice(1)} Recurring)` : ''}</div>
           </div>
+          ${isRecurring && donation.subscriptionId ? `
+          <div class="info-row">
+            <div class="info-label">Subscription ID:</div>
+            <div class="info-value">${donation.subscriptionId}</div>
+          </div>
+          ` : ''}
           <div class="info-row">
             <div class="info-label">Payment ID:</div>
             <div class="info-value">${donation.paymentId || 'N/A'}</div>
