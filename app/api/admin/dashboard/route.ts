@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
     // Format recent activity
     const recentActivity = [
       ...recentDonations.map((donation) => ({
-        id: donation._id.toString(),
+        id: String(donation._id),
         type: "donation" as const,
         title: `Donation of ₹${donation.amount.toLocaleString()}`,
         amount: donation.amount,
@@ -125,21 +125,21 @@ export async function GET(request: NextRequest) {
         timestamp: donation.createdAt,
       })),
       ...recentVolunteers.map((volunteer) => ({
-        id: volunteer._id.toString(),
+        id: String(volunteer._id),
         type: "volunteer" as const,
         title: "New volunteer registered",
         user: volunteer.userId?.name || "Unknown",
         timestamp: volunteer.createdAt,
       })),
       ...recentCampaigns.map((campaign) => ({
-        id: campaign._id.toString(),
+        id: String(campaign._id),
         type: "campaign" as const,
         title: `Campaign created: ${campaign.title}`,
         user: campaign.createdBy?.name || "Unknown",
         timestamp: campaign.createdAt,
       })),
       ...recentEvents.map((event) => ({
-        id: event._id.toString(),
+        id: String(event._id),
         type: "event" as const,
         title: `Event created: ${event.title}`,
         user: event.createdBy?.name || "Unknown",
