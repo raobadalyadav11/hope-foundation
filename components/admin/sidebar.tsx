@@ -7,14 +7,14 @@ import { cn } from "@/lib/utils"
 import { LayoutDashboard, Users, Heart, Calendar, FileText, Settings, BarChart3, CreditCard } from "lucide-react"
 
 const navigation = [
-  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { name: "Campaigns", href: "/admin/campaigns", icon: Heart },
-  { name: "Donations", href: "/admin/donations", icon: CreditCard },
-  { name: "Users", href: "/admin/users", icon: Users },
-  { name: "Events", href: "/admin/events", icon: Calendar },
-  { name: "Blog", href: "/admin/blog", icon: FileText },
-  { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-  { name: "Settings", href: "/admin/settings", icon: Settings },
+  { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+  { name: "Campaigns", href: "/admin/dashboard/campaigns", icon: Heart },
+  { name: "Donations", href: "/admin/dashboard/donations", icon: CreditCard },
+  { name: "Users", href: "/admin/dashboard/users", icon: Users },
+  { name: "Events", href: "/admin/dashboard/events", icon: Calendar },
+  { name: "Blog", href: "/admin/dashboard/blog", icon: FileText },
+  { name: "Analytics", href: "/admin/dashboard/analytics", icon: BarChart3 },
+  { name: "Settings", href: "/admin/dashboard/settings", icon: Settings },
 ]
 
 export function AdminSidebar() {

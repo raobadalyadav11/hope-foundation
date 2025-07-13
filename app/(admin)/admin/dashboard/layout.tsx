@@ -19,7 +19,7 @@ export default function AdminLayout({
   useEffect(() => {
     if (status === "loading") return
 
-    if (!session || !["admin", "creator"].includes(session.user.role)) {
+   if (!session || !session.user?.role || !["admin", "creator"].includes(session.user.role)) {
       router.push("/signin")
     }
   }, [session, status, router])
@@ -32,7 +32,7 @@ export default function AdminLayout({
     )
   }
 
-  if (!session || !["admin", "creator"].includes(session.user.role)) {
+if (!session || !session.user?.role || !["admin", "creator"].includes(session.user.role)) {
     return null
   }
 
