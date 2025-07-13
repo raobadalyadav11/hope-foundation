@@ -15,16 +15,23 @@ export async function GET(request: NextRequest) {
 
     await connectDB()
 
-    // Get user profile
-    const user = await User.findById(session.user.id).select("-password")
+    // Get user profile by email
+    const user = await User.findOne({
+      email: session.user.email
+    }).select("-password")
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    // Get donation statistics
+    // Get donation statistics by email
     const donationStats = await Donation.aggregate([
-      { $match: { donorId: session.user.id, status: "completed" } },
+      { 
+        $match: { 
+          donorEmail: session.user.email,
+          status: "completed" 
+        } 
+      },
       {
         $group: {
           _id: null,
@@ -35,9 +42,9 @@ export async function GET(request: NextRequest) {
       },
     ])
 
-    // Get recent donations
+    // Get recent donations by email
     const recentDonations = await Donation.find({
-      donorId: session.user.id,
+      donorEmail: session.user.email,
       status: "completed",
     })
       .populate("campaignId", "title image")
@@ -45,11 +52,11 @@ export async function GET(request: NextRequest) {
       .limit(5)
       .lean()
 
-    // Get donation history by month
+    // Get donation history by month using email
     const donationHistory = await Donation.aggregate([
       {
         $match: {
-          donorId: session.user.id,
+          donorEmail: session.user.email,
           status: "completed",
           createdAt: { $gte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000) },
         },
@@ -97,8 +104,8 @@ export async function PUT(request: NextRequest) {
 
     await connectDB()
 
-    const updatedUser = await User.findByIdAndUpdate(
-      session.user.id,
+    const updatedUser = await User.findOneAndUpdate(
+      { email: session.user.email },
       {
         name: body.name,
         phone: body.phone,

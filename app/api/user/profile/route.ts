@@ -15,13 +15,20 @@ export async function GET(request: NextRequest) {
 
     await connectDB()
 
-    const user = await User.findById(session.user.id).select("-password")
+    // For OAuth users, use email instead of ID
+    const user = await User.findOne({ 
+      email: session.user.email 
+    }).select("-password")
+    
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    // Get user stats
-    const donations = await Donation.find({ donorId: session.user.id, status: "completed" })
+    // Get user stats by email
+    const donations = await Donation.find({ 
+      donorEmail: session.user.email,
+      status: "completed" 
+    })
     const totalDonations = donations.reduce((sum, donation) => sum + donation.amount, 0)
     const campaignsSupported = new Set(donations.map((d) => d.campaignId?.toString()).filter(Boolean)).size
 
@@ -101,8 +108,9 @@ export async function PUT(request: NextRequest) {
       updateFields = { privacy: data }
     }
 
-    const user = await User.findByIdAndUpdate(
-      session.user.id,
+    // Use email for user lookup
+    const user = await User.findOneAndUpdate(
+      { email: session.user.email },
       updateFields,
       { new: true },
     ).select("-password")
