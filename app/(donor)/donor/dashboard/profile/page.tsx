@@ -172,7 +172,7 @@ export default function DonorProfilePage() {
         <CardContent>
           <div className="flex items-start gap-6">
             <Avatar className="h-24 w-24">
-              <AvatarImage src={profile.user.profileImage || "/placeholder.svg"} />
+              <AvatarImage src={profile.user.profileImage || "/event.png"} />
               <AvatarFallback>
                 <User className="h-12 w-12" />
               </AvatarFallback>
@@ -320,7 +320,7 @@ export default function DonorProfilePage() {
                     <div className="flex items-center gap-3">
                       {donation.campaignId?.image && (
                         <img
-                          src={donation.campaignId.image || "/placeholder.svg"}
+                          src={donation.campaignId.image || "/event.png"}
                           alt={donation.campaignId.title}
                           className="h-10 w-10 rounded object-cover"
                         />

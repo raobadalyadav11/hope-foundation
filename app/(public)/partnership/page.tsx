@@ -89,7 +89,7 @@ export default function PartnershipPage() {
     {
       name: "United Nations Development Programme",
       type: "International Organization",
-      logo: "/placeholder.svg?height=80&width=120",
+      logo: "/event.png?height=80&width=120",
       partnership: "Sustainable Development Goals Implementation",
       since: "2020",
       impact: "Reached 50,000+ beneficiaries",
@@ -97,7 +97,7 @@ export default function PartnershipPage() {
     {
       name: "Ministry of Rural Development",
       type: "Government Agency",
-      logo: "/placeholder.svg?height=80&width=120",
+      logo: "/event.png?height=80&width=120",
       partnership: "Rural Education Initiative",
       since: "2021",
       impact: "Established 25 learning centers",
@@ -105,7 +105,7 @@ export default function PartnershipPage() {
     {
       name: "Mumbai University",
       type: "Educational Institution",
-      logo: "/placeholder.svg?height=80&width=120",
+      logo: "/event.png?height=80&width=120",
       partnership: "Research & Development",
       since: "2022",
       impact: "Published 15 research papers",
@@ -113,7 +113,7 @@ export default function PartnershipPage() {
     {
       name: "Apollo Hospitals",
       type: "Healthcare Partner",
-      logo: "/placeholder.svg?height=80&width=120",
+      logo: "/event.png?height=80&width=120",
       partnership: "Mobile Health Clinics",
       since: "2021",
       impact: "Served 30,000+ patients",
@@ -292,7 +292,7 @@ export default function PartnershipPage() {
                 <CardContent className="p-6">
                   <div className="relative h-20 mb-4">
                     <Image
-                      src={partner.logo || "/placeholder.svg"}
+                      src={partner.logo || "/event.png"}
                       alt={partner.name}
                       fill
                       className="object-contain"

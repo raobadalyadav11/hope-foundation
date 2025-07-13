@@ -147,7 +147,7 @@ export default function CampaignsPage() {
                 >
                   <div className="relative h-64 overflow-hidden">
                     <Image
-                      src={campaign.image || "/placeholder.svg?height=250&width=400"}
+                      src={campaign.image || "/event.png?height=250&width=400"}
                       alt={campaign.title}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -308,7 +308,7 @@ export default function CampaignsPage() {
                   >
                     <div className="relative h-48 overflow-hidden">
                       <Image
-                        src={campaign.image || "/placeholder.svg?height=200&width=400"}
+                        src={campaign.image || "/event.png?height=200&width=400"}
                         alt={campaign.title}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"

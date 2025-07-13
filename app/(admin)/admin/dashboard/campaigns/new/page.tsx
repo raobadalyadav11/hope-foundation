@@ -365,7 +365,7 @@ export default function NewCampaignPage() {
                 {formData.image ? (
                   <div className="relative w-full h-48 rounded-lg overflow-hidden">
                     <Image
-                      src={formData.image || "/placeholder.svg"}
+                      src={formData.image || "/event.png"}
                       alt="Campaign main image"
                       fill
                       className="object-cover"
@@ -409,7 +409,7 @@ export default function NewCampaignPage() {
                   {formData.gallery.map((image, index) => (
                     <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
                       <Image
-                        src={image || "/placeholder.svg"}
+                        src={image || "/event.png"}
                         alt={`Gallery image ${index + 1}`}
                         fill
                         className="object-cover"

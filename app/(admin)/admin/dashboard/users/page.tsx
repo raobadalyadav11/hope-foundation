@@ -226,7 +226,7 @@ export default function AdminUsersPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <Avatar className="h-12 w-12">
-                      <AvatarImage src={user.profileImage || "/placeholder.svg"} alt={user.name} />
+                      <AvatarImage src={user.profileImage || "/event.png"} alt={user.name} />
                       <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
 

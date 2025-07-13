@@ -159,7 +159,7 @@ export default function EventDetailPage() {
               {/* Hero Image */}
               <div className="relative h-96">
                 <Image
-                  src={event.image || "/placeholder.svg?height=400&width=800"}
+                  src={event.image || "/event.png?height=400&width=800"}
                   alt={event.title}
                   fill
                   className="object-cover"

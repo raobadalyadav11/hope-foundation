@@ -215,7 +215,7 @@ export default function BlogEditorPage() {
           <CardContent className="p-6">
             {blog.featuredImage && (
               <img
-                src={blog.featuredImage || "/placeholder.svg"}
+                src={blog.featuredImage || "/event.png"}
                 alt={blog.title}
                 className="w-full h-64 object-cover rounded-lg mb-6"
               />
@@ -344,7 +344,7 @@ export default function BlogEditorPage() {
                 {blog.featuredImage ? (
                   <div className="space-y-4">
                     <img
-                      src={blog.featuredImage || "/placeholder.svg"}
+                      src={blog.featuredImage || "/event.png"}
                       alt="Featured"
                       className="w-full h-32 object-cover rounded-lg"
                     />

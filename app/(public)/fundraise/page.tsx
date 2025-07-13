@@ -74,7 +74,7 @@ export default function FundraisePage() {
       raised: "₹8,50,000",
       goal: "₹10,00,000",
       supporters: 245,
-      image: "/placeholder.svg?height=200&width=300",
+      image: "/event.png?height=200&width=300",
       description: "Building a school in rural Maharashtra",
     },
     {
@@ -83,7 +83,7 @@ export default function FundraisePage() {
       raised: "₹15,75,000",
       goal: "₹20,00,000",
       supporters: 432,
-      image: "/placeholder.svg?height=200&width=300",
+      image: "/event.png?height=200&width=300",
       description: "Supporting cancer treatment for underprivileged patients",
     },
     {
@@ -92,7 +92,7 @@ export default function FundraisePage() {
       raised: "₹25,00,000",
       goal: "₹25,00,000",
       supporters: 678,
-      image: "/placeholder.svg?height=200&width=300",
+      image: "/event.png?height=200&width=300",
       description: "Installing water purification systems in villages",
     },
   ]
@@ -257,7 +257,7 @@ export default function FundraisePage() {
               <Card key={index} className="hover:shadow-lg transition-shadow">
                 <div className="relative h-48">
                   <Image
-                    src={story.image || "/placeholder.svg"}
+                    src={story.image || "/event.png"}
                     alt={story.title}
                     fill
                     className="object-cover rounded-t-lg"

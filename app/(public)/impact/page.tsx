@@ -22,7 +22,7 @@ export default function ImpactPage() {
       description: "Building schools and providing quality education in underserved communities",
       impact: "15,000 children educated",
       progress: 85,
-      image: "/placeholder.svg?height=200&width=300",
+      image: "/event.png?height=200&width=300",
       stats: [
         { label: "Schools Built", value: "45" },
         { label: "Teachers Trained", value: "200+" },
@@ -34,7 +34,7 @@ export default function ImpactPage() {
       description: "Mobile medical units and health centers serving remote areas",
       impact: "25,000 treatments provided",
       progress: 92,
-      image: "/placeholder.svg?height=200&width=300",
+      image: "/event.png?height=200&width=300",
       stats: [
         { label: "Medical Camps", value: "120" },
         { label: "Health Centers", value: "15" },
@@ -46,7 +46,7 @@ export default function ImpactPage() {
       description: "Providing access to clean drinking water and sanitation",
       impact: "8,000 people with clean water access",
       progress: 78,
-      image: "/placeholder.svg?height=200&width=300",
+      image: "/event.png?height=200&width=300",
       stats: [
         { label: "Wells Constructed", value: "25" },
         { label: "Water Purification Systems", value: "40" },
@@ -61,21 +61,21 @@ export default function ImpactPage() {
       location: "Rural Maharashtra",
       story:
         "Thanks to our scholarship program, Priya became the first in her family to attend university. She's now studying to become a teacher.",
-      image: "/placeholder.svg?height=150&width=150",
+      image: "/event.png?height=150&width=150",
       category: "Education",
     },
     {
       name: "Village Health Transformation",
       location: "Remote Rajasthan",
       story: "Our mobile medical unit reduced infant mortality by 60% in this village of 500 families over two years.",
-      image: "/placeholder.svg?height=150&width=150",
+      image: "/event.png?height=150&width=150",
       category: "Healthcare",
     },
     {
       name: "Clean Water Changes Everything",
       location: "Drought-affected Gujarat",
       story: "After installing water purification systems, waterborne diseases dropped by 80% in this community.",
-      image: "/placeholder.svg?height=150&width=150",
+      image: "/event.png?height=150&width=150",
       category: "Water",
     },
   ]
@@ -134,7 +134,7 @@ export default function ImpactPage() {
                 <div className={`grid lg:grid-cols-2 gap-0 ${index % 2 === 1 ? "lg:grid-flow-col-dense" : ""}`}>
                   <div className={`relative h-64 lg:h-auto ${index % 2 === 1 ? "lg:col-start-2" : ""}`}>
                     <Image
-                      src={program.image || "/placeholder.svg"}
+                      src={program.image || "/event.png"}
                       alt={program.title}
                       fill
                       className="object-cover"
@@ -183,7 +183,7 @@ export default function ImpactPage() {
                 <CardHeader className="text-center">
                   <div className="relative w-24 h-24 mx-auto mb-4">
                     <Image
-                      src={story.image || "/placeholder.svg"}
+                      src={story.image || "/event.png"}
                       alt={story.name}
                       fill
                       className="object-cover rounded-full"

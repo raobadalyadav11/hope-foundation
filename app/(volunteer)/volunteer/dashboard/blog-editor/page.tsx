@@ -303,7 +303,7 @@ export default function VolunteerBlogEditorPage() {
               {blogData.featuredImage ? (
                 <div className="space-y-2">
                   <img
-                    src={blogData.featuredImage || "/placeholder.svg"}
+                    src={blogData.featuredImage || "/event.png"}
                     alt="Featured"
                     className="w-full h-32 object-cover rounded-lg"
                   />

@@ -87,28 +87,28 @@ export default function SponsorPage() {
   const currentSponsors = [
     {
       name: "TechCorp Solutions",
-      logo: "/placeholder.svg?height=80&width=120",
+      logo: "/event.png?height=80&width=120",
       tier: "Platinum",
       since: "2022",
       contribution: "Education Technology Program",
     },
     {
       name: "Green Energy Ltd",
-      logo: "/placeholder.svg?height=80&width=120",
+      logo: "/event.png?height=80&width=120",
       tier: "Gold",
       since: "2023",
       contribution: "Renewable Energy Initiative",
     },
     {
       name: "Healthcare Plus",
-      logo: "/placeholder.svg?height=80&width=120",
+      logo: "/event.png?height=80&width=120",
       tier: "Gold",
       since: "2021",
       contribution: "Mobile Health Clinics",
     },
     {
       name: "EduFoundation",
-      logo: "/placeholder.svg?height=80&width=120",
+      logo: "/event.png?height=80&width=120",
       tier: "Silver",
       since: "2023",
       contribution: "Scholarship Program",
@@ -280,7 +280,7 @@ export default function SponsorPage() {
                 <CardContent className="p-6">
                   <div className="relative h-20 mb-4">
                     <Image
-                      src={sponsor.logo || "/placeholder.svg"}
+                      src={sponsor.logo || "/event.png"}
                       alt={sponsor.name}
                       fill
                       className="object-contain"

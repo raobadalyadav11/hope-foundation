@@ -218,7 +218,7 @@ export default function AdminEventsPage() {
                   {/* Event Image */}
                   <div className="relative w-32 h-24 rounded-lg overflow-hidden flex-shrink-0">
                     <Image
-                      src={event.image || "/placeholder.svg?height=96&width=128"}
+                      src={event.image || "/event.png?height=96&width=128"}
                       alt={event.title}
                       fill
                       className="object-cover"

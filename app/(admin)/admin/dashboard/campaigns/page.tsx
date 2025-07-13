@@ -238,7 +238,7 @@ export default function AdminCampaignsPage() {
                   {/* Campaign Image */}
                   <div className="relative w-32 h-24 rounded-lg overflow-hidden flex-shrink-0">
                     <Image
-                      src={campaign.image || "/placeholder.svg?height=96&width=128"}
+                      src={campaign.image || "/event.png?height=96&width=128"}
                       alt={campaign.title}
                       fill
                       className="object-cover"

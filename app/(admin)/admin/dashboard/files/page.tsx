@@ -485,7 +485,7 @@ export default function AdminFilesPage() {
                         <div className="aspect-square relative mb-3 rounded-lg overflow-hidden bg-gray-100">
                           {file.resourceType === "image" ? (
                             <Image
-                              src={file.url || "/placeholder.svg"}
+                              src={file.url || "/event.png"}
                               alt={file.originalName}
                               fill
                               className="object-cover"
@@ -587,7 +587,7 @@ export default function AdminFilesPage() {
                           <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                             {file.resourceType === "image" ? (
                               <Image
-                                src={file.url || "/placeholder.svg"}
+                                src={file.url || "/event.png"}
                                 alt={file.originalName}
                                 width={48}
                                 height={48}

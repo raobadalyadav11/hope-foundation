@@ -149,7 +149,7 @@ export default function EventsPage() {
                 <Card key={event._id} className="overflow-hidden hover:shadow-xl transition-shadow group">
                   <div className="relative h-48 overflow-hidden">
                     <Image
-                      src={event.image || "/placeholder.svg?height=200&width=300"}
+                      src={event.image || "/event.png?height=200&width=300"}
                       alt={event.title}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"

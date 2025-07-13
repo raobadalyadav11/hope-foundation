@@ -370,7 +370,7 @@ export default function AdminBlogPage() {
                     {/* Blog Image */}
                     <div className="relative w-32 h-24 rounded-lg overflow-hidden flex-shrink-0">
                       <Image
-                        src={blog.featuredImage || "/placeholder.svg?height=96&width=128"}
+                        src={blog.featuredImage || "/event.png?height=96&width=128"}
                         alt={blog.title}
                         fill
                         className="object-cover"

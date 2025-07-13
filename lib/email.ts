@@ -13,6 +13,64 @@ const transporter = nodemailer.createTransport({
 })
 
 /**
+ * Generic email sending function
+ */
+export async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
+  try {
+    const info = await transporter.sendMail({
+      from: `"Hope Foundation" <${process.env.EMAIL_FROM || 'noreply@hopefoundation.org'}>`,
+      to,
+      subject,
+      html,
+    })
+    return true
+  } catch (error) {
+    console.error('Error sending email:', error)
+    return false
+  }
+}
+
+/**
+ * Send a donation confirmation email to the donor
+ */
+export async function sendDonationConfirmation(donation: any) {
+  try {
+    // Skip if no email is provided
+    if (!donation.donorEmail) return false
+
+    // Send email
+    const info = await transporter.sendMail({
+      from: `"Hope Foundation" <${process.env.EMAIL_FROM || 'noreply@hopefoundation.org'}>`,
+      to: donation.donorEmail,
+      subject: `Thank You for Your Donation to Hope Foundation`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #2563eb; padding: 20px; text-align: center; color: white;">
+            <h1 style="margin: 0;">Thank You for Your Donation</h1>
+          </div>
+          <div style="padding: 20px; border: 1px solid #ddd; border-top: none;">
+            <p>Dear ${donation.donorName},</p>
+            <p>Thank you for your generous donation to Hope Foundation. Your support helps us create lasting change in communities worldwide.</p>
+            <p>Your donation of ₹${donation.amount.toLocaleString()} has been successfully processed.</p>
+            <p>A receipt has been generated and is available in your donor dashboard. You can also download it directly from the donation confirmation page.</p>
+            <p>If you have any questions about your donation, please contact us at support@hopefoundation.org.</p>
+            <p>With gratitude,<br>Hope Foundation Team</p>
+          </div>
+          <div style="background-color: #f3f4f6; padding: 15px; text-align: center; font-size: 12px; color: #666;">
+            <p>Hope Foundation | 123 Charity Lane, Bangalore, Karnataka - 560001 | +91-9876543210</p>
+          </div>
+        </div>
+      `
+    })
+
+    return true
+  } catch (error) {
+    console.error('Error sending confirmation email:', error)
+    return false
+  }
+}
+
+/**
  * Send a donation receipt email to the donor
  */
 export async function sendDonationReceipt(donation: any) {
@@ -117,6 +175,310 @@ export async function sendRecurringDonationConfirmation(subscription: any) {
     return true
   } catch (error) {
     console.error('Error sending subscription confirmation email:', error)
+    return false
+  }
+}
+
+/**
+ * Send campaign update to donors
+ */
+export async function sendCampaignUpdate(campaign: any, update: any, recipients: string[]) {
+  try {
+    // Send email
+    const info = await transporter.sendMail({
+      from: `"Hope Foundation" <${process.env.EMAIL_FROM || 'noreply@hopefoundation.org'}>`,
+      bcc: recipients, // Use BCC for privacy
+      subject: `Update on Campaign: ${campaign.title}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #2563eb; padding: 20px; text-align: center; color: white;">
+            <h1 style="margin: 0;">Campaign Update</h1>
+          </div>
+          <div style="padding: 20px; border: 1px solid #ddd; border-top: none;">
+            <h2>${update.title}</h2>
+            <p>Dear Supporter,</p>
+            <p>Thank you for your support of our campaign "${campaign.title}". We have an important update to share with you:</p>
+            <div style="margin: 20px 0; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #2563eb;">
+              ${update.content}
+            </div>
+            ${update.image ? `<img src="${update.image}" alt="Update Image" style="max-width: 100%; margin: 15px 0; border-radius: 5px;">` : ''}
+            <p>Your continued support makes our work possible.</p>
+            <p><a href="${process.env.NEXTAUTH_URL}/campaigns/${campaign._id}">View Campaign</a></p>
+            <p>With gratitude,<br>Hope Foundation Team</p>
+          </div>
+          <div style="background-color: #f3f4f6; padding: 15px; text-align: center; font-size: 12px; color: #666;">
+            <p>Hope Foundation | 123 Charity Lane, Bangalore, Karnataka - 560001 | +91-9876543210</p>
+            <p>You're receiving this email because you donated to this campaign.</p>
+          </div>
+        </div>
+      `
+    })
+
+    return true
+  } catch (error) {
+    console.error('Error sending campaign update email:', error)
+    return false
+  }
+}
+
+/**
+ * Send contact form notification to admin
+ */
+export async function sendContactNotification(contact: any) {
+  try {
+    // Send email to admin
+    const info = await transporter.sendMail({
+      from: `"Hope Foundation Website" <${process.env.EMAIL_FROM || 'noreply@hopefoundation.org'}>`,
+      to: process.env.ADMIN_EMAIL || 'admin@hopefoundation.org',
+      subject: `New Contact Form Submission: ${contact.subject}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #2563eb; padding: 20px; text-align: center; color: white;">
+            <h1 style="margin: 0;">New Contact Form Submission</h1>
+          </div>
+          <div style="padding: 20px; border: 1px solid #ddd; border-top: none;">
+            <p><strong>Name:</strong> ${contact.name}</p>
+            <p><strong>Email:</strong> ${contact.email}</p>
+            <p><strong>Phone:</strong> ${contact.phone || 'Not provided'}</p>
+            <p><strong>Subject:</strong> ${contact.subject}</p>
+            <p><strong>Message:</strong></p>
+            <div style="margin: 10px 0; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #2563eb;">
+              ${contact.message}
+            </div>
+            <p><a href="${process.env.NEXTAUTH_URL}/admin/contacts">Manage Contact Submissions</a></p>
+          </div>
+        </div>
+      `
+    })
+
+    return true
+  } catch (error) {
+    console.error('Error sending contact notification email:', error)
+    return false
+  }
+}
+
+/**
+ * Send response to contact form submission
+ */
+export async function sendContactResponse(contact: any, response: string) {
+  try {
+    // Send email
+    const info = await transporter.sendMail({
+      from: `"Hope Foundation" <${process.env.EMAIL_FROM || 'noreply@hopefoundation.org'}>`,
+      to: contact.email,
+      subject: `Re: ${contact.subject}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #2563eb; padding: 20px; text-align: center; color: white;">
+            <h1 style="margin: 0;">Response to Your Inquiry</h1>
+          </div>
+          <div style="padding: 20px; border: 1px solid #ddd; border-top: none;">
+            <p>Dear ${contact.name},</p>
+            <p>Thank you for contacting Hope Foundation. We have received your inquiry regarding "${contact.subject}" and would like to provide the following response:</p>
+            <div style="margin: 20px 0; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #2563eb;">
+              ${response}
+            </div>
+            <p>Your original message:</p>
+            <div style="margin: 10px 0; padding: 15px; background-color: #f5f5f5; color: #666; font-style: italic;">
+              ${contact.message}
+            </div>
+            <p>If you have any further questions, please don't hesitate to contact us.</p>
+            <p>Best regards,<br>Hope Foundation Team</p>
+          </div>
+          <div style="background-color: #f3f4f6; padding: 15px; text-align: center; font-size: 12px; color: #666;">
+            <p>Hope Foundation | 123 Charity Lane, Bangalore, Karnataka - 560001 | +91-9876543210</p>
+          </div>
+        </div>
+      `
+    })
+
+    return true
+  } catch (error) {
+    console.error('Error sending contact response email:', error)
+    return false
+  }
+}
+
+/**
+ * Send event confirmation email
+ */
+export async function sendEventConfirmation(event: any, rsvp: any) {
+  try {
+    // Format date
+    const eventDate = new Date(event.date).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+    
+    const eventTime = new Date(event.date).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+
+    // Send email
+    const info = await transporter.sendMail({
+      from: `"Hope Foundation Events" <${process.env.EMAIL_FROM || 'noreply@hopefoundation.org'}>`,
+      to: rsvp.email,
+      subject: `Your Registration for ${event.title} is Confirmed`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #2563eb; padding: 20px; text-align: center; color: white;">
+            <h1 style="margin: 0;">Event Registration Confirmed</h1>
+          </div>
+          <div style="padding: 20px; border: 1px solid #ddd; border-top: none;">
+            <p>Dear ${rsvp.name},</p>
+            <p>Thank you for registering for our event. Your registration has been confirmed!</p>
+            <div style="margin: 20px 0; padding: 15px; background-color: #f9f9f9; border-radius: 5px;">
+              <h2 style="margin-top: 0;">${event.title}</h2>
+              <p><strong>Date:</strong> ${eventDate}</p>
+              <p><strong>Time:</strong> ${eventTime}</p>
+              <p><strong>Location:</strong> ${event.location}</p>
+              <p><strong>Registration ID:</strong> ${rsvp._id}</p>
+            </div>
+            ${event.image ? `<img src="${event.image}" alt="Event Image" style="max-width: 100%; margin: 15px 0; border-radius: 5px;">` : ''}
+            <p>We look forward to seeing you at the event!</p>
+            <p><a href="${process.env.NEXTAUTH_URL}/events/${event._id}">View Event Details</a></p>
+            <p>Best regards,<br>Hope Foundation Team</p>
+          </div>
+          <div style="background-color: #f3f4f6; padding: 15px; text-align: center; font-size: 12px; color: #666;">
+            <p>Hope Foundation | 123 Charity Lane, Bangalore, Karnataka - 560001 | +91-9876543210</p>
+          </div>
+        </div>
+      `
+    })
+
+    return true
+  } catch (error) {
+    console.error('Error sending event confirmation email:', error)
+    return false
+  }
+}
+
+/**
+ * Send newsletter welcome email
+ */
+export async function sendNewsletterWelcome(email: string, name: string = '') {
+  try {
+    // Send email
+    const info = await transporter.sendMail({
+      from: `"Hope Foundation" <${process.env.EMAIL_FROM || 'noreply@hopefoundation.org'}>`,
+      to: email,
+      subject: `Welcome to Hope Foundation Newsletter`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #2563eb; padding: 20px; text-align: center; color: white;">
+            <h1 style="margin: 0;">Welcome to Our Newsletter</h1>
+          </div>
+          <div style="padding: 20px; border: 1px solid #ddd; border-top: none;">
+            <p>Dear ${name || 'Supporter'},</p>
+            <p>Thank you for subscribing to the Hope Foundation newsletter!</p>
+            <p>You'll now receive regular updates about our:</p>
+            <ul>
+              <li>Latest campaigns and their impact</li>
+              <li>Upcoming events and volunteer opportunities</li>
+              <li>Success stories from the communities we serve</li>
+              <li>Ways you can get involved and make a difference</li>
+            </ul>
+            <p>We're excited to have you join our community of changemakers.</p>
+            <p><a href="${process.env.NEXTAUTH_URL}">Visit Our Website</a></p>
+            <p>Best regards,<br>Hope Foundation Team</p>
+          </div>
+          <div style="background-color: #f3f4f6; padding: 15px; text-align: center; font-size: 12px; color: #666;">
+            <p>Hope Foundation | 123 Charity Lane, Bangalore, Karnataka - 560001 | +91-9876543210</p>
+            <p>You can <a href="${process.env.NEXTAUTH_URL}/newsletter/unsubscribe?email=${encodeURIComponent(email)}">unsubscribe</a> at any time.</p>
+          </div>
+        </div>
+      `
+    })
+
+    return true
+  } catch (error) {
+    console.error('Error sending newsletter welcome email:', error)
+    return false
+  }
+}
+
+/**
+ * Send volunteer welcome email
+ */
+export async function sendVolunteerWelcome(volunteer: any) {
+  try {
+    // Send email
+    const info = await transporter.sendMail({
+      from: `"Hope Foundation Volunteer Program" <${process.env.EMAIL_FROM || 'noreply@hopefoundation.org'}>`,
+      to: volunteer.email,
+      subject: `Thank You for Applying to Volunteer with Hope Foundation`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #2563eb; padding: 20px; text-align: center; color: white;">
+            <h1 style="margin: 0;">Volunteer Application Received</h1>
+          </div>
+          <div style="padding: 20px; border: 1px solid #ddd; border-top: none;">
+            <p>Dear ${volunteer.name},</p>
+            <p>Thank you for your interest in volunteering with Hope Foundation! We have received your application and are excited about your willingness to contribute to our mission.</p>
+            <p>Our team will review your application and get back to you within 5-7 business days. If approved, you'll receive further instructions about orientation and available opportunities.</p>
+            <p>In the meantime, you can learn more about our volunteer program and current initiatives on our website.</p>
+            <p><a href="${process.env.NEXTAUTH_URL}/volunteer">Learn More About Volunteering</a></p>
+            <p>Thank you for your passion to make a difference!</p>
+            <p>Best regards,<br>Hope Foundation Volunteer Team</p>
+          </div>
+          <div style="background-color: #f3f4f6; padding: 15px; text-align: center; font-size: 12px; color: #666;">
+            <p>Hope Foundation | 123 Charity Lane, Bangalore, Karnataka - 560001 | +91-9876543210</p>
+          </div>
+        </div>
+      `
+    })
+
+    return true
+  } catch (error) {
+    console.error('Error sending volunteer welcome email:', error)
+    return false
+  }
+}
+
+/**
+ * Send volunteer approval email
+ */
+export async function sendVolunteerApproval(volunteer: any) {
+  try {
+    // Send email
+    const info = await transporter.sendMail({
+      from: `"Hope Foundation Volunteer Program" <${process.env.EMAIL_FROM || 'noreply@hopefoundation.org'}>`,
+      to: volunteer.email,
+      subject: `Your Volunteer Application Has Been Approved!`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #2563eb; padding: 20px; text-align: center; color: white;">
+            <h1 style="margin: 0;">Application Approved</h1>
+          </div>
+          <div style="padding: 20px; border: 1px solid #ddd; border-top: none;">
+            <p>Dear ${volunteer.name},</p>
+            <p>Congratulations! Your application to volunteer with Hope Foundation has been approved.</p>
+            <p>We're thrilled to welcome you to our volunteer team. Your skills and passion will make a meaningful difference in our work.</p>
+            <p><strong>Next Steps:</strong></p>
+            <ol>
+              <li>Complete your volunteer profile by logging in to our website</li>
+              <li>Sign up for the mandatory orientation session</li>
+              <li>Browse available volunteer opportunities</li>
+            </ol>
+            <p><a href="${process.env.NEXTAUTH_URL}/volunteer/dashboard">Access Your Volunteer Dashboard</a></p>
+            <p>If you have any questions, please contact our volunteer coordinator at volunteer@hopefoundation.org.</p>
+            <p>Welcome to the team!</p>
+            <p>Best regards,<br>Hope Foundation Volunteer Team</p>
+          </div>
+          <div style="background-color: #f3f4f6; padding: 15px; text-align: center; font-size: 12px; color: #666;">
+            <p>Hope Foundation | 123 Charity Lane, Bangalore, Karnataka - 560001 | +91-9876543210</p>
+          </div>
+        </div>
+      `
+    })
+
+    return true
+  } catch (error) {
+    console.error('Error sending volunteer approval email:', error)
     return false
   }
 }

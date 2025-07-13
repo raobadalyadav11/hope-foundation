@@ -74,7 +74,7 @@ export function Navbar() {
               <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors cursor-pointer">
                 <Avatar className="w-8 h-8">
                   <AvatarImage
-                    src={session?.user?.image || "/placeholder.svg"}
+                    src={session?.user?.image || "/event.png"}
                     alt={session?.user?.name || "Profile"}
                   />
                   <AvatarFallback className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
@@ -143,7 +143,7 @@ export function Navbar() {
                     <div className="flex items-center space-x-3 p-4 bg-white/50 rounded-xl">
                       <Avatar className="w-10 h-10">
                         <AvatarImage
-                          src={session?.user?.image || "/placeholder.svg"}
+                          src={session?.user?.image || "/event.png"}
                           alt={session?.user?.name || "Profile"}
                         />
                         <AvatarFallback className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white">

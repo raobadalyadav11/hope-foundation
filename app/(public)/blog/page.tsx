@@ -143,7 +143,7 @@ export default function BlogPage() {
               <div className="grid md:grid-cols-2 gap-0">
                 <div className="relative h-64 md:h-auto">
                   <Image
-                    src={featuredPost.featuredImage || "/placeholder.svg"}
+                    src={featuredPost.featuredImage || "/event.png"}
                     alt={featuredPost.title}
                     fill
                     className="object-cover"
@@ -213,7 +213,7 @@ export default function BlogPage() {
                   <Card key={post._id} className="overflow-hidden hover:shadow-lg transition-shadow">
                     <div className="relative h-48">
                       <Image 
-                        src={post.featuredImage || "/placeholder.svg"} 
+                        src={post.featuredImage || "/event.png"} 
                         alt={post.title} 
                         fill 
                         className="object-cover" 

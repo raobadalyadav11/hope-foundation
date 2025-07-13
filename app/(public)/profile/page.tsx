@@ -107,7 +107,7 @@ export default function ProfilePage() {
         <div className="text-center space-y-4">
           <div className="relative inline-block">
             <Avatar className="h-24 w-24 border-4 border-white shadow-xl">
-              <AvatarImage src={profile.personal?.avatar || "/placeholder.svg"} alt={profile.personal?.name} />
+              <AvatarImage src={profile.personal?.avatar || "/event.png"} alt={profile.personal?.name} />
               <AvatarFallback className="text-2xl bg-gradient-to-br from-blue-500 to-purple-500 text-white">
                 {profile.personal?.name?.charAt(0)?.toUpperCase() || "U"}
               </AvatarFallback>

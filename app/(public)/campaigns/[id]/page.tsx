@@ -252,7 +252,7 @@ export default function CampaignDetailPage() {
       <section className="relative">
         <div className="relative h-96 lg:h-[500px] overflow-hidden">
           <Image
-            src={campaign.gallery?.[selectedImage] || campaign.image || "/placeholder.svg?height=500&width=1200"}
+            src={campaign.gallery?.[selectedImage] || campaign.image || "/event.png?height=500&width=1200"}
             alt={campaign.title}
             fill
             className="object-cover"
@@ -436,7 +436,7 @@ export default function CampaignDetailPage() {
                           {update.image && (
                             <div className="relative h-48 mb-4 rounded-lg overflow-hidden">
                               <Image
-                                src={update.image || "/placeholder.svg"}
+                                src={update.image || "/event.png"}
                                 alt={update.title}
                                 fill
                                 className="object-cover"
@@ -517,7 +517,7 @@ export default function CampaignDetailPage() {
                       {campaign.gallery.map((image, index) => (
                         <div key={index} className="relative h-64 rounded-lg overflow-hidden">
                           <Image
-                            src={image || "/placeholder.svg"}
+                            src={image || "/event.png"}
                             alt={`Campaign image ${index + 1}`}
                             fill
                             className="object-cover hover:scale-105 transition-transform duration-300"
@@ -529,7 +529,7 @@ export default function CampaignDetailPage() {
                     <Card>
                       <CardContent className="text-center py-12">
                         <div className="w-12 h-12 bg-gray-200 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                          <Image src="/placeholder.svg" alt="Placeholder" className="w-6 h-6 text-gray-400" />
+                          <Image src="/event.png" alt="Placeholder" className="w-6 h-6 text-gray-400" />
                         </div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">No Gallery Images</h3>
                         <p className="text-gray-600">More images will be added as the campaign progresses.</p>
@@ -658,7 +658,7 @@ export default function CampaignDetailPage() {
                         <div className="flex gap-3">
                           <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
                             <Image
-                              src={relatedCampaign.image || "/placeholder.svg?height=64&width=64"}
+                              src={relatedCampaign.image || "/event.png?height=64&width=64"}
                               alt={relatedCampaign.title}
                               fill
                               className="object-cover"

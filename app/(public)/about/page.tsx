@@ -11,7 +11,7 @@ const teamMembers = [
   {
     name: "Dr. Sarah Johnson",
     role: "Founder & CEO",
-    image: "/placeholder.svg?height=300&width=300",
+    image: "/event.png?height=300&width=300",
     bio: "With over 15 years in humanitarian work, Dr. Johnson founded Hope Foundation to create sustainable change in underserved communities.",
     education: "PhD in International Development, Harvard University",
     experience: "Former UN Development Programme Director",
@@ -21,7 +21,7 @@ const teamMembers = [
   {
     name: "Michael Chen",
     role: "Director of Operations",
-    image: "/placeholder.svg?height=300&width=300",
+    image: "/event.png?height=300&width=300",
     bio: "Michael brings 12 years of operational excellence from the corporate sector, ensuring our programs run efficiently and effectively.",
     education: "MBA Operations Management, Stanford",
     experience: "Former McKinsey & Company Senior Partner",
@@ -31,7 +31,7 @@ const teamMembers = [
   {
     name: "Dr. Priya Sharma",
     role: "Head of Programs",
-    image: "/placeholder.svg?height=300&width=300",
+    image: "/event.png?height=300&width=300",
     bio: "Dr. Sharma leads our program development and implementation, with expertise in community health and education initiatives.",
     education: "MD Public Health, AIIMS Delhi",
     experience: "Former WHO Regional Health Advisor",
@@ -41,7 +41,7 @@ const teamMembers = [
   {
     name: "James Wilson",
     role: "Technology Director",
-    image: "/placeholder.svg?height=300&width=300",
+    image: "/event.png?height=300&width=300",
     bio: "James oversees our digital transformation initiatives, making our operations more efficient and transparent through technology.",
     education: "MS Computer Science, MIT",
     experience: "Former Google Senior Engineering Manager",
@@ -51,7 +51,7 @@ const teamMembers = [
   {
     name: "Maria Rodriguez",
     role: "Community Outreach Manager",
-    image: "/placeholder.svg?height=300&width=300",
+    image: "/event.png?height=300&width=300",
     bio: "Maria builds bridges between our organization and the communities we serve, ensuring our programs meet real needs.",
     education: "MA Social Work, Columbia University",
     experience: "10+ years in community development",
@@ -61,7 +61,7 @@ const teamMembers = [
   {
     name: "David Kim",
     role: "Finance & Transparency Officer",
-    image: "/placeholder.svg?height=300&width=300",
+    image: "/event.png?height=300&width=300",
     bio: "David ensures complete financial transparency and accountability, managing our resources to maximize impact.",
     education: "CPA, MBA Finance, Wharton",
     experience: "Former Deloitte Senior Manager",
@@ -368,7 +368,7 @@ export default function AboutPage() {
               <Card key={index} className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
                 <div className="relative h-64 overflow-hidden">
                   <Image
-                    src={member.image || "/placeholder.svg"}
+                    src={member.image || "/event.png"}
                     alt={member.name}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"

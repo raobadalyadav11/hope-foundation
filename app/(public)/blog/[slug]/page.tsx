@@ -195,7 +195,7 @@ export default function BlogPostPage() {
               {/* Hero Image */}
               <div className="relative h-96">
                 <Image
-                  src={blog.featuredImage || "/placeholder.svg?height=400&width=800"}
+                  src={blog.featuredImage || "/event.png?height=400&width=800"}
                   alt={blog.title}
                   fill
                   className="object-cover"
@@ -209,7 +209,7 @@ export default function BlogPostPage() {
               <div className="p-8">
                 <div className="flex items-center gap-4 mb-6">
                   <Avatar>
-                    <AvatarImage src={blog.authorId.profileImage || "/placeholder.svg"} />
+                    <AvatarImage src={blog.authorId.profileImage || "/event.png"} />
                     <AvatarFallback>{blog.authorId.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div>
@@ -256,7 +256,7 @@ export default function BlogPostPage() {
                       {blog.gallery.map((image, index) => (
                         <div key={index} className="relative h-64 rounded-lg overflow-hidden">
                           <Image
-                            src={image || "/placeholder.svg"}
+                            src={image || "/event.png"}
                             alt={`Gallery ${index + 1}`}
                             fill
                             className="object-cover"
@@ -329,7 +329,7 @@ export default function BlogPostPage() {
                     .map((comment) => (
                       <div key={comment._id} className="flex gap-4">
                         <Avatar>
-                          <AvatarImage src={comment.userId.profileImage || "/placeholder.svg"} />
+                          <AvatarImage src={comment.userId.profileImage || "/event.png"} />
                           <AvatarFallback>{comment.userId.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
@@ -365,7 +365,7 @@ export default function BlogPostPage() {
               <CardContent>
                 <div className="flex items-center gap-4 mb-4">
                   <Avatar className="w-16 h-16">
-                    <AvatarImage src={blog.authorId.profileImage || "/placeholder.svg"} />
+                    <AvatarImage src={blog.authorId.profileImage || "/event.png"} />
                     <AvatarFallback className="text-lg">{blog.authorId.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div>
@@ -392,7 +392,7 @@ export default function BlogPostPage() {
                         <div className="flex gap-3">
                           <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                             <Image
-                              src={relatedBlog.image || "/placeholder.svg?height=80&width=80"}
+                              src={relatedBlog.image || "/event.png?height=80&width=80"}
                               alt={relatedBlog.title}
                               fill
                               className="object-cover group-hover:scale-105 transition-transform"

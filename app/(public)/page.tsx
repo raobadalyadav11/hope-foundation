@@ -204,7 +204,7 @@ export default function HomePage() {
       role: "Volunteer Coordinator",
       content:
         "Being part of Hope Foundation has been life-changing. The impact we make together is incredible and inspiring.",
-      image: "/placeholder.svg?height=60&width=60",
+      image: "/event.png?height=60&width=60",
       rating: 5,
     },
     {
@@ -212,7 +212,7 @@ export default function HomePage() {
       role: "Monthly Donor",
       content:
         "I love how transparent they are with donations. I can see exactly how my money is being used to help communities.",
-      image: "/placeholder.svg?height=60&width=60",
+      image: "/event.png?height=60&width=60",
       rating: 5,
     },
     {
@@ -220,7 +220,7 @@ export default function HomePage() {
       role: "Community Leader",
       content:
         "The education program changed my community. Now our children have access to quality education and a brighter future.",
-      image: "/placeholder.svg?height=60&width=60",
+      image: "/event.png?height=60&width=60",
       rating: 5,
     },
   ]
@@ -247,7 +247,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 to-indigo-700/90"></div>
-        <div className="absolute inset-0 bg-[url('/placeholder.svg?height=800&width=1200')] bg-cover bg-center opacity-10"></div>
+        <div className="absolute inset-0 bg-[url('/event.png?height=800&width=1200')] bg-cover bg-center opacity-10"></div>
 
         {/* Floating Elements */}
         <div className="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full animate-bounce delay-1000"></div>
@@ -315,7 +315,7 @@ export default function HomePage() {
               <div className="relative z-10">
                 <div className="relative overflow-hidden rounded-3xl">
                   <Image
-                    src="/placeholder.png?height=500&width=600"
+                    src="/event.png?height=500&width=600"
                     alt="NGO Impact"
                     width={600}
                     height={500}
@@ -400,7 +400,7 @@ export default function HomePage() {
               >
                 <div className="relative h-64 overflow-hidden">
                   <Image
-                    src={campaign.image || "/placeholder.svg?height=250&width=400"}
+                    src={campaign.image || "/event.png?height=250&width=400"}
                     alt={campaign.title}
                     fill
                     className="object-cover group-hover:scale-110 transition-transform duration-500"
@@ -561,7 +561,7 @@ export default function HomePage() {
               >
                 <div className="relative h-48">
                   <Image
-                    src={event.image || "/placeholder.svg?height=200&width=400"}
+                    src={event.image || "/event.png?height=200&width=400"}
                     alt={event.title}
                     fill
                     className="object-cover group-hover:scale-110 transition-transform duration-500"
@@ -649,7 +649,7 @@ export default function HomePage() {
                 >
                   <div className="relative h-48">
                     <Image
-                      src={blog.image || "/placeholder.svg?height=200&width=400"}
+                      src={blog.image || "/event.png?height=200&width=400"}
                       alt={blog.title}
                       fill
                       className="object-cover group-hover:scale-110 transition-transform duration-500"
@@ -670,7 +670,7 @@ export default function HomePage() {
                     <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                       <div className="flex items-center gap-2">
                         <Image
-                          src={blog.author.image || "/placeholder.svg?height=24&width=24"}
+                          src={blog.author.image || "/event.png?height=24&width=24"}
                           alt={blog.author.name}
                           width={24}
                           height={24}
@@ -732,7 +732,7 @@ export default function HomePage() {
                   <p className=" mb-6 italic text-lg leading-relaxed">"{testimonial.content}"</p>
                   <div className="flex items-center gap-3">
                     <Image
-                      src={testimonial.image || "/placeholder.svg"}
+                      src={testimonial.image || "/event.png"}
                       alt={testimonial.name}
                       width={48}
                       height={48}
