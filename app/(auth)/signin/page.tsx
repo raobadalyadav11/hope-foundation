@@ -38,8 +38,14 @@ export default function SignInPage() {
       } else {
         const session = await getSession()
         if (session?.user?.role === "admin") {
-          router.push("/admin")
-        } else {
+          router.push("/admin/dashboard")
+        } else if(session?.user?.role==="donor"){
+          router.push("/donor/dashboard")
+        }
+         else if(session?.user?.role==='volunteer'){
+          router.push("/volunteer/dashboard")
+        }
+         else {
           router.push("/")
         }
       }

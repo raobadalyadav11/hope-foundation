@@ -89,9 +89,8 @@ export async function GET(request: NextRequest) {
         lastMonthCampaigns > 0 ? Math.round(((thisMonthCampaigns - lastMonthCampaigns) / lastMonthCampaigns) * 100) : 0,
     }
 
-    // Get recent activity
+    // Get recent activity - skip populating donorId to avoid ObjectId casting issues
     const recentDonations = await Donation.find({ status: "completed" })
-      .populate("donorId", "name")
       .populate("campaignId", "title")
       .sort({ createdAt: -1 })
       .limit(5)

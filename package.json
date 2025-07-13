@@ -5,7 +5,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "seed":"npx tsx scripts/seed.ts",
+    "seed": "npx tsx scripts/seed.ts",
     "lint": "next lint",
     "start": "next start"
   },
@@ -67,7 +67,7 @@
     "react-dom": "^19",
     "react-hook-form": "latest",
     "react-resizable-panels": "latest",
-    "recharts": "latest",
+    "recharts": "^3.1.0",
     "sonner": "latest",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
