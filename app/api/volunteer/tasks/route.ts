@@ -8,17 +8,26 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session) {
-      return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     await connectDB()
 
-    const tasks = await VolunteerTask.find({ volunteerId: session.user.id })
-      .populate("campaignId", "title")
-      .populate("eventId", "title date location")
+    const { searchParams } = new URL(request.url)
+    const status = searchParams.get("status") || "all"
+    const limit = Number.parseInt(searchParams.get("limit") || "10")
+
+    const query: any = { assignedTo: session.user.id }
+    
+    if (status !== "all") {
+      query.status = status
+    }
+
+    const tasks = await VolunteerTask.find(query)
       .populate("assignedBy", "name email")
       .sort({ createdAt: -1 })
+      .limit(limit)
       .lean()
 
     return NextResponse.json({ tasks })

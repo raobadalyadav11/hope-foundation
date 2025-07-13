@@ -36,20 +36,24 @@ export default function EventsPage() {
   const [category, setCategory] = useState("all")
   const [page, setPage] = useState(1)
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["events", search, category, page],
     queryFn: async () => {
       const params = new URLSearchParams({
-        search,
-        category,
+        search: search || "",
+        category: category === "all" ? "" : category,
         page: page.toString(),
         limit: "9",
-        upcoming: "true",
       })
       const response = await fetch(`/api/events?${params}`)
-      if (!response.ok) throw new Error("Failed to fetch events")
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to fetch events")
+      }
       return response.json()
     },
+    retry: 2,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   })
 
   const events = data?.events || []
@@ -72,7 +76,7 @@ export default function EventsPage() {
       <section className="bg-gradient-to-r from-green-600 to-blue-700 text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl font-bold mb-6">Upcoming Events</h1>
+            <h1 className="text-5xl font-bold mb-6">Our Events</h1>
             <p className="text-xl opacity-90">
               Join us at our events and be part of the change you want to see in the world. Connect with like-minded
               individuals and make a real impact.
@@ -113,7 +117,14 @@ export default function EventsPage() {
       {/* Events Grid */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          {isLoading ? (
+          {error ? (
+            <div className="text-center py-12">
+              <Calendar className="h-16 w-16 text-red-400 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Events</h2>
+              <p className="text-gray-600 mb-4">{error.message}</p>
+              <Button onClick={() => window.location.reload()}>Try Again</Button>
+            </div>
+          ) : isLoading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="animate-pulse">

@@ -52,26 +52,35 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create Razorpay order
-    const options = {
-      amount: amount * 100, // Convert to paise
-      currency: "INR",
-      receipt: `rcpt_${Date.now().toString().slice(-8)}`,
-      notes: {
-        donorId: session.user.id,
-        campaignId: campaignId || "",
-        donorName,
-        donorEmail,
-      },
+    // Create Razorpay order or mock for development
+    let order
+    
+    if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+      const options = {
+        amount: amount * 100, // Convert to paise
+        currency: "INR",
+        receipt: `rcpt_${Date.now().toString().slice(-8)}`,
+        notes: {
+          donorId: session.user.id,
+          campaignId: campaignId || "",
+          donorName,
+          donorEmail,
+        },
+      }
+      order = await razorpay.orders.create(options)
+    } else {
+      // Mock order for development
+      order = {
+        id: `order_${Date.now()}`,
+        amount: amount * 100,
+        currency: "INR",
+        status: "created"
+      }
     }
 
-    const order = await razorpay.orders.create(options)
-
     // Save donation record
-    const donation = await Donation.create({
+    const donationData: any = {
       donorId: session.user.id,
-      campaignId: (campaignId && Types.ObjectId.isValid(campaignId)) ? campaignId : undefined,
-      cause: (campaignId && !Types.ObjectId.isValid(campaignId)) ? campaignId : undefined,
       amount,
       orderId: order.id,
       donorName,
@@ -82,14 +91,25 @@ export async function POST(request: NextRequest) {
       message,
       status: "pending",
       paymentMethod: "razorpay",
-    })
+    }
+
+    // Add campaignId if valid ObjectId
+    if (campaignId && Types.ObjectId.isValid(campaignId)) {
+      donationData.campaignId = campaignId
+    }
+    // Add cause if it matches enum values
+    else if (campaignId && ["education", "healthcare", "community", "emergency"].includes(campaignId)) {
+      donationData.cause = campaignId
+    }
+
+    const donation = await Donation.create(donationData)
 
     return NextResponse.json({
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
       donationId: donation._id,
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "mock_key",
     })
   } catch (error) {
     if (error instanceof z.ZodError) {

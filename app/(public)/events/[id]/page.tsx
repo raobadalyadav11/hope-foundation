@@ -3,11 +3,23 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useParams } from "next/navigation"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Calendar, MapPin, Users, Clock, Phone, Mail, User, CheckCircle } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { 
+  Calendar, 
+  MapPin, 
+  Users, 
+  Clock, 
+  ArrowLeft, 
+  CheckCircle,
+  Phone,
+  Mail,
+  User
+} from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -21,11 +33,11 @@ interface Event {
   endDate?: string
   location: string
   address: string
-  image: string
-  gallery: string[]
-  category: string
-  currentAttendees: number
   maxAttendees?: number
+  currentAttendees: number
+  image: string
+  category: string
+  tags: string[]
   isFree: boolean
   ticketPrice?: number
   requirements: string[]
@@ -39,26 +51,41 @@ interface Event {
     email: string
     phone: string
   }
-  attendees: Array<{
-    userId: string
-    status: string
-  }>
   spotsLeft: number | null
   isFull: boolean
   daysUntil: number
+  attendees: Array<{
+    userId: {
+      _id: string
+      name: string
+    }
+    status: string
+    registeredAt: string
+  }>
 }
 
-export default function EventDetailsPage({ params }: { params: { id: string } }) {
+export default function EventDetailPage() {
+  const params = useParams()
   const { data: session } = useSession()
   const queryClient = useQueryClient()
-  const [isRegistering, setIsRegistering] = useState(false)
+  const [isRegistered, setIsRegistered] = useState(false)
 
   const { data: event, isLoading } = useQuery({
     queryKey: ["event", params.id],
-    queryFn: async () => {
+    queryFn: async (): Promise<Event> => {
       const response = await fetch(`/api/events/${params.id}`)
       if (!response.ok) throw new Error("Failed to fetch event")
-      return response.json() as Promise<Event>
+      const data = await response.json()
+      
+      // Check if user is registered
+      if (session) {
+        const registered = data.attendees?.some(
+          (attendee: any) => attendee.userId._id === session.user.id
+        )
+        setIsRegistered(registered)
+      }
+      
+      return data
     },
   })
 
@@ -67,15 +94,19 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
       const response = await fetch(`/api/events/${params.id}/register`, {
         method: "POST",
       })
-      if (!response.ok) throw new Error("Failed to register")
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || "Failed to register")
+      }
       return response.json()
     },
     onSuccess: () => {
-      toast.success("Successfully registered for the event!")
+      setIsRegistered(true)
+      toast.success("Successfully registered for event!")
       queryClient.invalidateQueries({ queryKey: ["event", params.id] })
     },
-    onError: (error: any) => {
-      toast.error(error.message || "Failed to register")
+    onError: (error: Error) => {
+      toast.error(error.message)
     },
   })
 
@@ -90,7 +121,7 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-600"></div>
       </div>
     )
   }
@@ -108,266 +139,225 @@ export default function EventDetailsPage({ params }: { params: { id: string } })
     )
   }
 
-  const isRegistered = event.attendees.some(
-    (attendee) => attendee.userId === session?.user?.id && attendee.status === "registered",
-  )
-
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative h-96 overflow-hidden">
-        <Image
-          src={event.image || "/placeholder.svg?height=400&width=800"}
-          alt={event.title}
-          fill
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-black/50"></div>
-        <div className="absolute inset-0 flex items-center">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl">
-              <div className="flex items-center gap-4 mb-4">
-                <Badge className="bg-green-500">{event.category}</Badge>
-                {event.isFree && <Badge variant="secondary">Free Event</Badge>}
-                {event.isFull && <Badge variant="destructive">Event Full</Badge>}
-              </div>
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{event.title}</h1>
-              <p className="text-xl text-white/90 mb-6">{event.description}</p>
-              <div className="flex flex-wrap gap-6 text-white/80">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
-                  <span>{new Date(event.date).toLocaleDateString()}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-5 h-5" />
-                  <span>{new Date(event.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5" />
-                  <span>{event.location}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  <span>
-                    {event.currentAttendees} registered
-                    {event.maxAttendees && ` / ${event.maxAttendees}`}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        {/* Back Button */}
+        <div className="mb-6">
+          <Button variant="ghost" asChild>
+            <Link href="/events">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Events
+            </Link>
+          </Button>
         </div>
-      </section>
 
-      <div className="container mx-auto px-4 py-12">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Description */}
-            <Card>
-              <CardHeader>
-                <CardTitle>About This Event</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="prose max-w-none">
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-line">{event.longDescription}</p>
+          <div className="lg:col-span-2">
+            <Card className="overflow-hidden">
+              {/* Hero Image */}
+              <div className="relative h-96">
+                <Image
+                  src={event.image || "/placeholder.svg?height=400&width=800"}
+                  alt={event.title}
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute top-4 left-4">
+                  <Badge className="bg-green-600 text-white">{event.category}</Badge>
                 </div>
-              </CardContent>
-            </Card>
+                {event.isFull && (
+                  <div className="absolute top-4 right-4">
+                    <Badge variant="destructive">Event Full</Badge>
+                  </div>
+                )}
+              </div>
 
-            {/* Agenda */}
-            {event.agenda && event.agenda.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Event Agenda</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {event.agenda.map((item, index) => (
-                      <div key={index} className="flex gap-4">
-                        <div className="flex-shrink-0 w-20 text-sm font-medium text-gray-600">{item.time}</div>
-                        <div className="flex-1">
-                          <h4 className="font-medium">{item.activity}</h4>
-                          {item.speaker && <p className="text-sm text-gray-600">Speaker: {item.speaker}</p>}
+              <div className="p-8">
+                <h1 className="text-4xl font-bold text-gray-900 mb-4">{event.title}</h1>
+                <p className="text-xl text-gray-600 mb-6">{event.description}</p>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2 mb-8">
+                  {event.tags.map((tag) => (
+                    <Badge key={tag} variant="secondary">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+
+                {/* Event Details */}
+                <div className="grid md:grid-cols-2 gap-6 mb-8">
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-green-600" />
+                    <div>
+                      <p className="font-semibold">Date</p>
+                      <p className="text-gray-600">
+                        {new Date(event.date).toLocaleDateString()}
+                        {event.endDate && ` - ${new Date(event.endDate).toLocaleDateString()}`}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-5 h-5 text-green-600" />
+                    <div>
+                      <p className="font-semibold">Time</p>
+                      <p className="text-gray-600">
+                        {new Date(event.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <MapPin className="w-5 h-5 text-green-600" />
+                    <div>
+                      <p className="font-semibold">Location</p>
+                      <p className="text-gray-600">{event.location}</p>
+                      <p className="text-sm text-gray-500">{event.address}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Users className="w-5 h-5 text-green-600" />
+                    <div>
+                      <p className="font-semibold">Attendees</p>
+                      <p className="text-gray-600">
+                        {event.currentAttendees} registered
+                        {event.maxAttendees && ` / ${event.maxAttendees} max`}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Price */}
+                {!event.isFree && event.ticketPrice && (
+                  <div className="mb-8">
+                    <div className="text-2xl font-bold text-green-600">₹{event.ticketPrice}</div>
+                  </div>
+                )}
+                {event.isFree && (
+                  <div className="mb-8">
+                    <div className="text-2xl font-bold text-green-600">Free Event</div>
+                  </div>
+                )}
+
+                {/* Description */}
+                <div className="prose max-w-none mb-8">
+                  <div dangerouslySetInnerHTML={{ __html: event.longDescription }} />
+                </div>
+
+                {/* Requirements */}
+                {event.requirements.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-xl font-semibold mb-4">Requirements</h3>
+                    <ul className="list-disc list-inside space-y-2">
+                      {event.requirements.map((req, index) => (
+                        <li key={index} className="text-gray-600">{req}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Agenda */}
+                {event.agenda.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-xl font-semibold mb-4">Agenda</h3>
+                    <div className="space-y-4">
+                      {event.agenda.map((item, index) => (
+                        <div key={index} className="flex gap-4 p-4 bg-gray-50 rounded-lg">
+                          <div className="font-semibold text-green-600 min-w-20">
+                            {item.time}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium">{item.activity}</p>
+                            {item.speaker && (
+                              <p className="text-sm text-gray-600">Speaker: {item.speaker}</p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                )}
 
-            {/* Requirements */}
-            {event.requirements && event.requirements.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Requirements</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {event.requirements.map((requirement, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm">{requirement}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Gallery */}
-            {event.gallery && event.gallery.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Event Gallery</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {event.gallery.map((image, index) => (
-                      <div key={index} className="relative h-32 rounded-lg overflow-hidden">
-                        <Image
-                          src={image || "/placeholder.svg"}
-                          alt={`Gallery ${index + 1}`}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                {/* Registration Button */}
+                <div className="flex gap-4">
+                  {isRegistered ? (
+                    <div className="flex items-center gap-2 text-green-600">
+                      <CheckCircle className="w-5 h-5" />
+                      <span className="font-semibold">You're registered!</span>
+                    </div>
+                  ) : (
+                    <Button
+                      size="lg"
+                      onClick={handleRegister}
+                      disabled={event.isFull || registerMutation.isPending}
+                      className="px-8"
+                    >
+                      {registerMutation.isPending ? "Registering..." : 
+                       event.isFull ? "Event Full" : "Register Now"}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </Card>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Registration Card */}
+            {/* Contact Person */}
             <Card>
               <CardHeader>
-                <CardTitle>Event Registration</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-center">
-                  {!event.isFree && event.ticketPrice && (
-                    <div className="text-3xl font-bold text-green-600 mb-2">₹{event.ticketPrice}</div>
-                  )}
-                  {event.isFree && <div className="text-3xl font-bold text-green-600 mb-2">Free</div>}
-                  <p className="text-sm text-gray-600">
-                    {event.spotsLeft !== null ? `${event.spotsLeft} spots remaining` : "Unlimited spots"}
-                  </p>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Date:</span>
-                    <span className="font-medium">{new Date(event.date).toLocaleDateString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Time:</span>
-                    <span className="font-medium">
-                      {new Date(event.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Location:</span>
-                    <span className="font-medium">{event.location}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Registered:</span>
-                    <span className="font-medium">
-                      {event.currentAttendees}
-                      {event.maxAttendees && ` / ${event.maxAttendees}`}
-                    </span>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {isRegistered ? (
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 text-green-600 mb-2">
-                      <CheckCircle className="w-5 h-5" />
-                      <span className="font-medium">You're registered!</span>
-                    </div>
-                    <p className="text-sm text-gray-600">We'll send you event updates via email.</p>
-                  </div>
-                ) : (
-                  <Button
-                    className="w-full"
-                    onClick={handleRegister}
-                    disabled={event.isFull || registerMutation.isPending}
-                  >
-                    {registerMutation.isPending
-                      ? "Registering..."
-                      : event.isFull
-                        ? "Event Full"
-                        : session
-                          ? "Register Now"
-                          : "Login to Register"}
-                  </Button>
-                )}
-
-                {!session && (
-                  <p className="text-xs text-center text-gray-500">
-                    <Link href="/login" className="text-blue-600 hover:underline">
-                      Login
-                    </Link>{" "}
-                    or{" "}
-                    <Link href="/signup" className="text-blue-600 hover:underline">
-                      sign up
-                    </Link>{" "}
-                    to register for this event
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Contact Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Contact Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <User className="w-5 h-5 text-gray-400" />
-                  <div>
-                    <p className="font-medium">{event.contactPerson.name}</p>
-                    <p className="text-sm text-gray-600">Event Coordinator</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-gray-400" />
-                  <a href={`mailto:${event.contactPerson.email}`} className="text-blue-600 hover:underline text-sm">
-                    {event.contactPerson.email}
-                  </a>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Phone className="w-5 h-5 text-gray-400" />
-                  <a href={`tel:${event.contactPerson.phone}`} className="text-blue-600 hover:underline text-sm">
-                    {event.contactPerson.phone}
-                  </a>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Location */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Event Location</CardTitle>
+                <CardTitle>Contact Person</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  <p className="font-medium">{event.location}</p>
-                  <p className="text-sm text-gray-600">{event.address}</p>
-                  <div className="bg-gray-100 rounded-lg h-32 flex items-center justify-center mt-4">
-                    <div className="text-center text-gray-500">
-                      <MapPin className="w-8 h-8 mx-auto mb-2" />
-                      <p className="text-sm">Map integration would go here</p>
-                    </div>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <User className="w-5 h-5 text-gray-400" />
+                    <span className="font-medium">{event.contactPerson.name}</span>
                   </div>
+                  <div className="flex items-center gap-3">
+                    <Mail className="w-5 h-5 text-gray-400" />
+                    <a href={`mailto:${event.contactPerson.email}`} className="text-blue-600 hover:underline">
+                      {event.contactPerson.email}
+                    </a>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Phone className="w-5 h-5 text-gray-400" />
+                    <a href={`tel:${event.contactPerson.phone}`} className="text-blue-600 hover:underline">
+                      {event.contactPerson.phone}
+                    </a>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Event Stats */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Event Stats</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <span>Days Until Event</span>
+                    <span className="font-semibold">
+                      {event.daysUntil > 0 ? `${event.daysUntil} days` : 
+                       event.daysUntil === 0 ? "Today" : "Past Event"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Registered</span>
+                    <span className="font-semibold">{event.currentAttendees}</span>
+                  </div>
+                  {event.spotsLeft !== null && (
+                    <div className="flex justify-between">
+                      <span>Spots Left</span>
+                      <span className="font-semibold">{event.spotsLeft}</span>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

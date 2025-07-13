@@ -11,7 +11,7 @@ const commentSchema = z.object({
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -24,8 +24,9 @@ export async function POST(
     const { content } = commentSchema.parse(body)
 
     await connectDB()
+    const { slug } = await params
 
-    const blog = await Blog.findOne({ slug: params.slug, status: "published" })
+    const blog = await Blog.findOne({ slug, status: "published" })
     
     if (!blog) {
       return NextResponse.json({ error: "Blog not found" }, { status: 404 })

@@ -1,15 +1,23 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import connectDB from "@/lib/mongodb"
-import Campaign from "@/lib/models/Campaign"
+import Campaign, { ICampaign } from "@/lib/models/Campaign"
 import Donation from "@/lib/models/Donation"
 import { authOptions } from "@/lib/auth"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest,   { params }: { params: Promise<{ id: string }> }
+) {
   try {
     await connectDB()
+        const { id } = await params
 
-    const campaign = await Campaign.findById(params.id).populate("createdBy", "name email").lean()
+
+    const campaign = await Campaign.findById(id).populate("createdBy", "name email").lean() as unknown as ICampaign & {
+      createdBy: {
+        name: string
+        email: string
+      }
+    }
 
     if (!campaign) {
       return NextResponse.json({ error: "Campaign not found" }, { status: 404 })
@@ -17,7 +25,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     // Get recent donations for this campaign
     const recentDonations = await Donation.find({
-      campaignId: params.id,
+      campaignId: id,
       status: "completed",
       isAnonymous: false,
     })
@@ -28,7 +36,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     // Calculate additional metrics
     const totalDonors = await Donation.countDocuments({
-      campaignId: params.id,
+      campaignId: id,
       status: "completed",
     })
 
@@ -48,19 +56,20 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !["admin", "creator"].includes(session.user.role)) {
+    if (!session || !session.user.role || !["admin", "creator"].includes(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     await connectDB()
+    const { id } = await params
 
     const body = await request.json()
 
-    const campaign = await Campaign.findByIdAndUpdate(params.id, body, { new: true, runValidators: true }).populate(
+    const campaign = await Campaign.findByIdAndUpdate(id, body, { new: true, runValidators: true }).populate(
       "createdBy",
       "name email",
     )
@@ -76,17 +85,18 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || session.user.role !== "admin") {
+    if (!session || !session.user.role || session.user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     await connectDB()
+    const { id } = await params
 
-    const campaign = await Campaign.findByIdAndUpdate(params.id, { isActive: false }, { new: true })
+    const campaign = await Campaign.findByIdAndUpdate(id, { isActive: false }, { new: true })
 
     if (!campaign) {
       return NextResponse.json({ error: "Campaign not found" }, { status: 404 })

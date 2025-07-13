@@ -42,20 +42,36 @@ interface Notification {
 export default function VolunteerDashboard() {
   const { data: session } = useSession()
 
-  const { data: dashboardData, isLoading } = useQuery({
+  const { data: dashboardData, isLoading, error } = useQuery({
     queryKey: ["volunteer-dashboard", session?.user?.id],
     queryFn: async () => {
       const response = await fetch("/api/volunteer/dashboard")
-      if (!response.ok) throw new Error("Failed to fetch volunteer data")
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to fetch volunteer data")
+      }
       return response.json()
     },
     enabled: !!session?.user?.id,
+    retry: 2,
   })
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Dashboard</h2>
+          <p className="text-gray-600 mb-4">{error.message}</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
       </div>
     )
   }

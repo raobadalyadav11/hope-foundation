@@ -4,11 +4,12 @@ import connectDB from "@/lib/mongodb"
 import Event from "@/lib/models/Event"
 import { authOptions } from "@/lib/auth"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectDB()
+    const { id } = await params
 
-    const event = await Event.findById(params.id)
+    const event = await Event.findById(id)
       .populate("createdBy", "name email")
       .populate("attendees.userId", "name email")
       .lean()
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -41,10 +42,11 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
 
     await connectDB()
+    const { id } = await params
 
     const body = await request.json()
 
-    const event = await Event.findByIdAndUpdate(params.id, body, { new: true, runValidators: true }).populate(
+    const event = await Event.findByIdAndUpdate(id, body, { new: true, runValidators: true }).populate(
       "createdBy",
       "name email",
     )
@@ -60,7 +62,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -69,8 +71,9 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     await connectDB()
+    const { id } = await params
 
-    const event = await Event.findByIdAndUpdate(params.id, { isActive: false }, { new: true })
+    const event = await Event.findByIdAndUpdate(id, { isActive: false }, { new: true })
 
     if (!event) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 })

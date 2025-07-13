@@ -529,7 +529,7 @@ export default function CampaignDetailPage() {
                     <Card>
                       <CardContent className="text-center py-12">
                         <div className="w-12 h-12 bg-gray-200 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                          <Image className="w-6 h-6 text-gray-400" />
+                          <Image src="/placeholder.svg" alt="Placeholder" className="w-6 h-6 text-gray-400" />
                         </div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">No Gallery Images</h3>
                         <p className="text-gray-600">More images will be added as the campaign progresses.</p>

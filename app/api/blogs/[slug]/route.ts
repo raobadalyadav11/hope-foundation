@@ -6,13 +6,14 @@ import { authOptions } from "@/lib/auth"
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     await connectDB()
+    const { slug } = await params
 
     const blog = await Blog.findOne({ 
-      slug: params.slug, 
+      slug, 
       status: "published" 
     })
       .populate("authorId", "name email profileImage")
