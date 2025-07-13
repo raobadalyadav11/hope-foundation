@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     // Save donation record
     const donationData: any = {
-      donorId: session.user.id,
+      donorId: session.user.id.toString(), // Ensure it's a string
       amount,
       orderId: order.id,
       donorName,
@@ -91,6 +91,7 @@ export async function POST(request: NextRequest) {
       message,
       status: "pending",
       paymentMethod: "razorpay",
+      currency: "INR", // Add default currency
     }
 
     // Add campaignId if valid ObjectId

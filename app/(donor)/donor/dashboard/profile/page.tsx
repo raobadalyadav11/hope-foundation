@@ -109,19 +109,25 @@ export default function DonorProfilePage() {
 
   const downloadReceipt = async (donationId: string) => {
     try {
-      const response = await fetch(`/api/donations/${donationId}/receipt`)
+      const response = await fetch("/api/donations/receipt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ donationId }),
+      })
+
+      const data = await response.json()
+
       if (response.ok) {
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url
-        a.download = `receipt-${donationId}.pdf`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
+        // Open receipt in new window
+        const receiptWindow = window.open("", "_blank")
+        if (receiptWindow) {
+          receiptWindow.document.write(atob(data.receipt))
+          receiptWindow.document.close()
+        } else {
+          toast.error("Please allow pop-ups to view the receipt")
+        }
       } else {
-        toast.error("Failed to download receipt")
+        toast.error(data.error || "Failed to generate receipt")
       }
     } catch (error) {
       toast.error("Failed to download receipt")

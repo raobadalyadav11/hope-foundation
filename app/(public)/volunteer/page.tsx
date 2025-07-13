@@ -149,7 +149,7 @@ export default function VolunteerPage() {
               </Button>
               <Button
                 size="lg"
-                variant="outline"
+                variant="destructive"
                 className="border-white text-white hover:bg-white hover:text-purple-600"
               >
                 <Link href="/events">View Volunteer Events</Link>

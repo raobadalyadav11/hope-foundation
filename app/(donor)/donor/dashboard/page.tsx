@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Heart, DollarSign, Target } from "lucide-react"
 import Link from "next/link"
+import { DonationHistory } from "@/components/donation-history"
 
 interface DonorStats {
   totalDonated: number
@@ -86,7 +87,7 @@ export default function OverviewPage() {
         </Card>
       </div>
 
-      {(!donorStats?.donations || donorStats.donations.length === 0) && (
+      {(!donorStats?.donations || donorStats.donations.length === 0) ? (
         <Card className="text-center py-12">
           <CardContent>
             <Heart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -97,6 +98,10 @@ export default function OverviewPage() {
             </Button>
           </CardContent>
         </Card>
+      ) : (
+        <div className="mt-8">
+          <DonationHistory userId={session?.user?.id || ""} />
+        </div>
       )}
     </div>
   )

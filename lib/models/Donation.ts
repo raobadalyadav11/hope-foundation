@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 
 export interface IDonation extends mongoose.Document {
-  donorId: mongoose.Types.ObjectId
+  donorId: mongoose.Types.ObjectId | string
   campaignId?: mongoose.Types.ObjectId
   cause?: string
   amount: number
@@ -30,7 +30,7 @@ export interface IDonation extends mongoose.Document {
 const donationSchema = new mongoose.Schema(
   {
     donorId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: "User",
       required: true,
     },

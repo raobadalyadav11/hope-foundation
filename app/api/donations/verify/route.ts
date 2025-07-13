@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       message: "Payment verified successfully",
+      donationId: donation._id,
       donation: {
         id: donation._id,
         amount: donation.amount,

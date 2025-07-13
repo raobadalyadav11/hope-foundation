@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 
 export interface ISubscription extends mongoose.Document {
-  donorId: mongoose.Types.ObjectId
+  donorId: mongoose.Types.ObjectId | string
   campaignId?: mongoose.Types.ObjectId
   subscriptionId: string
   planId: string
@@ -27,7 +27,7 @@ export interface ISubscription extends mongoose.Document {
 const subscriptionSchema = new mongoose.Schema(
   {
     donorId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: "User",
       required: true,
     },

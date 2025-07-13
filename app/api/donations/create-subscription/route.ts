@@ -59,10 +59,44 @@ export async function POST(request: NextRequest) {
     } else {
       nextPaymentDate.setFullYear(nextPaymentDate.getFullYear() + 1)
     }
+    
+    // Create a payment link for the subscription
+    let paymentLink = null
+    if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+      try {
+        // Create a payment link for the first payment
+        const paymentLinkOptions = {
+          amount: amount * 100, // Convert to paise
+          currency: "INR",
+          accept_partial: false,
+          description: `${frequency} donation to Hope Foundation`,
+          customer: {
+            name: donorName,
+            email: donorEmail,
+            contact: donorPhone || "",
+          },
+          notify: {
+            email: true,
+            sms: donorPhone ? true : false,
+          },
+          reminder_enable: true,
+          notes: {
+            subscriptionId: subscriptionId,
+            donorId: session.user.id,
+            frequency: frequency,
+            campaignId: campaignId || "",
+          },
+        }
+        
+        paymentLink = await razorpay.paymentLink.create(paymentLinkOptions)
+      } catch (error) {
+        console.error("Error creating payment link:", error)
+      }
+    }
 
     // Save subscription record
     const subscriptionRecord = await Subscription.create({
-      donorId: session.user.id,
+      donorId: session.user.id.toString(), // Ensure it's a string
       campaignId: (campaignId && Types.ObjectId.isValid(campaignId)) ? campaignId : undefined,
       subscriptionId,
       planId,
@@ -75,6 +109,9 @@ export async function POST(request: NextRequest) {
       donorPhone,
       isAnonymous: isAnonymous || false,
       status: "active",
+      totalPayments: 0, // Add required fields with defaults
+      totalAmount: 0,
+      failedPayments: 0,
     })
 
     return NextResponse.json({
@@ -84,6 +121,8 @@ export async function POST(request: NextRequest) {
       frequency,
       nextPaymentDate,
       message: "Recurring donation set up successfully",
+      shortUrl: paymentLink?.short_url || null,
+      paymentLinkId: paymentLink?.id || null,
     })
   } catch (error) {
     if (error instanceof z.ZodError) {

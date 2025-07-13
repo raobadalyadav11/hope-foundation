@@ -122,6 +122,13 @@ export default function DonatePage() {
         description: "Donation to Hope Foundation",
         order_id: orderData.orderId,
         handler: async (response: any) => {
+          // Set a timeout to reset processing state after 30 seconds
+          // in case verification process hangs
+          const timeoutId = setTimeout(() => {
+            setIsProcessing(false)
+            toast.error("Payment verification is taking longer than expected. Please check your donation history.")
+          }, 30000)
+          
           try {
             // Verify payment
             const verifyResponse = await fetch("/api/donations/verify", {
@@ -133,11 +140,42 @@ export default function DonatePage() {
                 razorpay_signature: response.razorpay_signature,
               }),
             })
+            
+            // Clear the timeout since we got a response
+            clearTimeout(timeoutId)
 
             const verifyData = await verifyResponse.json()
 
             if (verifyResponse.ok) {
               toast.success("Thank you for your donation! Payment successful.")
+              
+              // Generate receipt
+              try {
+                const receiptResponse = await fetch("/api/donations/receipt", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    donationId: verifyData.donationId,
+                  }),
+                })
+                
+                const receiptData = await receiptResponse.json()
+                
+                if (receiptResponse.ok) {
+                  // Open receipt in new window
+                  const receiptWindow = window.open("", "_blank")
+                  if (receiptWindow) {
+                    receiptWindow.document.write(atob(receiptData.receipt))
+                    receiptWindow.document.close()
+                  }
+                }
+              } catch (error) {
+                console.error("Error generating receipt:", error)
+              } finally {
+                // Reset processing state
+                setIsProcessing(false)
+              }
+              
               // Reset form
               setAmount("")
               setSelectedCause("")
@@ -176,6 +214,12 @@ export default function DonatePage() {
         toast.error("Payment failed. Please try again.")
         setIsProcessing(false)
       })
+      
+      // Reset processing state if modal is closed without completing payment
+      rzp.on("payment.cancel", () => {
+        setIsProcessing(false)
+      })
+      
       rzp.open()
     } catch (error: any) {
       console.error("Payment error:", error)
@@ -223,11 +267,28 @@ export default function DonatePage() {
         throw new Error(subscriptionData.error || "Failed to create subscription")
       }
 
-      toast.success("Recurring donation set up successfully!")
-
-      // Open Razorpay subscription link
+      // Check if we have a payment link
       if (subscriptionData.shortUrl) {
-        window.open(subscriptionData.shortUrl, "_blank")
+        toast.success("Please complete your first payment to activate the recurring donation.")
+        
+        // Open the payment link in a new window
+        const paymentWindow = window.open(subscriptionData.shortUrl, "_blank")
+        
+        // If popup is blocked, provide a button to open it
+        if (!paymentWindow) {
+          toast.error(
+            "Popup blocked. Please click the button below to complete your payment.",
+            {
+              action: {
+                label: "Complete Payment",
+                onClick: () => window.open(subscriptionData.shortUrl, "_blank"),
+              },
+              duration: 10000, // Show for 10 seconds
+            }
+          )
+        }
+      } else {
+        toast.success("Recurring donation set up successfully!")
       }
 
       // Reset form
@@ -240,6 +301,7 @@ export default function DonatePage() {
         address: "",
       })
       setIsAnonymous(false)
+      setIsProcessing(false)
     } catch (error: any) {
       console.error("Subscription error:", error)
       toast.error(error.message || "Failed to set up recurring donation")
