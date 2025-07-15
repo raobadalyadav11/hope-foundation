@@ -80,7 +80,7 @@ export default function AdminDashboard() {
     if (status === "loading") return
 
     if (!session || session.user.role !== "admin") {
-      router.push("/auth/signin")
+      router.push("/signin")
       return
     }
 

@@ -171,7 +171,7 @@ export default function CampaignDetailPage() {
 
   const handleDonate = () => {
     if (!session) {
-      router.push("/auth/signin")
+      router.push("/signin")
       return
     }
 

@@ -102,7 +102,7 @@ export default function FundraisePage() {
 
     if (!session) {
       toast.error("Please login to start a fundraiser")
-      router.push("/auth/signin")
+      router.push("/signin")
       return
     }
 

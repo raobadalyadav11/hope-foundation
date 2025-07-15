@@ -13,6 +13,17 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Heart, Mail, Lock, Eye, EyeOff } from "lucide-react"
 import Link from "next/link"
 
+// Define the possible roles
+type UserRole = "admin" | "donor" | "volunteer" | "creator" | null | undefined
+
+interface SessionUser {
+  role?: UserRole
+}
+
+interface Session {
+  user?: SessionUser
+}
+
 export default function SignInPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -21,11 +32,8 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+ const handleSubmit = async () => {
     setLoading(true)
-    setError("")
-
     try {
       const result = await signIn("credentials", {
         email,
@@ -35,19 +43,27 @@ export default function SignInPage() {
 
       if (result?.error) {
         setError("Invalid email or password")
-      } else {
-        const session = await getSession()
-        if (session?.user?.role === "admin") {
+        return
+      }
+
+      const session = await getSession() as Session | null
+      if (!session || !session.user) {
+        setError("No session found. Please try again.")
+        return
+      }
+
+      switch (session.user.role) {
+        case "admin":
           router.push("/admin/dashboard")
-        } else if(session?.user?.role==="donor"){
+          break
+        case "donor":
           router.push("/donor/dashboard")
-        }
-         else if(session?.user?.role==='volunteer'){
+          break
+        case "volunteer":
           router.push("/volunteer/dashboard")
-        }
-         else {
+          break
+        default:
           router.push("/")
-        }
       }
     } catch (error) {
       setError("An error occurred. Please try again.")

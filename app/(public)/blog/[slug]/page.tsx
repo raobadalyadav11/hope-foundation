@@ -315,7 +315,7 @@ export default function BlogPostPage() {
                   <div className="mb-6 p-4 bg-gray-50 rounded-lg text-center">
                     <p className="text-gray-600 mb-2">Please login to leave a comment</p>
                     <Button asChild>
-                      <Link href="/auth/signin">Login</Link>
+                      <Link href="/signin">Login</Link>
                     </Button>
                   </div>
                 )}
