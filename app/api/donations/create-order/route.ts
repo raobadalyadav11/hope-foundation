@@ -5,11 +5,14 @@ import Donation from "@/lib/models/Donation"
 import Campaign from "@/lib/models/Campaign"
 import { authOptions } from "@/lib/auth"
 import razorpay from "@/lib/razorpay"
+import stripe from "@/lib/stripe"
+import { selectPaymentGateway, convertCurrency } from "@/lib/stripe"
 import { z } from "zod"
 import { Types } from "mongoose"
 
 const orderSchema = z.object({
   amount: z.number().min(1, "Amount must be greater than 0"),
+  currency: z.enum(["INR", "USD", "EUR"]).default("INR"),
   campaignId: z.string().optional(),
   donorName: z.string().min(1, "Donor name is required"),
   donorEmail: z.string().email("Invalid email"),
@@ -28,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { amount, campaignId, donorName, donorEmail, donorPhone, donorAddress, isAnonymous, message } =
+    const { amount, currency, campaignId, donorName, donorEmail, donorPhone, donorAddress, isAnonymous, message } =
       orderSchema.parse(body)
 
     await connectDB()
@@ -52,36 +55,81 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create Razorpay order or mock for development
-    let order
+    // Select payment gateway based on currency
+    const gateway = selectPaymentGateway(currency)
     
-    if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
-      const options = {
-        amount: amount * 100, // Convert to paise
-        currency: "INR",
-        receipt: `rcpt_${Date.now().toString().slice(-8)}`,
-        notes: {
-          donorId: session.user.id,
-          campaignId: campaignId || "",
-          donorName,
-          donorEmail,
-        },
+    // Create payment order based on selected gateway
+    let order
+    let paymentMethod = gateway
+    
+    if (gateway === 'razorpay') {
+      // Convert to INR if needed for Razorpay
+      const razorpayAmount = currency === 'INR' ? amount : Math.round(convertCurrency(amount, currency, 'INR'))
+      
+      if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+        const options = {
+          amount: razorpayAmount * 100, // Convert to paise
+          currency: "INR",
+          receipt: `rcpt_${Date.now().toString().slice(-8)}`,
+          notes: {
+            donorId: session.user.id,
+            campaignId: campaignId || "",
+            donorName,
+            donorEmail,
+            originalAmount: amount,
+            originalCurrency: currency,
+          },
+        }
+        order = await razorpay.orders.create(options)
+      } else {
+        // Mock Razorpay order for development
+        order = {
+          id: `order_${Date.now()}`,
+          amount: razorpayAmount * 100,
+          currency: "INR",
+          status: "created"
+        }
       }
-      order = await razorpay.orders.create(options)
+    } else if (gateway === 'stripe') {
+      // Use Stripe for international payments
+      if (process.env.STRIPE_SECRET_KEY) {
+        const stripeAmount = currency === 'USD' ? amount * 100 : currency === 'EUR' ? amount * 100 : amount * 100 // Convert to cents
+        
+        const stripeOrder = await stripe.paymentIntents.create({
+          amount: Math.round(stripeAmount),
+          currency: currency.toLowerCase(),
+          metadata: {
+            donorId: session.user.id,
+            campaignId: campaignId || "",
+            donorName,
+            donorEmail,
+          },
+        })
+        
+        order = {
+          id: stripeOrder.id,
+          amount: stripeOrder.amount,
+          currency: stripeOrder.currency.toUpperCase(),
+          status: stripeOrder.status
+        }
+      } else {
+        // Mock Stripe order for development
+        order = {
+          id: `pi_${Date.now()}`,
+          amount: amount * 100,
+          currency: currency,
+          status: "requires_payment_method"
+        }
+      }
     } else {
-      // Mock order for development
-      order = {
-        id: `order_${Date.now()}`,
-        amount: amount * 100,
-        currency: "INR",
-        status: "created"
-      }
+      return NextResponse.json({ error: "Unsupported currency or payment gateway" }, { status: 400 })
     }
 
     // Save donation record
     const donationData: any = {
-      donorId: session.user.id.toString(), // Ensure it's a string
+      donorId: session.user.id.toString(),
       amount,
+      currency,
       orderId: order.id,
       donorName,
       donorEmail,
@@ -90,8 +138,7 @@ export async function POST(request: NextRequest) {
       isAnonymous: isAnonymous || false,
       message,
       status: "pending",
-      paymentMethod: "razorpay",
-      currency: "INR", // Add default currency
+      paymentMethod,
     }
 
     // Add campaignId if valid ObjectId
@@ -110,7 +157,11 @@ export async function POST(request: NextRequest) {
       amount: order.amount,
       currency: order.currency,
       donationId: donation._id,
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "mock_key",
+      gateway,
+      paymentMethod,
+      // Return appropriate keys based on gateway
+      razorpayKey: gateway === 'razorpay' ? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "mock_key" : undefined,
+      stripePublicKey: gateway === 'stripe' ? process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_mock_key" : undefined,
     })
   } catch (error) {
     if (error instanceof z.ZodError) {

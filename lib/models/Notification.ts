@@ -57,6 +57,14 @@ const NotificationSchema = new mongoose.Schema(
       ref: "User",
     },
     reviewedAt: Date,
+    readBy: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    }],
+    deletedBy: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    }],
   },
   {
     timestamps: true,

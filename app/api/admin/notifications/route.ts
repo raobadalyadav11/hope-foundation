@@ -121,10 +121,10 @@ export async function POST(request: NextRequest) {
 
     // Send notifications immediately if not scheduled
     if (!scheduledAt) {
-      if (type === "email") {
-        let delivered = 0
-        let failed = 0
+      let delivered = 0
+      let failed = 0
 
+      if (type === "email") {
         for (const user of recipientUsers) {
           try {
             await sendEmail({
@@ -138,15 +138,23 @@ export async function POST(request: NextRequest) {
             failed++
           }
         }
-
-        // Update delivery stats
-        await Notification.findByIdAndUpdate(notification._id, {
-          "deliveryStats.sent": recipientCount,
-          "deliveryStats.delivered": delivered,
-          "deliveryStats.failed": failed,
-        })
+      } else if (type === "in-app") {
+        // Mark in-app notifications as sent for all recipient users
+        delivered = recipientCount
+        // In-app notifications are automatically delivered when users fetch them
+      } else if (type === "sms") {
+        // TODO: Implement SMS sending logic
+        // For now, we'll mark SMS as failed until SMS integration is added
+        failed = recipientCount
+        console.log("SMS notifications not yet implemented")
       }
-      // TODO: Implement in-app and SMS notifications
+
+      // Update delivery stats
+      await Notification.findByIdAndUpdate(notification._id, {
+        "deliveryStats.sent": recipientCount,
+        "deliveryStats.delivered": delivered,
+        "deliveryStats.failed": failed,
+      })
     }
 
     return NextResponse.json({

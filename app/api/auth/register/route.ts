@@ -3,6 +3,7 @@ import connectDB from "@/lib/mongodb"
 import User from "@/lib/models/User"
 import { z } from "zod"
 import crypto from "crypto"
+import { sendVerificationEmail } from "@/lib/email"
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100, "Name cannot exceed 100 characters"),
@@ -43,13 +44,18 @@ export async function POST(request: NextRequest) {
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user.toObject()
 
-    // TODO: Send verification email
-    // await sendVerificationEmail(email, verificationToken)
+    // Send verification email
+    const emailSent = await sendVerificationEmail(email, name, verificationToken)
+    
+    if (!emailSent) {
+      console.error("Failed to send verification email")
+    }
 
     return NextResponse.json(
       {
         message: "User created successfully. Please check your email for verification.",
         user: userWithoutPassword,
+        verificationEmailSent: emailSent,
       },
       { status: 201 },
     )

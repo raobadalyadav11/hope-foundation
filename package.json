@@ -70,6 +70,7 @@
     "react-resizable-panels": "latest",
     "recharts": "^3.1.0",
     "sonner": "latest",
+    "stripe": "^20.0.0",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "latest",

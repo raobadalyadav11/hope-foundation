@@ -218,3 +218,232 @@ export async function generateDonationReceipt(donation: any): Promise<string> {
   // Return the HTML as a base64 string
   return Buffer.from(receiptHtml).toString('base64')
 }
+
+/**
+ * Generate 80G tax certificate HTML
+ */
+export async function generateTaxCertificate(certificate: any): Promise<string> {
+  const donation = certificate.donationId
+  const issueDate = certificate.issuedDate ? new Date(certificate.issuedDate).toLocaleDateString('en-IN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }) : new Date().toLocaleDateString('en-IN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+
+  const donationDate = new Date(certificate.donationDate).toLocaleDateString('en-IN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+
+  // Format amounts with Indian number system
+  const donationAmount = certificate.donationAmount.toLocaleString('en-IN')
+  const deductibleAmount = certificate.deductibleAmount.toLocaleString('en-IN')
+
+  const certificateHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8" />
+      <title>80G Certificate - Hope Foundation</title>
+      <style>
+        body {
+          font-family: 'Times New Roman', serif;
+          line-height: 1.6;
+          color: #000;
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 20px;
+        }
+        .certificate {
+          border: 3px solid #000;
+          padding: 40px;
+          margin: 20px 0;
+        }
+        .header {
+          text-align: center;
+          margin-bottom: 30px;
+          border-bottom: 2px solid #000;
+          padding-bottom: 20px;
+        }
+        .org-name {
+          font-size: 24px;
+          font-weight: bold;
+          margin-bottom: 5px;
+        }
+        .tagline {
+          font-size: 14px;
+          font-style: italic;
+          margin-bottom: 10px;
+        }
+        .certificate-title {
+          font-size: 22px;
+          font-weight: bold;
+          margin: 20px 0;
+          text-decoration: underline;
+        }
+        .section {
+          margin: 20px 0;
+          text-align: justify;
+        }
+        .section-title {
+          font-weight: bold;
+          font-size: 16px;
+          margin-bottom: 10px;
+          text-decoration: underline;
+        }
+        .info-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 15px 0;
+        }
+        .info-table td {
+          padding: 8px;
+          vertical-align: top;
+        }
+        .info-table .label {
+          font-weight: bold;
+          width: 40%;
+        }
+        .info-table .value {
+          width: 60%;
+        }
+        .amount {
+          font-size: 18px;
+          font-weight: bold;
+        }
+        .footer {
+          margin-top: 40px;
+          text-align: center;
+        }
+        .signature-section {
+          margin-top: 60px;
+          display: flex;
+          justify-content: space-between;
+        }
+        .signature-box {
+          width: 200px;
+          text-align: center;
+          border-top: 1px solid #000;
+          padding-top: 5px;
+        }
+        .qr-code {
+          width: 80px;
+          height: 80px;
+          border: 1px solid #000;
+          margin: 20px auto;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 10px;
+        }
+        @media print {
+          body { padding: 0; }
+          .certificate { border: 3px solid #000; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="certificate">
+        <div class="header">
+          <div class="org-name">${certificate.organizationDetails.name}</div>
+          <div class="tagline">Making a Difference Together</div>
+          <div>Reg. No: ${certificate.organizationDetails.registrationNumber} | PAN: ${certificate.organizationDetails.panNumber}</div>
+          <div>${certificate.organizationDetails.address}</div>
+        </div>
+
+        <div class="certificate-title">
+          CERTIFICATE OF DONATION U/S 80G OF THE INCOME TAX ACT, 1961
+        </div>
+
+        <div class="section">
+          <p><strong>Certificate No:</strong> ${certificate.certificateNumber}</p>
+          <p><strong>Financial Year:</strong> ${certificate.financialYear}</p>
+          <p><strong>Date of Issue:</strong> ${issueDate}</p>
+        </div>
+
+        <div class="section">
+          <div class="section-title">DONOR DETAILS</div>
+          <table class="info-table">
+            <tr>
+              <td class="label">Name:</td>
+              <td class="value">${certificate.donorName}</td>
+            </tr>
+            <tr>
+              <td class="label">Address:</td>
+              <td class="value">${certificate.donorAddress}</td>
+            </tr>
+            <tr>
+              <td class="label">PAN:</td>
+              <td class="value">${certificate.donorPan}</td>
+            </tr>
+            <tr>
+              <td class="label">Email:</td>
+              <td class="value">${certificate.donorEmail}</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="section">
+          <div class="section-title">DONATION DETAILS</div>
+          <table class="info-table">
+            <tr>
+              <td class="label">Date of Donation:</td>
+              <td class="value">${donationDate}</td>
+            </tr>
+            <tr>
+              <td class="label">Amount of Donation:</td>
+              <td class="value"><span class="amount">₹${donationAmount}</span></td>
+            </tr>
+            <tr>
+              <td class="label">Mode of Payment:</td>
+              <td class="value">${donation?.paymentMethod || 'Online'}</td>
+            </tr>
+            <tr>
+              <td class="label">Purpose of Donation:</td>
+              <td class="value">General philanthropic purposes</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="section">
+          <p><strong>50% of the above donation i.e. ₹${deductibleAmount} is deductible under section 80G of the Income Tax Act, 1961.</strong></p>
+          
+          <p><strong>Registration Details under section 80G:</strong></p>
+          <ul>
+            <li>Registration No: ${certificate.organizationDetails.eightyGNumber}</li>
+            <li>Valid from: 01/04/2020 to 31/03/2025</li>
+            <li>21A Registration No: ${certificate.organizationDetails.twelveANumber}</li>
+          </ul>
+
+          <p>This certificate is issued based on the donation received and is subject to the provisions of section 80G of the Income Tax Act, 1961 and rules made thereunder.</p>
+        </div>
+
+        <div class="footer">
+          <div class="qr-code">QR Code<br>Verification</div>
+          <p><strong>Verification URL:</strong> ${process.env.NEXTAUTH_URL}/verify-certificate/${certificate._id}</p>
+        </div>
+
+        <div class="signature-section">
+          <div class="signature-box">
+            <strong>Authorized Signatory</strong><br>
+            ${certificate.signatureDetails?.signatoryName || 'Hope Foundation Representative'}<br>
+            ${certificate.signatureDetails?.signatoryDesignation || 'Secretary'}
+          </div>
+          <div style="text-align: center; margin-top: 100px;">
+            <div style="font-size: 12px; color: #666;">
+              Generated on: ${issueDate}
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `
+
+  return Buffer.from(certificateHtml).toString('base64')
+}

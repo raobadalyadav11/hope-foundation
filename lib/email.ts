@@ -482,3 +482,92 @@ export async function sendVolunteerApproval(volunteer: any) {
     return false
   }
 }
+
+/**
+ * Send email verification email
+ */
+export async function sendVerificationEmail(email: string, name: string, verificationToken: string) {
+  try {
+    const verificationUrl = `${process.env.NEXTAUTH_URL}/auth/verify-email?token=${verificationToken}`
+    
+    const info = await transporter.sendMail({
+      from: `"Hope Foundation" <${process.env.EMAIL_FROM || 'noreply@hopefoundation.org'}>`,
+      to: email,
+      subject: `Verify Your Email Address - Hope Foundation`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #2563eb; padding: 20px; text-align: center; color: white;">
+            <h1 style="margin: 0;">Welcome to Hope Foundation!</h1>
+          </div>
+          <div style="padding: 20px; border: 1px solid #ddd; border-top: none;">
+            <p>Dear ${name},</p>
+            <p>Thank you for registering with Hope Foundation. To complete your account setup and start making a difference in communities, please verify your email address.</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${verificationUrl}" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                Verify Email Address
+              </a>
+            </div>
+            <p>Or copy and paste this link into your browser:</p>
+            <p style="word-break: break-all; color: #2563eb;">${verificationUrl}</p>
+            <p>This verification link will expire in 24 hours.</p>
+            <p>If you didn't create this account, please ignore this email.</p>
+            <p>Welcome to our community of changemakers!</p>
+            <p>Best regards,<br>Hope Foundation Team</p>
+          </div>
+          <div style="background-color: #f3f4f6; padding: 15px; text-align: center; font-size: 12px; color: #666;">
+            <p>Hope Foundation | 123 Charity Lane, Bangalore, Karnataka - 560001 | +91-9876543210</p>
+          </div>
+        </div>
+      `
+    })
+
+    return true
+  } catch (error) {
+    console.error('Error sending verification email:', error)
+    return false
+  }
+}
+
+/**
+ * Send password reset email
+ */
+export async function sendPasswordResetEmail(email: string, name: string, resetToken: string) {
+  try {
+    const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${resetToken}`
+    
+    const info = await transporter.sendMail({
+      from: `"Hope Foundation" <${process.env.EMAIL_FROM || 'noreply@hopefoundation.org'}>`,
+      to: email,
+      subject: `Reset Your Password - Hope Foundation`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #2563eb; padding: 20px; text-align: center; color: white;">
+            <h1 style="margin: 0;">Password Reset Request</h1>
+          </div>
+          <div style="padding: 20px; border: 1px solid #ddd; border-top: none;">
+            <p>Dear ${name},</p>
+            <p>We received a request to reset your password for your Hope Foundation account.</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetUrl}" style="display: inline-block; background-color: #dc2626; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                Reset Password
+              </a>
+            </div>
+            <p>Or copy and paste this link into your browser:</p>
+            <p style="word-break: break-all; color: #2563eb;">${resetUrl}</p>
+            <p>This password reset link will expire in 1 hour.</p>
+            <p>If you didn't request a password reset, please ignore this email. Your password will remain unchanged.</p>
+            <p>Best regards,<br>Hope Foundation Team</p>
+          </div>
+          <div style="background-color: #f3f4f6; padding: 15px; text-align: center; font-size: 12px; color: #666;">
+            <p>Hope Foundation | 123 Charity Lane, Bangalore, Karnataka - 560001 | +91-9876543210</p>
+          </div>
+        </div>
+      `
+    })
+
+    return true
+  } catch (error) {
+    console.error('Error sending password reset email:', error)
+    return false
+  }
+}
