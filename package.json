@@ -51,6 +51,7 @@
     "cloudinary": "latest",
     "clsx": "^2.1.1",
     "cmdk": "latest",
+    "critters": "^0.0.23",
     "crypto": "latest",
     "date-fns": "latest",
     "embla-carousel-react": "latest",
