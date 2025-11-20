@@ -1,78 +1,112 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/lib/auth"
 import connectDB from "@/lib/mongodb"
 import Newsletter from "@/lib/models/Newsletter"
-import { authOptions } from "@/lib/auth"
+import { sendNewsletterWelcome } from "@/lib/email"
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-
-    if (!session || !["admin", "creator"].includes(session.user.role)) {
+    if (!session || !session.user?.role || !["admin", "creator"].includes(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     await connectDB()
 
     const { searchParams } = new URL(request.url)
-    const status = searchParams.get("status") || "all"
-    const search = searchParams.get("search") || ""
-    const page = Number.parseInt(searchParams.get("page") || "1")
-    const limit = Number.parseInt(searchParams.get("limit") || "10")
+    const page = parseInt(searchParams.get("page") || "1")
+    const limit = parseInt(searchParams.get("limit") || "20")
+    const status = searchParams.get("status") || ""
 
-    // Build query
     const query: any = {}
-
-    if (status === "active") {
-      query.isActive = true
-    } else if (status === "inactive") {
-      query.isActive = false
+    
+    if (status && status !== "all") {
+      query.status = status
     }
-
-    if (search) {
-      query.$or = [{ email: { $regex: search, $options: "i" } }, { name: { $regex: search, $options: "i" } }]
-    }
-
-    const subscribers = await Newsletter.find(query)
-      .sort({ subscribedAt: -1 })
-      .limit(limit)
-      .skip((page - 1) * limit)
-      .lean()
 
     const total = await Newsletter.countDocuments(query)
-
-    // Get subscriber statistics
-    const stats = await Newsletter.aggregate([
-      {
-        $group: {
-          _id: null,
-          totalSubscribers: { $sum: 1 },
-          activeSubscribers: {
-            $sum: { $cond: [{ $eq: ["$isActive", true] }, 1, 0] },
-          },
-          inactiveSubscribers: {
-            $sum: { $cond: [{ $eq: ["$isActive", false] }, 1, 0] },
-          },
-        },
-      },
-    ])
+    const subscriptions = await Newsletter.find(query)
+      .sort({ subscribedAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
 
     return NextResponse.json({
-      subscribers,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
-      },
-      stats: stats[0] || {
-        totalSubscribers: 0,
-        activeSubscribers: 0,
-        inactiveSubscribers: 0,
-      },
+      subscriptions,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      total
     })
   } catch (error) {
-    console.error("Error fetching newsletter subscribers:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Error fetching newsletter subscriptions:", error)
+    return NextResponse.json(
+      { error: "Failed to fetch newsletter subscriptions" },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    await connectDB()
+
+    const { email, name, tags = [], preferences = {} } = await request.json()
+
+    if (!email) {
+      return NextResponse.json(
+        { error: "Email is required" },
+        { status: 400 }
+      )
+    }
+
+    // Check if email already exists
+    const existingSubscription = await Newsletter.findOne({ email })
+    
+    if (existingSubscription) {
+      if (existingSubscription.status === "active") {
+        return NextResponse.json(
+          { error: "Email already subscribed to newsletter" },
+          { status: 400 }
+        )
+      } else {
+        // Reactivate subscription
+        existingSubscription.status = "active"
+        existingSubscription.resubscribedAt = new Date()
+        await existingSubscription.save()
+        
+        // Send welcome email
+        await sendNewsletterWelcome(email, name)
+        
+        return NextResponse.json(existingSubscription)
+      }
+    }
+
+    // Create new subscription
+    const subscription = new Newsletter({
+      email,
+      name,
+      status: "active",
+      tags,
+      preferences: {
+        frequency: preferences.frequency || "weekly",
+        topics: preferences.topics || [],
+        ...preferences
+      },
+      subscribedAt: new Date(),
+      source: "website",
+    })
+
+    await subscription.save()
+
+    // Send welcome email
+    await sendNewsletterWelcome(email, name)
+
+    return NextResponse.json(subscription, { status: 201 })
+  } catch (error) {
+    console.error("Error creating newsletter subscription:", error)
+    return NextResponse.json(
+      { error: "Failed to create newsletter subscription" },
+      { status: 500 }
+    )
   }
 }

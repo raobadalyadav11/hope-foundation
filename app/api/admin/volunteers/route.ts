@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import connectDB from "@/lib/mongodb"
-import File from "@/lib/models/File"
+import Volunteer from "@/lib/models/Volunteer"
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,51 +15,52 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get("page") || "1")
-    const limit = parseInt(searchParams.get("limit") || "20")
+    const limit = parseInt(searchParams.get("limit") || "10")
     const search = searchParams.get("search") || ""
-    const type = searchParams.get("type") || ""
-    const usage = searchParams.get("usage") || ""
+    const status = searchParams.get("status") || ""
+    const skill = searchParams.get("skill") || ""
 
     const query: any = {}
     
     if (search) {
       query.$or = [
-        { originalName: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } }
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+        { skills: { $regex: search, $options: "i" } }
       ]
     }
 
-    if (type && type !== "all") {
-      query.mimeType = { $regex: type, $options: "i" }
+    if (status && status !== "all") {
+      query.status = status
     }
 
-    if (usage && usage !== "all") {
-      query.usage = usage
+    if (skill && skill !== "all") {
+      query.skills = { $in: [skill] }
     }
 
-    const total = await File.countDocuments(query)
-    const files = await File.find(query)
-      .populate("uploadedBy", "name email")
+    const total = await Volunteer.countDocuments(query)
+    const volunteers = await Volunteer.find(query)
+      .populate("userId", "name email profileImage")
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit)
 
     return NextResponse.json({
-      files,
+      volunteers,
       totalPages: Math.ceil(total / limit),
       currentPage: page,
       total
     })
   } catch (error) {
-    console.error("Error fetching files:", error)
+    console.error("Error fetching volunteers:", error)
     return NextResponse.json(
-      { error: "Failed to fetch files" },
+      { error: "Failed to fetch volunteers" },
       { status: 500 }
     )
   }
 }
 
-export async function DELETE(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session || session.user.role !== "admin") {
@@ -68,27 +69,16 @@ export async function DELETE(request: NextRequest) {
 
     await connectDB()
 
-    const { fileIds } = await request.json()
+    const data = await request.json()
+    
+    const volunteer = new Volunteer(data)
+    await volunteer.save()
 
-    if (!fileIds || !Array.isArray(fileIds)) {
-      return NextResponse.json(
-        { error: "File IDs are required" },
-        { status: 400 }
-      )
-    }
-
-    const result = await File.deleteMany({
-      _id: { $in: fileIds }
-    })
-
-    return NextResponse.json({
-      message: `${result.deletedCount} files deleted successfully`,
-      deletedCount: result.deletedCount
-    })
+    return NextResponse.json(volunteer, { status: 201 })
   } catch (error) {
-    console.error("Error deleting files:", error)
+    console.error("Error creating volunteer:", error)
     return NextResponse.json(
-      { error: "Failed to delete files" },
+      { error: "Failed to create volunteer" },
       { status: 500 }
     )
   }
