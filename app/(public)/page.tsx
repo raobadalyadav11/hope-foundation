@@ -22,6 +22,9 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { OrganizationStructuredData, ReviewStructuredData, FAQStructuredData } from "@/components/seo/structured-data"
+import { analytics } from "@/lib/seo"
+import { useEffect } from "react"
 
 interface Campaign {
   _id: string
@@ -56,6 +59,7 @@ interface BlogPost {
   _id: string
   title: string
   excerpt: string
+  slug?: string
   image: string
   author: {
     name: string
@@ -80,6 +84,38 @@ interface Stats {
 }
 
 export default function HomePage() {
+  // Analytics tracking
+  useEffect(() => {
+    analytics.trackPageView("/", "Hope Foundation - Creating Hope, Changing Lives")
+  }, [])
+
+  const faqData = [
+    {
+      question: "How does Hope Foundation ensure transparency in donations?",
+      answer: "We provide detailed reports on how every donation is used, with 95% of funds going directly to programs. All our financial records are publicly available, and we undergo regular third-party audits."
+    },
+    {
+      question: "What percentage of donations actually reaches the beneficiaries?",
+      answer: "95% of all donations go directly to our programs and beneficiaries. Only 5% is used for administrative costs and fundraising activities."
+    },
+    {
+      question: "How can I track the impact of my donation?",
+      answer: "We provide regular updates on your donation's impact through email reports, detailed impact statements, and our transparency portal where you can see real-time progress."
+    },
+    {
+      question: "Are donations to Hope Foundation tax-deductible?",
+      answer: "Yes, Hope Foundation is a registered charitable trust and all donations are tax-deductible under Section 80G of the Income Tax Act."
+    },
+    {
+      question: "How do I become a volunteer with Hope Foundation?",
+      answer: "Visit our volunteer page and fill out the application form. We have opportunities in education, healthcare, community development, and disaster relief across various locations."
+    },
+    {
+      question: "What types of campaigns does Hope Foundation run?",
+      answer: "We run campaigns focused on education, healthcare, community development, environmental sustainability, disaster relief, and women's empowerment across 12 countries."
+    }
+  ]
+
   const { data: campaignsData, isLoading: campaignsLoading } = useQuery({
     queryKey: ["campaigns", "featured"],
     queryFn: async () => {
@@ -244,6 +280,11 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {/* SEO Structured Data */}
+      <OrganizationStructuredData />
+      <ReviewStructuredData testimonials={testimonials} />
+      <FAQStructuredData faqs={faqData} />
+
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 to-indigo-700/90"></div>
@@ -393,7 +434,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {campaigns?.map((campaign, index) => (
+            {campaigns?.map((campaign: Campaign, index: number) => (
               <Card
                 key={campaign._id}
                 className="overflow-hidden hover:shadow-2xl transition-all duration-500 group border-0 shadow-lg hover:scale-105 transform"
@@ -554,7 +595,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {events?.map((event) => (
+            {events?.map((event: Event) => (
               <Card
                 key={event._id}
                 className="overflow-hidden hover:shadow-2xl transition-all duration-500 group hover:scale-105 transform"
@@ -642,7 +683,7 @@ export default function HomePage() {
             </div>
 
             <div className="grid lg:grid-cols-3 gap-8">
-              {blogs.map((blog) => (
+              {blogs.map((blog: BlogPost) => (
                 <Card
                   key={blog._id}
                   className="overflow-hidden hover:shadow-2xl transition-all duration-500 group hover:scale-105 transform"
@@ -743,6 +784,32 @@ export default function HomePage() {
                       <div className="text-sm text-gray-500">{testimonial.role}</div>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <Badge className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full mb-4">❓ Frequently Asked Questions</Badge>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Common Questions About Our Work</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Get answers to the most frequently asked questions about Hope Foundation, our work, and how you can get involved.
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto space-y-6">
+            {faqData.map((faq, index) => (
+              <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg font-semibold text-gray-900">{faq.question}</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <p className="text-gray-700 leading-relaxed">{faq.answer}</p>
                 </CardContent>
               </Card>
             ))}
